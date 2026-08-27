@@ -38,10 +38,10 @@ export const getSourceMeta = (source: CandidateSource) => {
     case 'urbangaon':
       return {
         label: 'UrbanGaon Careers Portal',
-        badgeColor: '#10b981',
+        badgeColor: '#2581eb',
         textColor: '#ffffff',
-        accentColor: [16, 185, 129] as [number, number, number],
-        iconText: 'DIRECT PORTAL APPLICATION'
+        accentColor: [37, 129, 235] as [number, number, number],
+        iconText: 'URBANGAON® • A PERFECT BALANCE'
       };
     case 'internshala':
       return {
@@ -278,7 +278,7 @@ export const generateCandidateResumePdf = (candidate: Candidate): jsPDF => {
     doc.setFontSize(7.5);
     doc.setTextColor(156, 163, 175);
     doc.text(
-      `UrbanGaon Unified ATS • Candidate ID: ${candidate.id} • ATS Match: ${candidate.atsMatchScore}% • Recruiter: ${candidate.recruiterAssigned || 'Unassigned'}`,
+      `UrbanGaon® (a perfect balance) ATS • Candidate ID: ${candidate.id} • ATS Match: ${candidate.atsMatchScore}% • Recruiter: ${candidate.recruiterAssigned || 'Unassigned'}`,
       margin,
       pageHeight - 7
     );

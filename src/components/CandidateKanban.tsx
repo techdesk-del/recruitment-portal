@@ -43,7 +43,7 @@ export const CandidateKanban: React.FC = () => {
     linkedin: { label: 'LinkedIn', class: 'bg-sky-500/10 text-sky-400 border-sky-500/20' },
     indeed: { label: 'Indeed', class: 'bg-indigo-500/10 text-indigo-400 border-indigo-500/20' },
     apna: { label: 'Apna.co', class: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' },
-    urbangaon: { label: 'UrbanGaon', class: 'bg-teal-500/10 text-teal-400 border-teal-500/20' },
+    urbangaon: { label: 'UrbanGaon', class: 'bg-blue-500/10 text-blue-400 border-blue-500/20' },
     internshala: { label: 'Internshala', class: 'bg-cyan-500/10 text-cyan-400 border-cyan-500/20' },
     referral: { label: 'Referral', class: 'bg-purple-500/10 text-purple-400 border-purple-500/20' }
   };

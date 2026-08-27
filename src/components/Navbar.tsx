@@ -12,6 +12,7 @@ import {
   Download
 } from 'lucide-react';
 import { useRecruitment } from '../context/RecruitmentContext';
+import { UrbanGaonLogo } from './UrbanGaonLogo';
 
 export const Navbar: React.FC = () => {
   const { 
@@ -31,13 +32,13 @@ export const Navbar: React.FC = () => {
   return (
     <header className="sticky top-0 z-40 border-b border-slate-800/80 bg-slate-950/90 backdrop-blur-md">
       {/* Top Banner / Sync Bar */}
-      <div className="bg-gradient-to-r from-indigo-950/60 via-slate-900/80 to-slate-950 px-4 py-1.5 text-xs border-b border-slate-800/50 flex flex-wrap items-center justify-between gap-2">
+      <div className="bg-gradient-to-r from-blue-950/50 via-slate-900/80 to-slate-950 px-4 py-1.5 text-xs border-b border-slate-800/50 flex flex-wrap items-center justify-between gap-2">
         <div className="flex items-center gap-3">
-          <span className="flex items-center gap-1.5 font-medium text-emerald-400">
-            <span className="w-2 h-2 rounded-full bg-emerald-400 live-indicator"></span>
-            Multi-Source Ingestion Engine Active
+          <span className="flex items-center gap-1.5 font-medium text-blue-400">
+            <span className="w-2 h-2 rounded-full bg-blue-400 live-indicator"></span>
+            UrbanGaon ATS Engine • a perfect balance
           </span>
-          <span className="text-slate-500">|</span>
+          <span className="text-slate-600 hidden md:inline">|</span>
           <div className="flex items-center gap-2 text-slate-300">
             <span className="flex items-center gap-1 px-1.5 py-0.5 rounded bg-blue-500/10 border border-blue-500/20 text-blue-400 font-mono text-[11px]">
               <CheckCircle2 size={11} className="text-blue-400" /> Naukri API (Live)
@@ -75,20 +76,12 @@ export const Navbar: React.FC = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16 gap-4">
           
-          {/* Logo & Company */}
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-indigo-700 flex items-center justify-center text-white font-bold text-xl shadow-lg shadow-indigo-500/20 border border-indigo-400/30">
-              U
-            </div>
-            <div>
-              <div className="flex items-center gap-2">
-                <span className="text-base font-bold text-white tracking-tight">UrbanGaon</span>
-                <span className="text-[10px] uppercase font-bold tracking-wider px-1.5 py-0.5 rounded bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">
-                  ATS PRO
-                </span>
-              </div>
-              <p className="text-[11px] text-slate-400 font-medium">Unified Recruitment & Resume Engine</p>
-            </div>
+          {/* Official UrbanGaon Logo with Tagline */}
+          <div className="flex items-center gap-2.5">
+            <UrbanGaonLogo size="md" showTagline={true} taglineText="a perfect balance" />
+            <span className="hidden sm:inline-block text-[9px] uppercase font-extrabold tracking-wider px-1.5 py-0.5 rounded bg-blue-500/20 text-blue-300 border border-blue-500/30 ml-0.5">
+              ATS PRO
+            </span>
           </div>
 
           {/* Center Navigation Tabs */}

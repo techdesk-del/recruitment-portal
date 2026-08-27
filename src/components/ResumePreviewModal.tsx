@@ -2,6 +2,7 @@ import React from 'react';
 import { X, Download, Printer, Copy, CheckCircle2 } from 'lucide-react';
 import { useRecruitment } from '../context/RecruitmentContext';
 import { getSourceMeta } from '../utils/resumeGenerator';
+import { UrbanGaonIcon, UrbanGaonLogo } from './UrbanGaonLogo';
 
 export const ResumePreviewModal: React.FC = () => {
   const { previewResumeCandidate, setPreviewResumeCandidate, downloadResume, showToast } = useRecruitment();
@@ -37,16 +38,16 @@ ${cand.resumeData.skills.join(', ')}`;
         
         {/* Top Control Bar */}
         <div className="p-4 bg-slate-950 border-b border-slate-800 flex items-center justify-between gap-4">
-          <div className="flex items-center gap-2">
-            <div className="w-3 h-3 rounded-full bg-emerald-400"></div>
+          <div className="flex items-center gap-3">
+            <UrbanGaonIcon size={26} />
             <div>
               <h3 className="text-sm font-bold text-white flex items-center gap-2">
-                <span>Verified ATS Resume</span>
-                <span className="text-[10px] uppercase font-bold px-2 py-0.5 rounded bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">
+                <span>Verified ATS Dossier</span>
+                <span className="text-[10px] uppercase font-bold px-2 py-0.5 rounded bg-blue-500/20 text-blue-300 border border-blue-500/30">
                   {cand.source.toUpperCase()}
                 </span>
               </h3>
-              <p className="text-[11px] text-slate-400">{cand.name} • {cand.jobAppliedFor}</p>
+              <p className="text-[11px] text-slate-400">{cand.name} • {cand.jobAppliedFor} • <span className="text-blue-400 font-semibold">UrbanGaon® a perfect balance</span></p>
             </div>
           </div>
 
@@ -87,14 +88,19 @@ ${cand.resumeData.skills.join(', ')}`;
         <div className="flex-1 overflow-y-auto p-6 bg-slate-950/70">
           <div className="bg-white text-slate-900 p-8 sm:p-10 rounded-xl shadow-2xl border border-slate-300 font-sans space-y-6 max-w-2xl mx-auto">
             
-            {/* Top Source Badge Watermark */}
+            {/* Top Source Badge & Brand Header */}
             <div className="flex items-center justify-between pb-3 border-b-2 border-slate-900">
-              <span className="text-[10px] font-bold tracking-widest text-indigo-700 uppercase">
-                [ {sourceMeta.iconText} ]
-              </span>
-              <span className="text-[10px] text-slate-500 font-mono">
-                REF: {cand.id.toUpperCase()} • MATCH: {cand.atsMatchScore}%
-              </span>
+              <div className="flex items-center gap-2">
+                <UrbanGaonLogo size="sm" showTagline={true} taglineText="a perfect balance" theme="light" />
+              </div>
+              <div className="text-right">
+                <span className="text-[10px] font-bold tracking-widest text-blue-700 uppercase block">
+                  [ {sourceMeta.iconText} ]
+                </span>
+                <span className="text-[10px] text-slate-500 font-mono">
+                  REF: {cand.id.toUpperCase()} • ATS MATCH: {cand.atsMatchScore}%
+                </span>
+              </div>
             </div>
 
             {/* Candidate Header */}
@@ -176,9 +182,9 @@ ${cand.resumeData.skills.join(', ')}`;
             )}
 
             {/* Footer */}
-            <div className="pt-4 border-t border-slate-300 flex items-center justify-between text-[10px] text-slate-400">
-              <span>UrbanGaon ATS • Verified multi-source candidate ingestion</span>
-              <span>100% Downloadable PDF Ready</span>
+            <div className="pt-4 border-t border-slate-300 flex items-center justify-between text-[10px] text-slate-500">
+              <span className="font-semibold text-slate-700">UrbanGaon® ATS — a perfect balance</span>
+              <span>100% Downloadable PDF Dossier Ready</span>
             </div>
 
           </div>

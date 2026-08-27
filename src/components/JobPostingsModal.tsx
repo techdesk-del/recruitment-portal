@@ -2,6 +2,7 @@ import React from 'react';
 import { X, Briefcase, MapPin, CheckCircle2, Users, ExternalLink, Plus } from 'lucide-react';
 import { useRecruitment } from '../context/RecruitmentContext';
 import { CandidateSource } from '../types';
+import { UrbanGaonIcon } from './UrbanGaonLogo';
 
 export const JobPostingsModal: React.FC = () => {
   const { jobs, isJobModalOpen, setIsJobModalOpen, setFilters, setActiveView } = useRecruitment();
@@ -13,7 +14,7 @@ export const JobPostingsModal: React.FC = () => {
     linkedin: { name: 'LinkedIn', color: 'bg-sky-500/10 text-sky-400 border-sky-500/20' },
     indeed: { name: 'Indeed', color: 'bg-indigo-500/10 text-indigo-400 border-indigo-500/20' },
     apna: { name: 'Apna.co', color: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' },
-    urbangaon: { name: 'Careers Portal', color: 'bg-teal-500/10 text-teal-400 border-teal-500/20' },
+    urbangaon: { name: 'UrbanGaon Careers', color: 'bg-blue-500/10 text-blue-400 border-blue-500/20' },
     internshala: { name: 'Internshala', color: 'bg-cyan-500/10 text-cyan-400 border-cyan-500/20' },
     referral: { name: 'Internal Referral', color: 'bg-purple-500/10 text-purple-400 border-purple-500/20' }
   };
@@ -30,13 +31,16 @@ export const JobPostingsModal: React.FC = () => {
         
         {/* Header */}
         <div className="p-6 bg-slate-950 border-b border-slate-800 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-indigo-500/20 border border-indigo-500/30 flex items-center justify-center text-indigo-400">
-              <Briefcase size={20} />
-            </div>
+          <div className="flex items-center gap-3.5">
+            <UrbanGaonIcon size={38} />
             <div>
-              <h2 className="text-lg font-bold text-white">Active Job Requisitions & Platform Sync</h2>
-              <p className="text-xs text-slate-400">Multi-portal cross-posting status and candidate pipeline volume</p>
+              <div className="flex items-center gap-2">
+                <h2 className="text-lg font-bold text-white">UrbanGaon Job Requisitions</h2>
+                <span className="text-[10px] uppercase font-bold px-2 py-0.5 rounded bg-blue-500/20 text-blue-300 border border-blue-500/30">
+                  a perfect balance
+                </span>
+              </div>
+              <p className="text-xs text-slate-400">Multi-portal cross-posting status & candidate pipeline volume</p>
             </div>
           </div>
           <button

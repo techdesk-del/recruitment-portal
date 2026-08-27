@@ -18,6 +18,7 @@ import {
 } from 'lucide-react';
 import { useRecruitment } from '../context/RecruitmentContext';
 import { CandidateSource } from '../types';
+import { UrbanGaonLogo, UrbanGaonIcon } from './UrbanGaonLogo';
 
 export const OverviewDashboard: React.FC = () => {
   const { 
@@ -37,7 +38,7 @@ export const OverviewDashboard: React.FC = () => {
     linkedin: { name: 'LinkedIn', color: 'text-sky-400', border: 'border-sky-500/30', bg: 'bg-sky-500/10', icon: '💼' },
     indeed: { name: 'Indeed', color: 'text-indigo-400', border: 'border-indigo-500/30', bg: 'bg-indigo-500/10', icon: '🔷' },
     apna: { name: 'Apna.co', color: 'text-emerald-400', border: 'border-emerald-500/30', bg: 'bg-emerald-500/10', icon: '🟢' },
-    urbangaon: { name: 'UrbanGaon Portal', color: 'text-teal-400', border: 'border-teal-500/30', bg: 'bg-teal-500/10', icon: '🌿' },
+    urbangaon: { name: 'UrbanGaon Portal', color: 'text-blue-400', border: 'border-blue-500/30', bg: 'bg-blue-500/10', icon: '🏠' },
     internshala: { name: 'Internshala', color: 'text-cyan-400', border: 'border-cyan-500/30', bg: 'bg-cyan-500/10', icon: '🎓' },
     referral: { name: 'Referrals', color: 'text-purple-400', border: 'border-purple-500/30', bg: 'bg-purple-500/10', icon: '🤝' }
   };
@@ -62,19 +63,21 @@ export const OverviewDashboard: React.FC = () => {
     <div className="space-y-8 animate-fade-in pb-12">
       
       {/* Top Welcome & Summary Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-gradient-to-r from-slate-900 via-indigo-950/40 to-slate-900 p-6 rounded-2xl border border-slate-800 shadow-xl">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-gradient-to-r from-slate-900 via-blue-950/30 to-slate-900 p-6 rounded-2xl border border-slate-800 shadow-xl">
         <div>
-          <div className="flex items-center gap-2 mb-1">
-            <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 flex items-center gap-1">
-              <Sparkles size={12} /> Executive Talent Command Center
+          <div className="flex items-center gap-2 mb-2">
+            <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-blue-500/20 text-blue-300 border border-blue-500/30 flex items-center gap-1.5">
+              <Sparkles size={12} className="text-blue-400" /> Executive Talent Command Center
             </span>
-            <span className="text-xs text-slate-400">Q3 Hiring Cycle</span>
+            <span className="text-xs text-slate-400">• Q3 Hiring Cycle</span>
           </div>
-          <h1 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
-            Unified Recruitment Operations
-          </h1>
-          <p className="text-sm text-slate-300 mt-1">
-            Real-time candidate synchronization across Naukri, LinkedIn, Indeed & Careers Portal with instant ATS resume generation.
+          
+          <div className="flex items-center gap-3 mt-1">
+            <UrbanGaonLogo size="lg" showTagline={true} taglineText="a perfect balance" />
+          </div>
+
+          <p className="text-sm text-slate-300 mt-2">
+            Unified talent acquisition & multi-source ATS pipeline. Synchronized across Naukri, LinkedIn, Indeed & UrbanGaon Portal.
           </p>
         </div>
 

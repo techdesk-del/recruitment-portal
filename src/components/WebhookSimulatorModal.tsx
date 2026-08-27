@@ -63,12 +63,13 @@ export const WebhookSimulatorModal: React.FC = () => {
     },
     {
       id: 'urbangaon',
-      name: 'UrbanGaon Careers Portal Form',
-      desc: 'Simulates direct submission on careers.urbangaon.com careers page with direct resume upload.',
-      icon: '🌿',
+      name: 'UrbanGaon Careers Portal (a perfect balance)',
+      desc: 'Simulates direct submission on careers.urbangaon.com portal with real-time ATS parsing and instant dossier generation.',
+      icon: '🏠',
       payloadSnippet: `{
   "form": "careers_apply",
   "origin": "careers.urbangaon.com",
+  "brandTagline": "a perfect balance",
   "candidate": {
     "name": "Pooja Bhattacharya",
     "role": "UI/UX Product Designer",

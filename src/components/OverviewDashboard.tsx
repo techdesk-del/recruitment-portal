@@ -13,6 +13,7 @@ import {
 import { useRecruitment } from '../context/RecruitmentContext';
 import { CandidateSource } from '../types';
 import { UrbanGaonLogo } from './UrbanGaonLogo';
+import { PortalLogo } from './PortalLogo';
 
 export const OverviewDashboard: React.FC = () => {
   const { 
@@ -170,7 +171,7 @@ export const OverviewDashboard: React.FC = () => {
                 className={`p-4 rounded-xl border ${meta.border} ${meta.bg} cursor-pointer hover:shadow-xs hover:border-blue-400 transition flex flex-col justify-between`}
               >
                 <div className="flex items-center justify-between">
-                  <span className="text-base">{meta.icon}</span>
+                  <PortalLogo source={src} size={24} />
                   <span className="text-xl font-extrabold text-slate-900">{count}</span>
                 </div>
                 <div className={`text-xs font-bold mt-2 ${meta.color}`}>
@@ -207,8 +208,9 @@ export const OverviewDashboard: React.FC = () => {
               >
                 <div>
                   <div className="flex items-center justify-between mb-1.5">
-                    <span className={`text-[10px] font-bold px-2 py-0.5 rounded border ${meta.border} ${meta.bg} ${meta.color}`}>
-                      {meta.name}
+                    <span className={`text-[10px] font-bold px-2 py-0.5 rounded border inline-flex items-center gap-1.5 ${meta.border} ${meta.bg} ${meta.color}`}>
+                      <PortalLogo source={cand.source} size={12} />
+                      <span>{meta.name}</span>
                     </span>
                     <span className="text-[11px] text-slate-500 capitalize">{cand.status.replace('_', ' ')}</span>
                   </div>

@@ -15,6 +15,7 @@ import {
 } from 'lucide-react';
 import { useRecruitment } from '../context/RecruitmentContext';
 import { CandidateStatus, CandidateSource } from '../types';
+import { PortalLogo } from './PortalLogo';
 
 export const CandidateTable: React.FC = () => {
   const { 
@@ -337,8 +338,8 @@ export const CandidateTable: React.FC = () => {
 
                       {/* Source Badge */}
                       <td className="py-3.5 px-4">
-                        <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-medium border ${source.class}`}>
-                          <span>{source.icon}</span>
+                        <span className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md text-[11px] font-medium border ${source.class}`}>
+                          <PortalLogo source={cand.source} size={13} />
                           <span>{source.label}</span>
                         </span>
                       </td>

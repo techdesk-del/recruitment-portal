@@ -8,7 +8,8 @@ import {
   LogOut 
 } from 'lucide-react';
 import { useRecruitment } from '../context/RecruitmentContext';
-import { UrbanGaonLogo, UrbanGaonIcon } from './UrbanGaonLogo';
+import { UrbanGaonLogo } from './UrbanGaonLogo';
+import { PortalLogo } from './PortalLogo';
 import { CandidateSource } from '../types';
 
 export const Sidebar: React.FC = () => {
@@ -134,7 +135,7 @@ export const Sidebar: React.FC = () => {
             }`}
           >
             <div className="flex items-center gap-2.5">
-              <span className="text-sm">💼</span>
+              <PortalLogo source="linkedin" size={17} />
               <span>LinkedIn</span>
             </div>
             <span className="text-[11px] text-slate-400 font-normal">
@@ -151,7 +152,7 @@ export const Sidebar: React.FC = () => {
             }`}
           >
             <div className="flex items-center gap-2.5">
-              <span className="text-sm">🔵</span>
+              <PortalLogo source="naukri" size={17} />
               <span>Naukri.com</span>
             </div>
             <span className="text-[11px] text-slate-400 font-normal">
@@ -168,7 +169,7 @@ export const Sidebar: React.FC = () => {
             }`}
           >
             <div className="flex items-center gap-2.5">
-              <span className="text-sm">🔷</span>
+              <PortalLogo source="indeed" size={17} />
               <span>Indeed</span>
             </div>
             <span className="text-[11px] text-slate-400 font-normal">
@@ -185,7 +186,7 @@ export const Sidebar: React.FC = () => {
             }`}
           >
             <div className="flex items-center gap-2.5">
-              <span className="text-sm">🟢</span>
+              <PortalLogo source="apna" size={17} />
               <span>Apna.co</span>
             </div>
             <span className="text-[11px] text-slate-400 font-normal">
@@ -202,7 +203,7 @@ export const Sidebar: React.FC = () => {
             }`}
           >
             <div className="flex items-center gap-2.5">
-              <span className="text-sm">🏠</span>
+              <PortalLogo source="urbangaon" size={17} />
               <span>UrbanGaon</span>
             </div>
             <span className="text-[11px] text-slate-400 font-normal">

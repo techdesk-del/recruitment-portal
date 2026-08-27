@@ -2,6 +2,7 @@ import React from 'react';
 import { Briefcase, MapPin, Users, ArrowRight, CheckCircle2, DollarSign, Calendar } from 'lucide-react';
 import { useRecruitment } from '../context/RecruitmentContext';
 import { CandidateSource } from '../types';
+import { PortalLogo } from './PortalLogo';
 
 export const JobsView: React.FC = () => {
   const { jobs, candidates, setFilters, setActiveView } = useRecruitment();
@@ -106,9 +107,10 @@ export const JobsView: React.FC = () => {
                       return (
                         <span
                           key={plat}
-                          className={`text-[10px] font-semibold px-2 py-0.5 rounded-md border ${meta?.color || 'bg-slate-100 text-slate-700'}`}
+                          className={`text-[10px] font-semibold px-2 py-0.5 rounded-md border inline-flex items-center gap-1.5 ${meta?.color || 'bg-slate-100 text-slate-700'}`}
                         >
-                          {meta?.name || plat}
+                          <PortalLogo source={plat} size={12} />
+                          <span>{meta?.name || plat}</span>
                         </span>
                       );
                     })}

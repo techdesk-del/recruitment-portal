@@ -2,7 +2,8 @@ import React from 'react';
 import { X, Briefcase, MapPin, CheckCircle2, Users, ExternalLink, Plus } from 'lucide-react';
 import { useRecruitment } from '../context/RecruitmentContext';
 import { CandidateSource } from '../types';
-import { UrbanGaonLogo, UrbanGaonIcon } from './UrbanGaonLogo';
+import { UrbanGaonLogo } from './UrbanGaonLogo';
+import { PortalLogo } from './PortalLogo';
 
 export const JobPostingsModal: React.FC = () => {
   const { jobs, isJobModalOpen, setIsJobModalOpen, setFilters, setActiveView } = useRecruitment();
@@ -89,10 +90,10 @@ export const JobPostingsModal: React.FC = () => {
                     return (
                       <span
                         key={p}
-                        className={`text-[10px] font-bold px-2 py-0.5 rounded border ${pl.color} flex items-center gap-1`}
+                        className={`text-[10px] font-bold px-2 py-0.5 rounded border ${pl.color} inline-flex items-center gap-1.5`}
                       >
-                        <CheckCircle2 size={10} />
-                        {pl.name}
+                        <PortalLogo source={p} size={12} />
+                        <span>{pl.name}</span>
                       </span>
                     );
                   })}

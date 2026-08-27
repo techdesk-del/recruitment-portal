@@ -10,6 +10,7 @@ import {
 } from 'lucide-react';
 import { useRecruitment } from '../context/RecruitmentContext';
 import { Candidate, CandidateStatus, CandidateSource } from '../types';
+import { PortalLogo } from './PortalLogo';
 
 export const CandidateKanban: React.FC = () => {
   const { 
@@ -178,8 +179,9 @@ export const CandidateKanban: React.FC = () => {
                         <div>
                           {/* Top row: Source badge + ATS Match */}
                           <div className="flex items-center justify-between gap-2 mb-2">
-                            <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded border ${badge.class}`}>
-                              {badge.label}
+                            <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded border inline-flex items-center gap-1 ${badge.class}`}>
+                              <PortalLogo source={cand.source} size={12} />
+                              <span>{badge.label}</span>
                             </span>
                             <span className="text-[10px] font-mono font-bold text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-200">
                               {cand.atsMatchScore}% ATS

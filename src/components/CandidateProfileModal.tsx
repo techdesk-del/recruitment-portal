@@ -20,6 +20,7 @@ import {
 } from 'lucide-react';
 import { useRecruitment } from '../context/RecruitmentContext';
 import { CandidateStatus, Scorecard, CandidateSource } from '../types';
+import { PortalLogo } from './PortalLogo';
 
 export const CandidateProfileModal: React.FC = () => {
   const { 
@@ -85,8 +86,9 @@ export const CandidateProfileModal: React.FC = () => {
             <div>
               <div className="flex flex-wrap items-center gap-2">
                 <h2 className="text-xl font-extrabold text-slate-900">{cand.name}</h2>
-                <span className={`text-[11px] font-bold px-2 py-0.5 rounded-md border ${badge.class} flex items-center gap-1`}>
-                  <span>{badge.icon}</span> {badge.label}
+                <span className={`text-[11px] font-bold px-2 py-0.5 rounded-md border ${badge.class} inline-flex items-center gap-1.5`}>
+                  <PortalLogo source={cand.source} size={14} />
+                  <span>{badge.label}</span>
                 </span>
                 <span className="text-xs font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">
                   {cand.atsMatchScore}% Match

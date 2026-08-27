@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
-import { X, Zap, CheckCircle2, Play, RefreshCw, Layers } from 'lucide-react';
+import { X, Zap, CheckCircle2, Play, RefreshCw } from 'lucide-react';
 import { useRecruitment } from '../context/RecruitmentContext';
 import { CandidateSource } from '../types';
+import { PortalLogo } from './PortalLogo';
 
 export const WebhookSimulatorModal: React.FC = () => {
   const { isWebhookModalOpen, setIsWebhookModalOpen, simulateIncomingApplication } = useRecruitment();
@@ -10,12 +11,11 @@ export const WebhookSimulatorModal: React.FC = () => {
 
   if (!isWebhookModalOpen) return null;
 
-  const platforms: { id: CandidateSource; name: string; desc: string; payloadSnippet: string; icon: string }[] = [
+  const platforms: { id: CandidateSource; name: string; desc: string; payloadSnippet: string }[] = [
     {
       id: 'naukri',
       name: 'Naukri.com Corporate API',
       desc: 'Simulates candidate webhook dispatched from Naukri Recruiter API on apply event.',
-      icon: '🔵',
       payloadSnippet: `{
   "statusCode": 200,
   "source": "naukri-fastforward",
@@ -33,7 +33,6 @@ export const WebhookSimulatorModal: React.FC = () => {
       id: 'linkedin',
       name: 'LinkedIn EasyApply Email Parser',
       desc: 'Simulates receiving and extracting application data from LinkedIn recruitment notifications.',
-      icon: '💼',
       payloadSnippet: `{
   "messageId": "msg_li_894819",
   "sender": "jobs-noreply@linkedin.com",
@@ -50,7 +49,6 @@ export const WebhookSimulatorModal: React.FC = () => {
       id: 'indeed',
       name: 'Indeed Employer Webhook',
       desc: 'Simulates instant HTTP POST webhook from Indeed Employer dashboard when candidate applies.',
-      icon: '🔷',
       payloadSnippet: `{
   "event": "application.created",
   "platform": "indeed",
@@ -62,10 +60,24 @@ export const WebhookSimulatorModal: React.FC = () => {
 }`
     },
     {
+      id: 'apna',
+      name: 'Apna.co Recruiter Webhook',
+      desc: 'Simulates direct verified candidate profile ingestion from Apna Recruiter dashboard.',
+      payloadSnippet: `{
+  "event": "candidate.verified_apply",
+  "platform": "apna",
+  "applicant": {
+    "fullName": "Rahul Verma",
+    "appliedRole": "Backend Node.js Developer",
+    "experience": "3.5 Years",
+    "verifiedMobile": "+91 98765 43210"
+  }
+}`
+    },
+    {
       id: 'urbangaon',
       name: 'UrbanGaon Careers Portal (a perfect balance)',
       desc: 'Simulates direct submission on careers.urbangaon.com portal with real-time ATS parsing and instant dossier generation.',
-      icon: '🏠',
       payloadSnippet: `{
   "form": "careers_apply",
   "origin": "careers.urbangaon.com",
@@ -96,7 +108,7 @@ export const WebhookSimulatorModal: React.FC = () => {
         {/* Header */}
         <div className="p-6 bg-slate-950 border-b border-slate-800 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center text-emerald-400">
+            <div className="p-2.5 rounded-2xl bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
               <Zap size={20} />
             </div>
             <div>
@@ -130,8 +142,8 @@ export const WebhookSimulatorModal: React.FC = () => {
                       : 'border-slate-800 bg-slate-950 hover:border-slate-700'
                   }`}
                 >
-                  <div className="flex items-center justify-between mb-1.5">
-                    <span className="text-sm">{p.icon}</span>
+                  <div className="flex items-center justify-between mb-2">
+                    <PortalLogo source={p.id} size={22} />
                     {selectedSource === p.id && (
                       <CheckCircle2 size={15} className="text-emerald-400" />
                     )}

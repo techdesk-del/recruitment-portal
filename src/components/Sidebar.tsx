@@ -5,12 +5,7 @@ import {
   Briefcase, 
   Kanban, 
   Settings, 
-  LogOut, 
-  Globe, 
-  FileText,
-  CheckCircle2,
-  Building2,
-  GraduationCap
+  LogOut 
 } from 'lucide-react';
 import { useRecruitment } from '../context/RecruitmentContext';
 import { UrbanGaonIcon } from './UrbanGaonLogo';
@@ -45,7 +40,7 @@ export const Sidebar: React.FC = () => {
   };
 
   return (
-    <aside className="w-64 bg-white border-r border-slate-200/80 flex flex-col justify-between h-screen sticky top-0 shrink-0 select-none z-30 shadow-xs">
+    <aside className="w-64 bg-white border-r border-slate-200/80 flex flex-col justify-between h-screen sticky top-0 shrink-0 select-none z-30 shadow-xs font-sans">
       
       {/* Top Brand & Navigation */}
       <div className="p-4 space-y-6 overflow-y-auto">
@@ -55,41 +50,41 @@ export const Sidebar: React.FC = () => {
           <UrbanGaonIcon size={38} />
           <div>
             <div className="flex items-center gap-1 leading-tight">
-              <h1 className="font-extrabold text-slate-900 text-base font-sans">UrbanGaon</h1>
-              <span className="text-[10px] text-slate-400 font-bold">®</span>
+              <h1 className="font-semibold text-slate-800 text-base font-sans">UrbanGaon</h1>
+              <span className="text-[10px] text-slate-400 font-medium">®</span>
             </div>
-            <p className="text-[11px] text-slate-400 font-medium">Admin / HR Lead</p>
+            <p className="text-[11px] text-slate-400 font-normal">Admin / HR Lead</p>
           </div>
         </div>
 
         {/* Main Navigation Menu */}
-        <div className="space-y-1.5">
+        <div className="space-y-1">
           <button
             onClick={() => handleGeneralViewClick('dashboard')}
-            className={`w-full flex items-center gap-3 px-3.5 py-3 rounded-2xl text-xs font-bold transition-all ${
+            className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-2xl text-xs font-medium transition-all ${
               activeView === 'dashboard' || activeView === 'overview'
-                ? 'bg-blue-600 text-white shadow-md shadow-blue-600/30'
+                ? 'bg-blue-600 text-white shadow-xs'
                 : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
             }`}
           >
-            <LayoutGrid size={18} />
+            <LayoutGrid size={17} />
             <span>Dashboard</span>
           </button>
 
           <button
             onClick={() => handleGeneralViewClick('candidates')}
-            className={`w-full flex items-center justify-between px-3.5 py-3 rounded-2xl text-xs font-bold transition-all ${
+            className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-2xl text-xs font-medium transition-all ${
               activeView === 'candidates'
-                ? 'bg-blue-600 text-white shadow-md shadow-blue-600/30'
+                ? 'bg-blue-600 text-white shadow-xs'
                 : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
             }`}
           >
             <div className="flex items-center gap-3">
-              <Users size={18} />
+              <Users size={17} />
               <span>All Candidates</span>
             </div>
-            <span className={`text-[11px] font-extrabold px-2 py-0.5 rounded-full ${
-              activeView === 'candidates' ? 'bg-blue-800/80 text-white' : 'bg-slate-100 text-slate-600'
+            <span className={`text-[11px] font-medium px-2 py-0.2 rounded-full ${
+              activeView === 'candidates' ? 'bg-blue-800/80 text-white' : 'bg-slate-100 text-slate-500'
             }`}>
               {candidates.length}
             </span>
@@ -97,18 +92,18 @@ export const Sidebar: React.FC = () => {
 
           <button
             onClick={() => handleGeneralViewClick('jobs')}
-            className={`w-full flex items-center justify-between px-3.5 py-3 rounded-2xl text-xs font-bold transition-all ${
+            className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-2xl text-xs font-medium transition-all ${
               activeView === 'jobs'
-                ? 'bg-blue-600 text-white shadow-md shadow-blue-600/30'
+                ? 'bg-blue-600 text-white shadow-xs'
                 : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
             }`}
           >
             <div className="flex items-center gap-3">
-              <Briefcase size={18} />
+              <Briefcase size={17} />
               <span>Job Openings</span>
             </div>
-            <span className={`text-[11px] font-extrabold px-2 py-0.5 rounded-full ${
-              activeView === 'jobs' ? 'bg-blue-800/80 text-white' : 'bg-slate-100 text-slate-600'
+            <span className={`text-[11px] font-medium px-2 py-0.2 rounded-full ${
+              activeView === 'jobs' ? 'bg-blue-800/80 text-white' : 'bg-slate-100 text-slate-500'
             }`}>
               {jobs.length}
             </span>
@@ -116,26 +111,26 @@ export const Sidebar: React.FC = () => {
 
           <button
             onClick={() => handleGeneralViewClick('pipeline')}
-            className={`w-full flex items-center gap-3 px-3.5 py-3 rounded-2xl text-xs font-bold transition-all ${
+            className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-2xl text-xs font-medium transition-all ${
               activeView === 'pipeline'
-                ? 'bg-blue-600 text-white shadow-md shadow-blue-600/30'
+                ? 'bg-blue-600 text-white shadow-xs'
                 : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
             }`}
           >
-            <Kanban size={18} />
+            <Kanban size={17} />
             <span>Pipeline Stages</span>
           </button>
         </div>
 
         {/* Portal Integrations Section */}
-        <div className="pt-3 border-t border-slate-100 space-y-1.5">
-          <div className="px-3 pb-1.5 text-[10px] font-extrabold uppercase tracking-wider text-slate-400">
+        <div className="pt-3 border-t border-slate-100 space-y-1">
+          <div className="px-3 pb-1 text-[10px] font-medium uppercase tracking-wider text-slate-400">
             Sourcing Portals
           </div>
 
           <button
             onClick={() => handlePortalClick('linkedin')}
-            className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all ${
+            className={`w-full flex items-center justify-between px-3.5 py-2 rounded-xl text-xs font-medium transition-all ${
               activeView === 'linkedin'
                 ? 'bg-sky-50 text-sky-700 border border-sky-200'
                 : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
@@ -145,14 +140,14 @@ export const Sidebar: React.FC = () => {
               <span className="text-base">💼</span>
               <span>LinkedIn</span>
             </div>
-            <span className="text-[11px] px-2 py-0.5 rounded-full bg-slate-100 text-slate-600 font-semibold">
+            <span className="text-[11px] px-2 py-0.2 rounded-full bg-slate-100 text-slate-500 font-normal">
               {getPortalCount('linkedin')}
             </span>
           </button>
 
           <button
             onClick={() => handlePortalClick('naukri')}
-            className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all ${
+            className={`w-full flex items-center justify-between px-3.5 py-2 rounded-xl text-xs font-medium transition-all ${
               activeView === 'naukri'
                 ? 'bg-blue-50 text-blue-700 border border-blue-200'
                 : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
@@ -162,14 +157,14 @@ export const Sidebar: React.FC = () => {
               <span className="text-base">🔵</span>
               <span>Naukri.com</span>
             </div>
-            <span className="text-[11px] px-2 py-0.5 rounded-full bg-slate-100 text-slate-600 font-semibold">
+            <span className="text-[11px] px-2 py-0.2 rounded-full bg-slate-100 text-slate-500 font-normal">
               {getPortalCount('naukri')}
             </span>
           </button>
 
           <button
             onClick={() => handlePortalClick('indeed')}
-            className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all ${
+            className={`w-full flex items-center justify-between px-3.5 py-2 rounded-xl text-xs font-medium transition-all ${
               activeView === 'indeed'
                 ? 'bg-indigo-50 text-indigo-700 border border-indigo-200'
                 : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
@@ -179,14 +174,14 @@ export const Sidebar: React.FC = () => {
               <span className="text-base">🔷</span>
               <span>Indeed</span>
             </div>
-            <span className="text-[11px] px-2 py-0.5 rounded-full bg-slate-100 text-slate-600 font-semibold">
+            <span className="text-[11px] px-2 py-0.2 rounded-full bg-slate-100 text-slate-500 font-normal">
               {getPortalCount('indeed')}
             </span>
           </button>
 
           <button
             onClick={() => handlePortalClick('apna')}
-            className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all ${
+            className={`w-full flex items-center justify-between px-3.5 py-2 rounded-xl text-xs font-medium transition-all ${
               activeView === 'apna'
                 ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
                 : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
@@ -196,14 +191,14 @@ export const Sidebar: React.FC = () => {
               <span className="text-base">🟢</span>
               <span>Apna.co</span>
             </div>
-            <span className="text-[11px] px-2 py-0.5 rounded-full bg-slate-100 text-slate-600 font-semibold">
+            <span className="text-[11px] px-2 py-0.2 rounded-full bg-slate-100 text-slate-500 font-normal">
               {getPortalCount('apna')}
             </span>
           </button>
 
           <button
             onClick={() => handlePortalClick('internshala')}
-            className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all ${
+            className={`w-full flex items-center justify-between px-3.5 py-2 rounded-xl text-xs font-medium transition-all ${
               activeView === 'internshala'
                 ? 'bg-cyan-50 text-cyan-700 border border-cyan-200'
                 : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
@@ -213,14 +208,14 @@ export const Sidebar: React.FC = () => {
               <span className="text-base">🎓</span>
               <span>Internshala</span>
             </div>
-            <span className="text-[11px] px-2 py-0.5 rounded-full bg-slate-100 text-slate-600 font-semibold">
+            <span className="text-[11px] px-2 py-0.2 rounded-full bg-slate-100 text-slate-500 font-normal">
               {getPortalCount('internshala')}
             </span>
           </button>
 
           <button
             onClick={() => handlePortalClick('urbangaon')}
-            className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all ${
+            className={`w-full flex items-center justify-between px-3.5 py-2 rounded-xl text-xs font-medium transition-all ${
               activeView === 'urbangaon'
                 ? 'bg-blue-50 text-blue-700 border border-blue-200'
                 : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
@@ -230,7 +225,7 @@ export const Sidebar: React.FC = () => {
               <span className="text-base">🏠</span>
               <span>UrbanGaon Careers</span>
             </div>
-            <span className="text-[11px] px-2 py-0.5 rounded-full bg-slate-100 text-slate-600 font-semibold">
+            <span className="text-[11px] px-2 py-0.2 rounded-full bg-slate-100 text-slate-500 font-normal">
               {getPortalCount('urbangaon')}
             </span>
           </button>
@@ -239,26 +234,26 @@ export const Sidebar: React.FC = () => {
       </div>
 
       {/* Bottom Settings & User Profile Footer */}
-      <div className="p-4 border-t border-slate-200 bg-slate-50/50 space-y-3">
+      <div className="p-4 border-t border-slate-200 bg-slate-50/50 space-y-2">
         <button
           onClick={() => handleGeneralViewClick('overview')}
-          className="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-bold text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-xl transition"
+          className="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-medium text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-xl transition"
         >
-          <Settings size={16} />
+          <Settings size={15} />
           <span>Hiring Settings</span>
         </button>
 
         <div className="pt-2 border-t border-slate-200 flex items-center justify-between text-xs px-1">
           <div className="flex items-center gap-2">
-            <div className="w-7 h-7 rounded-full bg-blue-600 text-white font-bold text-xs flex items-center justify-center shadow-2xs">
+            <div className="w-7 h-7 rounded-full bg-blue-600 text-white font-medium text-xs flex items-center justify-center">
               A
             </div>
-            <span className="font-bold text-slate-800 text-xs">Akash Das</span>
+            <span className="font-medium text-slate-700 text-xs">Akash Das</span>
           </div>
 
           <button
             onClick={() => alert('Demo HR Session')}
-            className="flex items-center gap-1 text-[11px] font-bold text-rose-500 hover:text-rose-600 transition"
+            className="flex items-center gap-1 text-[11px] font-medium text-rose-500 hover:text-rose-600 transition"
           >
             <LogOut size={12} />
             <span>Sign out</span>

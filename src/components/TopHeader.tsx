@@ -5,9 +5,7 @@ import {
   Bell, 
   RefreshCw, 
   Download, 
-  Briefcase, 
-  RotateCcw,
-  Sparkles
+  Briefcase 
 } from 'lucide-react';
 import { useRecruitment } from '../context/RecruitmentContext';
 
@@ -38,14 +36,14 @@ export const TopHeader: React.FC = () => {
   };
 
   return (
-    <header className="sticky top-0 z-20 bg-white/90 backdrop-blur-md border-b border-slate-200/80 px-6 py-3.5 flex items-center justify-between gap-4 shadow-2xs">
+    <header className="sticky top-0 z-20 bg-white/90 backdrop-blur-md border-b border-slate-200/80 px-6 py-3 flex items-center justify-between gap-4 shadow-2xs font-sans">
       
       {/* Left Search & Quick Stats */}
       <div className="flex items-center gap-3 flex-1 max-w-xl">
         {/* Active Jobs Pill */}
         <button
           onClick={() => setActiveView('jobs')}
-          className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-100/90 hover:bg-slate-200 border border-slate-200 text-xs font-bold text-slate-700 transition shrink-0"
+          className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-100/90 hover:bg-slate-200 border border-slate-200 text-xs font-medium text-slate-700 transition shrink-0"
         >
           <Briefcase size={14} className="text-blue-600" />
           <span>Open Roles: {jobs.length}</span>
@@ -59,9 +57,9 @@ export const TopHeader: React.FC = () => {
             placeholder="Search candidates, skills, location..."
             value={filters.searchQuery}
             onChange={(e) => setFilters((prev) => ({ ...prev, searchQuery: e.target.value }))}
-            className="w-full pl-9 pr-10 py-1.5 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:border-blue-500 focus:bg-white transition"
+            className="w-full pl-9 pr-10 py-1.5 rounded-xl bg-slate-50 border border-slate-200 text-xs font-normal text-slate-900 placeholder-slate-400 focus:outline-none focus:border-blue-500 focus:bg-white transition"
           />
-          <kbd className="hidden md:inline-block absolute right-3 top-1/2 -translate-y-1/2 text-[10px] font-mono px-1.5 py-0.5 rounded bg-slate-200 text-slate-500 font-semibold border border-slate-300">
+          <kbd className="hidden md:inline-block absolute right-3 top-1/2 -translate-y-1/2 text-[10px] font-mono px-1.5 py-0.5 rounded bg-slate-200 text-slate-500 font-normal border border-slate-300">
             ⌘K
           </kbd>
         </div>
@@ -73,14 +71,14 @@ export const TopHeader: React.FC = () => {
         {/* Blue Primary Button (+ New Lead style) */}
         <button
           onClick={() => simulateIncomingApplication()}
-          className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs shadow-xs transition active:scale-95"
+          className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-medium text-xs shadow-xs transition active:scale-95"
         >
           <Plus size={15} />
           <span>+ Add Candidate</span>
         </button>
 
         {/* Role Pill */}
-        <div className="hidden lg:flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-50 border border-emerald-200 text-xs font-semibold text-emerald-800">
+        <div className="hidden lg:flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-50 border border-emerald-200 text-xs font-medium text-emerald-800">
           <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
           <span>Role: Admin / HR</span>
         </div>
@@ -92,7 +90,7 @@ export const TopHeader: React.FC = () => {
           title="Sync candidate portals"
           className="p-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 transition"
         >
-          <RefreshCw size={15} className={`text-slate-600 ${isSyncing ? 'animate-spin' : ''}`} />
+          <RefreshCw size={14} className={`text-slate-600 ${isSyncing ? 'animate-spin' : ''}`} />
         </button>
 
         {/* Export Excel Button */}
@@ -101,13 +99,13 @@ export const TopHeader: React.FC = () => {
           title="Export CSV"
           className="p-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 transition"
         >
-          <Download size={15} className="text-slate-600" />
+          <Download size={14} className="text-slate-600" />
         </button>
 
         {/* Notification Bell */}
         <div className="relative">
           <button className="p-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 transition">
-            <Bell size={15} className="text-slate-600" />
+            <Bell size={14} className="text-slate-600" />
           </button>
           <span className="absolute top-1 right-1 w-2 h-2 rounded-full bg-blue-600 ring-2 ring-white"></span>
         </div>

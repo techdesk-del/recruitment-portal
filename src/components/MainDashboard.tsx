@@ -1,11 +1,9 @@
 import React from 'react';
 import { 
   Calendar, 
-  ChevronDown,
-  ArrowRight,
-  Download,
-  Users,
-  Briefcase
+  ChevronDown, 
+  ArrowRight, 
+  Download 
 } from 'lucide-react';
 import { useRecruitment } from '../context/RecruitmentContext';
 import { CandidateSource } from '../types';
@@ -43,127 +41,124 @@ export const MainDashboard: React.FC = () => {
       {/* Top Welcome Title & Filter Row matching exact reference screenshot */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-extrabold text-slate-900 tracking-tight">Dashboard</h1>
-          <p className="text-sm text-slate-500 font-medium mt-0.5">Welcome back, Akash</p>
+          <h1 className="text-2xl font-semibold text-slate-800 tracking-tight">Dashboard</h1>
+          <p className="text-xs text-slate-500 font-normal mt-0.5">Welcome back, Akash</p>
         </div>
 
         <div className="flex items-center gap-2">
-          <div className="flex items-center gap-2.5 px-4 py-2 rounded-xl bg-white border border-slate-200 text-xs font-semibold text-slate-700 shadow-2xs cursor-pointer hover:border-slate-300 transition">
-            <Calendar size={15} className="text-slate-400" />
+          <div className="flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-white border border-slate-200 text-xs font-medium text-slate-600 shadow-2xs cursor-pointer hover:border-slate-300 transition">
+            <Calendar size={14} className="text-slate-400" />
             <span>Active Hiring Cycle</span>
             <ChevronDown size={14} className="text-slate-400" />
           </div>
         </div>
       </div>
 
-      {/* SECTION 1: PERFORMANCE • LAST 6 MONTHS / HIRING PIPELINE */}
+      {/* SECTION 1: PERFORMANCE • RECRUITMENT PIPELINE */}
       <div className="space-y-3">
-        <div className="text-[11px] font-extrabold uppercase tracking-widest text-slate-400">
+        <div className="text-[11px] font-medium uppercase tracking-widest text-slate-400">
           PERFORMANCE • RECRUITMENT PIPELINE
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           
-          {/* Card 1: Total Applicants (Green number like Booked Value) */}
+          {/* Card 1: Total Applicants */}
           <div 
             onClick={() => setActiveView('candidates')}
-            className="p-6 rounded-2xl bg-white border border-slate-200/90 shadow-2xs hover:shadow-md hover:border-emerald-400 transition cursor-pointer flex flex-col justify-between min-h-[140px]"
+            className="p-5 rounded-2xl bg-white border border-slate-200/90 shadow-2xs hover:shadow-xs hover:border-emerald-400 transition cursor-pointer flex flex-col justify-between min-h-[135px]"
           >
-            <span className="text-xs font-semibold text-slate-500">Total Applicants</span>
+            <span className="text-xs font-normal text-slate-500">Total Applicants</span>
             <div className="mt-2">
-              <span className="text-3xl sm:text-4xl font-extrabold text-[#00a86b] tracking-tight">
+              <span className="text-3xl font-semibold text-[#00a86b] tracking-tight">
                 {metrics.totalApplications}
               </span>
-              <p className="text-xs text-slate-400 font-medium mt-1">all sourced candidates</p>
+              <p className="text-xs text-slate-400 font-normal mt-1">all sourced candidates</p>
             </div>
           </div>
 
-          {/* Card 2: Pipeline Value (Blue number like Pipeline Value) */}
+          {/* Card 2: In Pipeline */}
           <div 
             onClick={() => setActiveView('pipeline')}
-            className="p-6 rounded-2xl bg-white border border-slate-200/90 shadow-2xs hover:shadow-md hover:border-blue-400 transition cursor-pointer flex flex-col justify-between min-h-[140px]"
+            className="p-5 rounded-2xl bg-white border border-slate-200/90 shadow-2xs hover:shadow-xs hover:border-blue-400 transition cursor-pointer flex flex-col justify-between min-h-[135px]"
           >
-            <span className="text-xs font-semibold text-slate-500">In Pipeline</span>
+            <span className="text-xs font-normal text-slate-500">In Pipeline</span>
             <div className="mt-2">
-              <span className="text-3xl sm:text-4xl font-extrabold text-[#2563eb] tracking-tight">
+              <span className="text-3xl font-semibold text-[#2563eb] tracking-tight">
                 {metrics.activeCandidates}
               </span>
-              <p className="text-xs text-slate-400 font-medium mt-1">{jobs.length} active positions</p>
+              <p className="text-xs text-slate-400 font-normal mt-1">{jobs.length} active positions</p>
             </div>
           </div>
 
-          {/* Card 3: Conversion (Orange number like Conversion) */}
-          <div className="p-6 rounded-2xl bg-white border border-slate-200/90 shadow-2xs flex flex-col justify-between min-h-[140px]">
-            <span className="text-xs font-semibold text-slate-500">Interview Conversion</span>
+          {/* Card 3: Interview Conversion */}
+          <div className="p-5 rounded-2xl bg-white border border-slate-200/90 shadow-2xs flex flex-col justify-between min-h-[135px]">
+            <span className="text-xs font-normal text-slate-500">Interview Conversion</span>
             <div className="mt-2">
-              <span className="text-3xl sm:text-4xl font-extrabold text-[#ea580c] tracking-tight">
+              <span className="text-3xl font-semibold text-[#ea580c] tracking-tight">
                 {metrics.overallConversionRate}%
               </span>
-              <p className="text-xs text-slate-400 font-medium mt-1">{metrics.statusBreakdown.joined} of {metrics.totalApplications} hired</p>
+              <p className="text-xs text-slate-400 font-normal mt-1">{metrics.statusBreakdown.joined} of {metrics.totalApplications} hired</p>
             </div>
           </div>
 
-          {/* Card 4: Avg Time to Hire (Sky Blue number like Avg Ticket Size) */}
-          <div className="p-6 rounded-2xl bg-white border border-slate-200/90 shadow-2xs flex flex-col justify-between min-h-[140px]">
-            <span className="text-xs font-semibold text-slate-500">Avg Time to Hire</span>
+          {/* Card 4: Avg Time to Hire */}
+          <div className="p-5 rounded-2xl bg-white border border-slate-200/90 shadow-2xs flex flex-col justify-between min-h-[135px]">
+            <span className="text-xs font-normal text-slate-500">Avg Time to Hire</span>
             <div className="mt-2">
-              <span className="text-3xl sm:text-4xl font-extrabold text-[#0284c7] tracking-tight">
-                {metrics.avgTimeToHireDays} <span className="text-xl font-bold text-slate-400">days</span>
+              <span className="text-3xl font-semibold text-[#0284c7] tracking-tight">
+                {metrics.avgTimeToHireDays} <span className="text-base font-normal text-slate-400">days</span>
               </span>
-              <p className="text-xs text-slate-400 font-medium mt-1">per hired applicant</p>
+              <p className="text-xs text-slate-400 font-normal mt-1">per hired applicant</p>
             </div>
           </div>
 
         </div>
       </div>
 
-      {/* SECTION 2: APPLICATIONS • TODAY / PORTALS (Matching 2nd row in reference screenshot) */}
+      {/* SECTION 2: PORTAL SOURCES • APPLICATIONS */}
       <div className="space-y-3">
-        <div className="text-[11px] font-extrabold uppercase tracking-widest text-slate-400">
-          PORTAL SOURCES • APPLICATIONS TODAY
+        <div className="text-[11px] font-medium uppercase tracking-widest text-slate-400">
+          PORTAL SOURCES • APPLICATIONS
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           
-          {/* Card 1: Today's Ingestion */}
           <div 
             onClick={() => handlePortalFilter('linkedin')}
-            className="p-6 rounded-2xl bg-white border border-slate-200/90 shadow-2xs hover:shadow-md hover:border-sky-400 transition cursor-pointer min-h-[140px] flex flex-col justify-between"
+            className="p-5 rounded-2xl bg-white border border-slate-200/90 shadow-2xs hover:shadow-xs hover:border-sky-400 transition cursor-pointer min-h-[135px] flex flex-col justify-between"
           >
-            <span className="text-xs font-semibold text-slate-500">LinkedIn EasyApply</span>
+            <span className="text-xs font-normal text-slate-500">LinkedIn EasyApply</span>
             <div className="mt-2">
-              <span className="text-3xl sm:text-4xl font-extrabold text-[#2563eb]">
+              <span className="text-3xl font-semibold text-[#2563eb]">
                 {metrics.sourceBreakdown.linkedin || 0}
               </span>
-              <p className="text-xs text-slate-400 font-medium mt-1">synced via webhook</p>
+              <p className="text-xs text-slate-400 font-normal mt-1">synced via webhook</p>
             </div>
           </div>
 
-          {/* Card 2: Connection Rate / Naukri */}
           <div 
             onClick={() => handlePortalFilter('naukri')}
-            className="p-6 rounded-2xl bg-white border border-slate-200/90 shadow-2xs hover:shadow-md hover:border-blue-400 transition cursor-pointer min-h-[140px] flex flex-col justify-between"
+            className="p-5 rounded-2xl bg-white border border-slate-200/90 shadow-2xs hover:shadow-xs hover:border-blue-400 transition cursor-pointer min-h-[135px] flex flex-col justify-between"
           >
-            <span className="text-xs font-semibold text-slate-500">Naukri FastForward</span>
+            <span className="text-xs font-normal text-slate-500">Naukri FastForward</span>
             <div className="mt-2">
-              <span className="text-3xl sm:text-4xl font-extrabold text-[#00a86b]">
+              <span className="text-3xl font-semibold text-[#00a86b]">
                 {metrics.sourceBreakdown.naukri || 0}
               </span>
-              <p className="text-xs text-slate-400 font-medium mt-1">verified profiles</p>
+              <p className="text-xs text-slate-400 font-normal mt-1">verified profiles</p>
             </div>
           </div>
 
-          {/* Card 3: Indeed / Other */}
           <div 
             onClick={() => handlePortalFilter('indeed')}
-            className="p-6 rounded-2xl bg-white border border-slate-200/90 shadow-2xs hover:shadow-md hover:border-indigo-400 transition cursor-pointer min-h-[140px] flex flex-col justify-between"
+            className="p-5 rounded-2xl bg-white border border-slate-200/90 shadow-2xs hover:shadow-xs hover:border-indigo-400 transition cursor-pointer min-h-[135px] flex flex-col justify-between"
           >
-            <span className="text-xs font-semibold text-slate-500">Indeed Applications</span>
+            <span className="text-xs font-normal text-slate-500">Indeed Applications</span>
             <div className="mt-2">
-              <span className="text-3xl sm:text-4xl font-extrabold text-[#ea580c]">
+              <span className="text-3xl font-semibold text-[#ea580c]">
                 {metrics.sourceBreakdown.indeed || 0}
               </span>
-              <p className="text-xs text-slate-400 font-medium mt-1">active candidates</p>
+              <p className="text-xs text-slate-400 font-normal mt-1">active candidates</p>
             </div>
           </div>
 
@@ -173,12 +168,12 @@ export const MainDashboard: React.FC = () => {
       {/* SECTION 3: RECENT CANDIDATES */}
       <div className="space-y-3">
         <div className="flex items-center justify-between">
-          <div className="text-[11px] font-extrabold uppercase tracking-widest text-slate-400">
+          <div className="text-[11px] font-medium uppercase tracking-widest text-slate-400">
             RECENT CANDIDATE APPLICATIONS
           </div>
           <button
             onClick={() => setActiveView('candidates')}
-            className="text-xs font-bold text-blue-600 hover:text-blue-700 flex items-center gap-1"
+            className="text-xs font-medium text-blue-600 hover:text-blue-700 flex items-center gap-1"
           >
             <span>View All ({candidates.length})</span>
             <ArrowRight size={13} />
@@ -189,53 +184,53 @@ export const MainDashboard: React.FC = () => {
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse">
               <thead>
-                <tr className="bg-slate-50/80 border-b border-slate-200 text-[11px] font-bold text-slate-500 uppercase tracking-wider">
-                  <th className="py-3.5 px-5">Candidate</th>
-                  <th className="py-3.5 px-4">Applied Role</th>
-                  <th className="py-3.5 px-4">Portal</th>
-                  <th className="py-3.5 px-4">Experience</th>
-                  <th className="py-3.5 px-4">Hiring Stage</th>
-                  <th className="py-3.5 px-5 text-right">Actions</th>
+                <tr className="bg-slate-50/80 border-b border-slate-200 text-[11px] font-medium text-slate-500 uppercase tracking-wider">
+                  <th className="py-3 px-5">Candidate</th>
+                  <th className="py-3 px-4">Applied Role</th>
+                  <th className="py-3 px-4">Portal</th>
+                  <th className="py-3 px-4">Experience</th>
+                  <th className="py-3 px-4">Hiring Stage</th>
+                  <th className="py-3 px-5 text-right">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 text-xs">
                 {recentCandidates.map((cand) => (
                   <tr key={cand.id} className="hover:bg-slate-50/70 transition">
-                    <td className="py-3.5 px-5">
+                    <td className="py-3 px-5">
                       <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-full bg-blue-100 text-blue-700 font-bold text-xs flex items-center justify-center">
+                        <div className="w-8 h-8 rounded-full bg-blue-100 text-blue-700 font-medium text-xs flex items-center justify-center">
                           {cand.name.charAt(0)}
                         </div>
                         <div>
                           <p 
                             onClick={() => setSelectedCandidate(cand)}
-                            className="font-bold text-slate-900 hover:text-blue-600 cursor-pointer text-sm"
+                            className="font-medium text-slate-900 hover:text-blue-600 cursor-pointer text-sm"
                           >
                             {cand.name}
                           </p>
-                          <p className="text-[11px] text-slate-400">{cand.email}</p>
+                          <p className="text-[11px] text-slate-400 font-normal">{cand.email}</p>
                         </div>
                       </div>
                     </td>
-                    <td className="py-3.5 px-4 font-semibold text-slate-800">{cand.jobAppliedFor}</td>
-                    <td className="py-3.5 px-4 capitalize text-slate-600 font-semibold">{cand.source}</td>
-                    <td className="py-3.5 px-4 text-slate-600 font-medium">{cand.experienceYears} Years</td>
-                    <td className="py-3.5 px-4">
-                      <span className="px-2.5 py-1 rounded-md bg-blue-50 text-blue-700 border border-blue-200 text-[11px] font-bold capitalize">
+                    <td className="py-3 px-4 font-normal text-slate-700">{cand.jobAppliedFor}</td>
+                    <td className="py-3 px-4 capitalize text-slate-600 font-normal">{cand.source}</td>
+                    <td className="py-3 px-4 text-slate-600 font-normal">{cand.experienceYears} Years</td>
+                    <td className="py-3 px-4">
+                      <span className="px-2 py-0.5 rounded-md bg-blue-50 text-blue-700 border border-blue-200 text-[11px] font-medium capitalize">
                         {cand.status.replace('_', ' ')}
                       </span>
                     </td>
-                    <td className="py-3.5 px-5 text-right">
+                    <td className="py-3 px-5 text-right">
                       <div className="flex items-center justify-end gap-1.5">
                         <button
                           onClick={() => setSelectedCandidate(cand)}
-                          className="px-3 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-[11px] transition"
+                          className="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 font-medium text-[11px] transition"
                         >
                           Profile
                         </button>
                         <button
                           onClick={() => downloadResume(cand.id)}
-                          className="p-1.5 rounded-lg bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 transition"
+                          className="p-1 rounded-lg bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 transition"
                         >
                           <Download size={13} />
                         </button>

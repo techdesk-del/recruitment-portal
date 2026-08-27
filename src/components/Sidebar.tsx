@@ -8,7 +8,7 @@ import {
   LogOut 
 } from 'lucide-react';
 import { useRecruitment } from '../context/RecruitmentContext';
-import { UrbanGaonIcon } from './UrbanGaonLogo';
+import { UrbanGaonLogo, UrbanGaonIcon } from './UrbanGaonLogo';
 import { CandidateSource } from '../types';
 
 export const Sidebar: React.FC = () => {
@@ -45,13 +45,9 @@ export const Sidebar: React.FC = () => {
       {/* Top Brand & Navigation */}
       <div className="p-4 space-y-6 overflow-y-auto">
         
-        {/* Brand Header */}
-        <div className="flex items-center gap-3 px-2 pt-1 pb-2">
-          <UrbanGaonIcon size={38} className="rounded-full shrink-0" />
-          <div className="flex flex-col justify-center">
-            <h1 className="font-bold text-slate-900 text-[16px] leading-tight tracking-tight">UrbanGaon</h1>
-            <p className="text-[11px] text-slate-400 font-normal leading-tight mt-0.5">Admin / HR Lead</p>
-          </div>
+        {/* Brand Header with Exact Attached Logo */}
+        <div className="px-2 pt-1 pb-3 flex items-center">
+          <UrbanGaonLogo size="md" className="h-11 w-auto object-contain" />
         </div>
 
         {/* Main Navigation Menu (Dashboard, All Candidates, Job Openings, Pipeline Stages) */}

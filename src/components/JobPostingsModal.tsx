@@ -2,7 +2,7 @@ import React from 'react';
 import { X, Briefcase, MapPin, CheckCircle2, Users, ExternalLink, Plus } from 'lucide-react';
 import { useRecruitment } from '../context/RecruitmentContext';
 import { CandidateSource } from '../types';
-import { UrbanGaonIcon } from './UrbanGaonLogo';
+import { UrbanGaonLogo, UrbanGaonIcon } from './UrbanGaonLogo';
 
 export const JobPostingsModal: React.FC = () => {
   const { jobs, isJobModalOpen, setIsJobModalOpen, setFilters, setActiveView } = useRecruitment();
@@ -38,18 +38,13 @@ export const JobPostingsModal: React.FC = () => {
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs animate-fade-in">
       <div className="bg-white border border-slate-200 rounded-3xl w-full max-w-4xl max-h-[85vh] flex flex-col shadow-2xl overflow-hidden animate-slide-up text-slate-900">
         
-        {/* Header */}
+        {/* Header with Exact Attached Logo */}
         <div className="p-6 bg-slate-50 border-b border-slate-200 flex items-center justify-between">
-          <div className="flex items-center gap-3.5">
-            <UrbanGaonIcon size={38} />
+          <div className="flex items-center gap-4">
+            <UrbanGaonLogo size="md" className="h-10 w-auto" />
             <div>
-              <div className="flex items-center gap-2">
-                <h2 className="text-lg font-bold text-slate-900">UrbanGaon Job Requisitions</h2>
-                <span className="text-[10px] uppercase font-bold px-2 py-0.5 rounded bg-blue-50 text-blue-700 border border-blue-200">
-                  a perfect balance
-                </span>
-              </div>
-              <p className="text-xs text-slate-500">Multi-portal cross-posting status & candidate pipeline volume</p>
+              <h2 className="text-base font-semibold text-slate-900">Job Requisitions</h2>
+              <p className="text-xs text-slate-400 font-normal">Active job postings across all recruitment portals</p>
             </div>
           </div>
           <button

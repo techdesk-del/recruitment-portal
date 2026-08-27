@@ -19,9 +19,9 @@ export const UrbanGaonIcon: React.FC<{ size?: number | string; className?: strin
   return (
     <img 
       src={iconPng} 
-      alt="UrbanGaon Logo"
+      alt="UrbanGaon Icon"
       style={{ width: pixelSize, height: pixelSize }}
-      className={`rounded-full object-cover shrink-0 select-none shadow-sm ${className}`}
+      className={`rounded-full object-cover shrink-0 select-none ${className}`}
     />
   );
 };
@@ -29,79 +29,26 @@ export const UrbanGaonIcon: React.FC<{ size?: number | string; className?: strin
 export const UrbanGaonLogo: React.FC<UrbanGaonLogoProps> = ({
   variant = 'full',
   size = 'md',
-  showTagline = true,
-  taglineText = 'a perfect balance',
-  theme = 'light',
   className = ''
 }) => {
-  const iconSizes = {
-    sm: 28,
-    md: 40,
-    lg: 48,
-    xl: 60
-  };
-
-  const titleSizes = {
-    sm: 'text-sm',
-    md: 'text-lg',
-    lg: 'text-2xl',
-    xl: 'text-3xl'
-  };
-
-  const taglineSizes = {
-    sm: 'text-[10px]',
-    md: 'text-xs',
-    lg: 'text-sm',
-    xl: 'text-base'
+  const heights = {
+    sm: 'h-7',
+    md: 'h-10',
+    lg: 'h-12',
+    xl: 'h-16'
   };
 
   if (variant === 'icon-only') {
+    const iconSizes = { sm: 28, md: 38, lg: 48, xl: 60 };
     return <UrbanGaonIcon size={iconSizes[size]} className={className} />;
   }
 
-  if (variant === 'image-full') {
-    const heights = {
-      sm: 'h-8',
-      md: 'h-11',
-      lg: 'h-14',
-      xl: 'h-16'
-    };
-    return (
-      <img 
-        src={logoPng} 
-        alt="UrbanGaon - a perfect balance"
-        className={`${heights[size]} object-contain select-none rounded-lg ${className}`}
-      />
-    );
-  }
-
-  const textColor = theme === 'dark' ? 'text-white' : 'text-slate-900';
-  const taglineColor = theme === 'dark' ? 'text-slate-300' : 'text-slate-600';
-
+  // Exact attached logo image with exact mark and tagline
   return (
-    <div className={`flex items-center gap-3 select-none ${className}`}>
-      {/* Exact Attached Brand Icon */}
-      <div className="relative group">
-        <UrbanGaonIcon size={iconSizes[size]} className="drop-shadow-md group-hover:scale-105 transition-transform" />
-      </div>
-
-      {/* Brand Typography & Exact Tagline */}
-      <div className="flex flex-col justify-center">
-        <div className="flex items-center gap-1 leading-none">
-          <span className={`font-extrabold tracking-tight ${titleSizes[size]} ${textColor} font-sans`}>
-            UrbanGaon
-          </span>
-          <span className={`text-[10px] -mt-1 font-bold ${textColor}`}>
-            ®
-          </span>
-        </div>
-
-        {showTagline && (
-          <span className={`font-semibold tracking-wide ${taglineSizes[size]} ${taglineColor} mt-0.5 font-sans lowercase`}>
-            {taglineText}
-          </span>
-        )}
-      </div>
-    </div>
+    <img 
+      src={logoPng} 
+      alt="UrbanGaon® a perfect balance"
+      className={`${heights[size]} w-auto object-contain select-none ${className}`}
+    />
   );
 };

@@ -74,7 +74,7 @@ export const RecruitmentProvider: React.FC<{ children: React.ReactNode }> = ({ c
     }
   });
 
-  const [activeView, setActiveView] = useState<'overview' | 'pipeline' | 'candidates' | 'jobs' | 'analytics'>('overview');
+  const [activeView, setActiveView] = useState<'overview' | 'pipeline' | 'candidates' | 'jobs' | 'analytics'>('candidates');
   const [selectedCandidate, setSelectedCandidate] = useState<Candidate | null>(null);
   const [previewResumeCandidate, setPreviewResumeCandidate] = useState<Candidate | null>(null);
   const [isJobModalOpen, setIsJobModalOpen] = useState(false);

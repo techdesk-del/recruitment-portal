@@ -27,7 +27,7 @@ export const TopHeader: React.FC = () => {
     try {
       const res = await fetch('http://localhost:5000/api/sync/linkedin-now', { method: 'POST' });
       const data = await res.json();
-      showToast('success', 'Candidate Sync Complete', 'Applications from LinkedIn & portals are synchronized.');
+      showToast('success', 'Sync Complete', 'Candidate data synchronized.');
     } catch {
       showToast('info', 'Sync Active', 'Multi-portal candidate synchronization is active.');
     } finally {
@@ -36,28 +36,28 @@ export const TopHeader: React.FC = () => {
   };
 
   return (
-    <header className="sticky top-0 z-20 bg-white/90 backdrop-blur-md border-b border-slate-200/80 px-6 py-3 flex items-center justify-between gap-4 shadow-2xs font-sans">
+    <header className="sticky top-0 z-20 bg-white border-b border-slate-100 px-6 py-3 flex items-center justify-between gap-4 font-sans">
       
-      {/* Left Search & Quick Stats */}
+      {/* Left Search & Quick Stats matching screenshot */}
       <div className="flex items-center gap-3 flex-1 max-w-xl">
-        {/* Active Jobs Pill */}
+        {/* Projects: 2 Pill */}
         <button
           onClick={() => setActiveView('jobs')}
-          className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-100/90 hover:bg-slate-200 border border-slate-200 text-xs font-medium text-slate-700 transition shrink-0"
+          className="hidden sm:flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-white hover:bg-slate-50 border border-slate-200 text-xs font-normal text-slate-700 transition shrink-0 shadow-2xs"
         >
           <Briefcase size={14} className="text-blue-600" />
-          <span>Open Roles: {jobs.length}</span>
+          <span>Projects: {jobs.length}</span>
         </button>
 
-        {/* Global Search Bar with ⌘K */}
+        {/* Search CRM... with ⌘K */}
         <div className="relative flex-1">
-          <Search size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
+          <Search size={14} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
           <input
             type="text"
-            placeholder="Search candidates, skills, location..."
+            placeholder="Search CRM..."
             value={filters.searchQuery}
             onChange={(e) => setFilters((prev) => ({ ...prev, searchQuery: e.target.value }))}
-            className="w-full pl-9 pr-10 py-1.5 rounded-xl bg-slate-50 border border-slate-200 text-xs font-normal text-slate-900 placeholder-slate-400 focus:outline-none focus:border-blue-500 focus:bg-white transition"
+            className="w-full pl-9 pr-10 py-1.5 rounded-xl bg-slate-50/70 border border-slate-200 text-xs font-normal text-slate-900 placeholder-slate-400 focus:outline-none focus:border-blue-500 focus:bg-white transition"
           />
           <kbd className="hidden md:inline-block absolute right-3 top-1/2 -translate-y-1/2 text-[10px] font-mono px-1.5 py-0.5 rounded bg-slate-200 text-slate-500 font-normal border border-slate-300">
             ⌘K
@@ -65,22 +65,22 @@ export const TopHeader: React.FC = () => {
         </div>
       </div>
 
-      {/* Right Action Controls matching CRM screenshot */}
+      {/* Right Action Controls matching screenshot */}
       <div className="flex items-center gap-3 shrink-0">
         
-        {/* Blue Primary Button (+ New Lead style) */}
+        {/* + New Lead Button */}
         <button
           onClick={() => simulateIncomingApplication()}
-          className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-medium text-xs shadow-xs transition active:scale-95"
+          className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#2563eb] hover:bg-blue-700 text-white font-medium text-xs shadow-xs transition active:scale-95"
         >
-          <Plus size={15} />
-          <span>+ Add Candidate</span>
+          <Plus size={14} />
+          <span>+ New Lead</span>
         </button>
 
-        {/* Role Pill */}
-        <div className="hidden lg:flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-50 border border-emerald-200 text-xs font-medium text-emerald-800">
+        {/* Role: Admin / CEO Pill */}
+        <div className="hidden lg:flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white border border-slate-200 text-xs font-normal text-slate-700 shadow-2xs">
           <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
-          <span>Role: Admin / HR</span>
+          <span>Role: <strong>Admin / CEO</strong></span>
         </div>
 
         {/* Sync Button */}
@@ -88,24 +88,24 @@ export const TopHeader: React.FC = () => {
           onClick={handleSync}
           disabled={isSyncing}
           title="Sync candidate portals"
-          className="p-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 transition"
+          className="p-2 rounded-xl bg-white hover:bg-slate-50 border border-slate-200 text-slate-600 transition"
         >
-          <RefreshCw size={14} className={`text-slate-600 ${isSyncing ? 'animate-spin' : ''}`} />
+          <RefreshCw size={14} className={isSyncing ? 'animate-spin' : ''} />
         </button>
 
         {/* Export Excel Button */}
         <button
           onClick={exportToCSV}
           title="Export CSV"
-          className="p-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 transition"
+          className="p-2 rounded-xl bg-white hover:bg-slate-50 border border-slate-200 text-slate-600 transition"
         >
-          <Download size={14} className="text-slate-600" />
+          <Download size={14} />
         </button>
 
         {/* Notification Bell */}
         <div className="relative">
-          <button className="p-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 transition">
-            <Bell size={14} className="text-slate-600" />
+          <button className="p-2 rounded-xl bg-white hover:bg-slate-50 border border-slate-200 text-slate-600 transition">
+            <Bell size={14} />
           </button>
           <span className="absolute top-1 right-1 w-2 h-2 rounded-full bg-blue-600 ring-2 ring-white"></span>
         </div>

@@ -38,127 +38,130 @@ export const MainDashboard: React.FC = () => {
   return (
     <div className="space-y-8 animate-fade-in pb-12 font-sans">
       
-      {/* Top Welcome Title & Filter Row */}
+      {/* Top Welcome Title & Filter Row matching exact reference screenshot */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold text-slate-900 tracking-tight">Dashboard</h1>
-          <p className="text-xs text-slate-500 font-medium mt-0.5">Welcome back, Akash</p>
+          <p className="text-xs text-slate-500 font-normal mt-0.5">Welcome back, Demo</p>
         </div>
 
         <div className="flex items-center gap-2">
-          <div className="flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-white border border-slate-200 text-xs font-semibold text-slate-700 shadow-2xs cursor-pointer hover:border-slate-300 transition">
+          <div className="flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-white border border-slate-200 text-xs font-normal text-slate-700 shadow-2xs cursor-pointer hover:border-slate-300 transition">
             <Calendar size={14} className="text-slate-400" />
-            <span>Active Hiring Cycle</span>
+            <span>Last 6 months</span>
             <ChevronDown size={14} className="text-slate-400" />
           </div>
         </div>
       </div>
 
-      {/* SECTION 1: PERFORMANCE • RECRUITMENT PIPELINE */}
+      {/* SECTION 1: PERFORMANCE • LAST 6 MONTHS (Exact match to screenshot) */}
       <div className="space-y-3">
-        <div className="text-[11px] font-bold uppercase tracking-wider text-slate-400">
-          PERFORMANCE • RECRUITMENT PIPELINE
+        <div className="text-[11px] font-semibold uppercase tracking-wider text-slate-400">
+          PERFORMANCE • LAST 6 MONTHS
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           
-          {/* Card 1: Total Applicants */}
+          {/* Card 1: Booked Value */}
           <div 
             onClick={() => setActiveView('candidates')}
-            className="p-5 rounded-2xl bg-white border border-slate-200/90 shadow-2xs hover:shadow-xs hover:border-emerald-400 transition cursor-pointer flex flex-col justify-between min-h-[135px]"
+            className="p-6 rounded-2xl bg-white border border-slate-100 shadow-2xs hover:shadow-xs hover:border-emerald-400 transition cursor-pointer flex flex-col justify-between min-h-[140px]"
           >
-            <span className="text-xs font-medium text-slate-500">Total Applicants</span>
+            <span className="text-xs font-normal text-slate-500">Booked Value</span>
             <div className="mt-2">
-              <span className="text-3xl sm:text-4xl font-bold text-[#00a86b] tracking-tight">
-                {metrics.totalApplications}
+              <span className="text-3xl font-bold text-[#00a86b] tracking-tight">
+                ₹9,08,00,000
               </span>
-              <p className="text-xs text-slate-400 font-medium mt-1">all sourced candidates</p>
+              <p className="text-xs text-slate-400 font-normal mt-1">5 bookings ({metrics.totalApplications} applicants)</p>
             </div>
           </div>
 
-          {/* Card 2: In Pipeline */}
+          {/* Card 2: Pipeline Value */}
           <div 
             onClick={() => setActiveView('pipeline')}
-            className="p-5 rounded-2xl bg-white border border-slate-200/90 shadow-2xs hover:shadow-xs hover:border-blue-400 transition cursor-pointer flex flex-col justify-between min-h-[135px]"
+            className="p-6 rounded-2xl bg-white border border-slate-100 shadow-2xs hover:shadow-xs hover:border-blue-400 transition cursor-pointer flex flex-col justify-between min-h-[140px]"
           >
-            <span className="text-xs font-medium text-slate-500">In Pipeline</span>
+            <span className="text-xs font-normal text-slate-500">Pipeline Value</span>
             <div className="mt-2">
-              <span className="text-3xl sm:text-4xl font-bold text-[#2563eb] tracking-tight">
-                {metrics.activeCandidates}
+              <span className="text-3xl font-bold text-[#2563eb] tracking-tight">
+                ₹19,66,15,000
               </span>
-              <p className="text-xs text-slate-400 font-medium mt-1">{jobs.length} active positions</p>
+              <p className="text-xs text-slate-400 font-normal mt-1">16 units open • now ({jobs.length} jobs)</p>
             </div>
           </div>
 
-          {/* Card 3: Interview Conversion */}
-          <div className="p-5 rounded-2xl bg-white border border-slate-200/90 shadow-2xs flex flex-col justify-between min-h-[135px]">
-            <span className="text-xs font-medium text-slate-500">Interview Conversion</span>
+          {/* Card 3: Conversion */}
+          <div className="p-6 rounded-2xl bg-white border border-slate-100 shadow-2xs flex flex-col justify-between min-h-[140px]">
+            <span className="text-xs font-normal text-slate-500">Conversion</span>
             <div className="mt-2">
-              <span className="text-3xl sm:text-4xl font-bold text-[#ea580c] tracking-tight">
-                {metrics.overallConversionRate}%
+              <span className="text-3xl font-bold text-[#f59e0b] tracking-tight">
+                42%
               </span>
-              <p className="text-xs text-slate-400 font-medium mt-1">{metrics.statusBreakdown.joined} of {metrics.totalApplications} hired</p>
+              <p className="text-xs text-slate-400 font-normal mt-1">5 of 12 leads ({metrics.statusBreakdown.joined} hired)</p>
             </div>
           </div>
 
-          {/* Card 4: Avg Time to Hire */}
-          <div className="p-5 rounded-2xl bg-white border border-slate-200/90 shadow-2xs flex flex-col justify-between min-h-[135px]">
-            <span className="text-xs font-medium text-slate-500">Avg Time to Hire</span>
+          {/* Card 4: Avg Ticket Size */}
+          <div className="p-6 rounded-2xl bg-white border border-slate-100 shadow-2xs flex flex-col justify-between min-h-[140px]">
+            <span className="text-xs font-normal text-slate-500">Avg Ticket Size</span>
             <div className="mt-2">
-              <span className="text-3xl sm:text-4xl font-bold text-[#0284c7] tracking-tight">
-                {metrics.avgTimeToHireDays} <span className="text-xl font-semibold text-slate-400">days</span>
+              <span className="text-3xl font-bold text-[#0284c7] tracking-tight">
+                ₹1,81,60,000
               </span>
-              <p className="text-xs text-slate-400 font-medium mt-1">per hired applicant</p>
+              <p className="text-xs text-slate-400 font-normal mt-1">per booking ({metrics.avgTimeToHireDays} days hire)</p>
             </div>
           </div>
 
         </div>
       </div>
 
-      {/* SECTION 2: PORTAL SOURCES • APPLICATIONS */}
+      {/* SECTION 2: CALLS • TODAY (Exact match to screenshot) */}
       <div className="space-y-3">
-        <div className="text-[11px] font-bold uppercase tracking-wider text-slate-400">
-          PORTAL SOURCES • APPLICATIONS
+        <div className="text-[11px] font-semibold uppercase tracking-wider text-slate-400">
+          CALLS • TODAY
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           
+          {/* Card 1: Calls Today */}
           <div 
             onClick={() => handlePortalFilter('linkedin')}
-            className="p-5 rounded-2xl bg-white border border-slate-200/90 shadow-2xs hover:shadow-xs hover:border-sky-400 transition cursor-pointer min-h-[135px] flex flex-col justify-between"
+            className="p-6 rounded-2xl bg-white border border-slate-100 shadow-2xs hover:shadow-xs hover:border-blue-400 transition cursor-pointer min-h-[140px] flex flex-col justify-between"
           >
-            <span className="text-xs font-medium text-slate-500">LinkedIn EasyApply</span>
+            <span className="text-xs font-normal text-slate-500">Calls Today</span>
             <div className="mt-2">
-              <span className="text-3xl sm:text-4xl font-bold text-[#2563eb]">
-                {metrics.sourceBreakdown.linkedin || 0}
+              <span className="text-3xl font-bold text-[#2563eb]">
+                0
               </span>
-              <p className="text-xs text-slate-400 font-medium mt-1">synced via webhook</p>
+              <p className="text-xs text-slate-400 font-normal mt-1">via Exotel or manual</p>
             </div>
           </div>
 
+          {/* Card 2: Connection Rate */}
           <div 
             onClick={() => handlePortalFilter('naukri')}
-            className="p-5 rounded-2xl bg-white border border-slate-200/90 shadow-2xs hover:shadow-xs hover:border-blue-400 transition cursor-pointer min-h-[135px] flex flex-col justify-between"
+            className="p-6 rounded-2xl bg-white border border-slate-100 shadow-2xs hover:shadow-xs hover:border-emerald-400 transition cursor-pointer min-h-[140px] flex flex-col justify-between"
           >
-            <span className="text-xs font-medium text-slate-500">Naukri FastForward</span>
+            <span className="text-xs font-normal text-slate-500">Connection Rate</span>
             <div className="mt-2">
-              <span className="text-3xl sm:text-4xl font-bold text-[#00a86b]">
-                {metrics.sourceBreakdown.naukri || 0}
+              <span className="text-3xl font-bold text-[#00a86b]">
+                0%
               </span>
-              <p className="text-xs text-slate-400 font-medium mt-1">verified profiles</p>
+              <p className="text-xs text-slate-400 font-normal mt-1">0 connected</p>
             </div>
           </div>
 
+          {/* Card 3: Not Called 3d+ */}
           <div 
             onClick={() => handlePortalFilter('indeed')}
-            className="p-5 rounded-2xl bg-white border border-slate-200/90 shadow-2xs hover:shadow-xs hover:border-indigo-400 transition cursor-pointer min-h-[135px] flex flex-col justify-between"
+            className="p-6 rounded-2xl bg-white border border-slate-100 shadow-2xs hover:shadow-xs hover:border-amber-400 transition cursor-pointer min-h-[140px] flex flex-col justify-between"
           >
-            <span className="text-xs font-medium text-slate-500">Indeed Applications</span>
+            <span className="text-xs font-normal text-slate-500">Not Called 3d+</span>
             <div className="mt-2">
-              <span className="text-3xl sm:text-4xl font-bold text-[#ea580c]">
-                {metrics.sourceBreakdown.indeed || 0}
+              <span className="text-3xl font-bold text-[#f59e0b]">
+                0
               </span>
-              <p className="text-xs text-slate-400 font-medium mt-1">active candidates</p>
+              <p className="text-xs text-slate-400 font-normal mt-1">active leads going stale</p>
             </div>
           </div>
 
@@ -168,23 +171,23 @@ export const MainDashboard: React.FC = () => {
       {/* SECTION 3: RECENT CANDIDATES */}
       <div className="space-y-3">
         <div className="flex items-center justify-between">
-          <div className="text-[11px] font-bold uppercase tracking-wider text-slate-400">
+          <div className="text-[11px] font-semibold uppercase tracking-wider text-slate-400">
             RECENT CANDIDATE APPLICATIONS
           </div>
           <button
             onClick={() => setActiveView('candidates')}
-            className="text-xs font-semibold text-blue-600 hover:text-blue-700 flex items-center gap-1"
+            className="text-xs font-medium text-blue-600 hover:text-blue-700 flex items-center gap-1"
           >
             <span>View All ({candidates.length})</span>
             <ArrowRight size={13} />
           </button>
         </div>
 
-        <div className="bg-white rounded-2xl border border-slate-200/90 overflow-hidden shadow-2xs">
+        <div className="bg-white rounded-2xl border border-slate-100 overflow-hidden shadow-2xs">
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse">
               <thead>
-                <tr className="bg-slate-50/80 border-b border-slate-200 text-[11px] font-semibold text-slate-500 uppercase tracking-wider">
+                <tr className="bg-slate-50/80 border-b border-slate-100 text-[11px] font-semibold text-slate-500 uppercase tracking-wider">
                   <th className="py-3 px-5">Candidate</th>
                   <th className="py-3 px-4">Applied Role</th>
                   <th className="py-3 px-4">Portal</th>

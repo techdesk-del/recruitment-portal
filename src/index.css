@@ -12,6 +12,7 @@
     font-family: var(--font-sans);
     background-color: #f8fafc;
     color: #0f172a;
+    letter-spacing: -0.02em;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
   }

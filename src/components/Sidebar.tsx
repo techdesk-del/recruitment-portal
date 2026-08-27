@@ -5,14 +5,7 @@ import {
   Briefcase, 
   Kanban, 
   Settings, 
-  LogOut,
-  Calendar,
-  Layers,
-  PhoneCall,
-  FolderKanban,
-  Building2,
-  TrendingUp,
-  Inbox
+  LogOut 
 } from 'lucide-react';
 import { useRecruitment } from '../context/RecruitmentContext';
 import { UrbanGaonIcon } from './UrbanGaonLogo';
@@ -52,18 +45,18 @@ export const Sidebar: React.FC = () => {
       {/* Top Brand & Navigation */}
       <div className="p-4 space-y-6 overflow-y-auto">
         
-        {/* Brand Header matching exact reference screenshot */}
+        {/* Brand Header */}
         <div className="flex items-center gap-3 px-2 pt-1 pb-2">
           <UrbanGaonIcon size={38} className="rounded-full shrink-0" />
           <div className="flex flex-col justify-center">
             <h1 className="font-bold text-slate-900 text-[16px] leading-tight tracking-tight">UrbanGaon</h1>
-            <p className="text-[11px] text-slate-400 font-normal leading-tight mt-0.5">Admin / CEO</p>
+            <p className="text-[11px] text-slate-400 font-normal leading-tight mt-0.5">Admin / HR Lead</p>
           </div>
         </div>
 
-        {/* Main Navigation Menu matching exact screenshot */}
+        {/* Main Navigation Menu (Dashboard, All Candidates, Job Openings, Pipeline Stages) */}
         <div className="space-y-1">
-          {/* Active Dashboard Button */}
+          {/* Dashboard */}
           <button
             onClick={() => handleGeneralViewClick('dashboard')}
             className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm transition-all ${
@@ -76,36 +69,7 @@ export const Sidebar: React.FC = () => {
             <span>Dashboard</span>
           </button>
 
-          {/* Today */}
-          <button
-            onClick={() => handleGeneralViewClick('dashboard')}
-            className="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-normal text-slate-500 hover:text-slate-900 hover:bg-slate-50 transition"
-          >
-            <Calendar size={18} className="text-slate-400" />
-            <span>Today</span>
-          </button>
-
-          {/* Projects / Jobs */}
-          <button
-            onClick={() => handleGeneralViewClick('jobs')}
-            className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-sm transition-all ${
-              activeView === 'jobs'
-                ? 'bg-[#2563eb] text-white font-medium shadow-md shadow-blue-500/20'
-                : 'text-slate-500 hover:text-slate-900 hover:bg-slate-50 font-normal'
-            }`}
-          >
-            <div className="flex items-center gap-3">
-              <FolderKanban size={18} className={activeView === 'jobs' ? 'text-white' : 'text-slate-400'} />
-              <span>Projects / Jobs</span>
-            </div>
-            <span className={`text-[11px] font-normal px-2 py-0.2 rounded-full ${
-              activeView === 'jobs' ? 'bg-blue-800/80 text-white' : 'bg-slate-100 text-slate-500'
-            }`}>
-              {jobs.length}
-            </span>
-          </button>
-
-          {/* Leads / Candidates */}
+          {/* All Candidates */}
           <button
             onClick={() => handleGeneralViewClick('candidates')}
             className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-sm transition-all ${
@@ -116,7 +80,7 @@ export const Sidebar: React.FC = () => {
           >
             <div className="flex items-center gap-3">
               <Users size={18} className={activeView === 'candidates' ? 'text-white' : 'text-slate-400'} />
-              <span>Leads / Applicants</span>
+              <span>All Candidates</span>
             </div>
             <span className={`text-[11px] font-normal px-2 py-0.2 rounded-full ${
               activeView === 'candidates' ? 'bg-blue-800/80 text-white' : 'bg-slate-100 text-slate-500'
@@ -125,7 +89,27 @@ export const Sidebar: React.FC = () => {
             </span>
           </button>
 
-          {/* Calls / Interviews */}
+          {/* Job Openings */}
+          <button
+            onClick={() => handleGeneralViewClick('jobs')}
+            className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-sm transition-all ${
+              activeView === 'jobs'
+                ? 'bg-[#2563eb] text-white font-medium shadow-md shadow-blue-500/20'
+                : 'text-slate-500 hover:text-slate-900 hover:bg-slate-50 font-normal'
+            }`}
+          >
+            <div className="flex items-center gap-3">
+              <Briefcase size={18} className={activeView === 'jobs' ? 'text-white' : 'text-slate-400'} />
+              <span>Job Openings</span>
+            </div>
+            <span className={`text-[11px] font-normal px-2 py-0.2 rounded-full ${
+              activeView === 'jobs' ? 'bg-blue-800/80 text-white' : 'bg-slate-100 text-slate-500'
+            }`}>
+              {jobs.length}
+            </span>
+          </button>
+
+          {/* Pipeline Stages */}
           <button
             onClick={() => handleGeneralViewClick('pipeline')}
             className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm transition-all ${
@@ -134,8 +118,8 @@ export const Sidebar: React.FC = () => {
                 : 'text-slate-500 hover:text-slate-900 hover:bg-slate-50 font-normal'
             }`}
           >
-            <PhoneCall size={18} className={activeView === 'pipeline' ? 'text-white' : 'text-slate-400'} />
-            <span>Calls / Pipeline</span>
+            <Kanban size={18} className={activeView === 'pipeline' ? 'text-white' : 'text-slate-400'} />
+            <span>Pipeline Stages</span>
           </button>
         </div>
 
@@ -223,7 +207,7 @@ export const Sidebar: React.FC = () => {
           >
             <div className="flex items-center gap-3">
               <span className="text-sm">🏠</span>
-              <span>UrbanGaon</span>
+              <span>UrbanGaon Careers</span>
             </div>
             <span className="text-[11px] text-slate-400 font-normal">
               {getPortalCount('urbangaon')}
@@ -233,18 +217,18 @@ export const Sidebar: React.FC = () => {
 
       </div>
 
-      {/* Bottom Settings & User Profile Footer matching screenshot */}
+      {/* Bottom Settings & User Profile Footer */}
       <div className="p-4 border-t border-slate-100 space-y-2">
         <button
           onClick={() => handleGeneralViewClick('overview')}
           className="w-full flex items-center gap-3 px-3.5 py-2 text-sm font-normal text-slate-500 hover:text-slate-900 hover:bg-slate-50 rounded-xl transition"
         >
           <Settings size={18} className="text-slate-400" />
-          <span>Settings</span>
+          <span>Hiring Settings</span>
         </button>
 
         <div className="pt-2 border-t border-slate-100 flex items-center justify-between text-xs px-2">
-          <span className="font-semibold text-slate-900 text-xs">Yudhister Tiwari</span>
+          <span className="font-semibold text-slate-900 text-xs">Akash Das</span>
 
           <button
             onClick={() => alert('Demo HR Session')}

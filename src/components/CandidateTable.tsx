@@ -9,7 +9,9 @@ import {
   MapPin, 
   ChevronLeft, 
   ChevronRight, 
-  RotateCcw 
+  RotateCcw,
+  ArrowRight,
+  Filter
 } from 'lucide-react';
 import { useRecruitment } from '../context/RecruitmentContext';
 import { CandidateStatus, CandidateSource } from '../types';
@@ -24,7 +26,9 @@ export const CandidateTable: React.FC = () => {
     setSelectedCandidate, 
     setPreviewResumeCandidate, 
     downloadResume, 
-    exportToCSV 
+    exportToCSV,
+    activeView,
+    setActiveView
   } = useRecruitment();
 
   const [currentPage, setCurrentPage] = useState(1);
@@ -51,15 +55,20 @@ export const CandidateTable: React.FC = () => {
     { value: 'rejected', label: 'Rejected', color: 'bg-rose-50 text-rose-700 border-rose-300' }
   ];
 
-  // Quick stats counts
-  const totalCount = candidates.length;
-  const inReviewCount = candidates.filter((c) => ['screening', 'shortlisted'].includes(c.status)).length;
-  const interviewCount = candidates.filter((c) => ['interview_r1', 'interview_r2'].includes(c.status)).length;
-  const hiredCount = candidates.filter((c) => c.status === 'joined').length;
-
-  // Filter candidates
-  const filteredCandidates = candidates.filter((cand) => {
+  // Candidates in active portal or general scope
+  const scopedCandidates = candidates.filter((cand) => {
     if (filters.source !== 'all' && cand.source !== filters.source) return false;
+    return true;
+  });
+
+  // Dynamic quick stats counts based on active scope
+  const totalCount = scopedCandidates.length;
+  const inReviewCount = scopedCandidates.filter((c) => ['screening', 'shortlisted'].includes(c.status)).length;
+  const interviewCount = scopedCandidates.filter((c) => ['interview_r1', 'interview_r2'].includes(c.status)).length;
+  const hiredCount = scopedCandidates.filter((c) => c.status === 'joined').length;
+
+  // Filter candidates for table display
+  const filteredCandidates = scopedCandidates.filter((cand) => {
     if (filters.status !== 'all' && cand.status !== filters.status) return false;
     if (filters.jobId !== 'all' && cand.jobId !== filters.jobId) return false;
     if (filters.searchQuery) {
@@ -94,11 +103,45 @@ export const CandidateTable: React.FC = () => {
       dateRange: 'all',
       minRating: 0
     });
+    setActiveView('candidates');
+  };
+
+  const portalTitles: Record<string, string> = {
+    linkedin: 'LinkedIn EasyApply Candidates',
+    naukri: 'Naukri.com Candidates',
+    indeed: 'Indeed Candidates',
+    apna: 'Apna.co Candidates',
+    urbangaon: 'UrbanGaon Careers Candidates',
+    internshala: 'Internshala Candidates'
   };
 
   return (
-    <div className="space-y-5 animate-fade-in pb-12 font-sans">
+    <div className="space-y-6 animate-fade-in pb-12 font-sans">
       
+      {/* Portal Header Title if specific portal is selected */}
+      {filters.source !== 'all' && (
+        <div className="flex items-center justify-between bg-white border border-slate-200/90 p-4 rounded-2xl shadow-2xs">
+          <div className="flex items-center gap-3">
+            <span className="text-xl">{sourceBadges[filters.source]?.icon || '📋'}</span>
+            <div>
+              <h2 className="text-base font-bold text-slate-900">
+                {portalTitles[filters.source] || `${filters.source.toUpperCase()} Candidates`}
+              </h2>
+              <p className="text-xs text-slate-400 font-normal">
+                Showing {filteredCandidates.length} candidate applications sourced from this portal
+              </p>
+            </div>
+          </div>
+          <button
+            onClick={resetFilters}
+            className="text-xs text-blue-600 hover:text-blue-700 font-medium flex items-center gap-1"
+          >
+            <span>View All Sources</span>
+            <ArrowRight size={13} />
+          </button>
+        </div>
+      )}
+
       {/* 4 Simple Top HR Metric Cards in Light Mode */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
         <div 
@@ -107,7 +150,9 @@ export const CandidateTable: React.FC = () => {
         >
           <span className="text-[11px] font-medium text-slate-500 uppercase tracking-wider block">Total Applicants</span>
           <span className="text-2xl font-bold text-slate-900 mt-1 block">{totalCount}</span>
-          <span className="text-[11px] text-blue-600 font-medium mt-0.5 block">All Sourced Portals</span>
+          <span className="text-[11px] text-blue-600 font-medium mt-0.5 block">
+            {filters.source === 'all' ? 'All Sourced Portals' : `${sourceBadges[filters.source]?.label || filters.source}`}
+          </span>
         </div>
 
         <div 

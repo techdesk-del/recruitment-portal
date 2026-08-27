@@ -38,130 +38,130 @@ export const MainDashboard: React.FC = () => {
   return (
     <div className="space-y-8 animate-fade-in pb-12 font-sans">
       
-      {/* Top Welcome Title & Filter Row matching exact reference screenshot */}
+      {/* Top Welcome Title & Filter Row */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold text-slate-900 tracking-tight">Dashboard</h1>
-          <p className="text-xs text-slate-500 font-normal mt-0.5">Welcome back, Demo</p>
+          <p className="text-xs text-slate-500 font-normal mt-0.5">Welcome back, Akash • UrbanGaon Recruitment Operations</p>
         </div>
 
         <div className="flex items-center gap-2">
           <div className="flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-white border border-slate-200 text-xs font-normal text-slate-700 shadow-2xs cursor-pointer hover:border-slate-300 transition">
             <Calendar size={14} className="text-slate-400" />
-            <span>Last 6 months</span>
+            <span>Active Hiring Cycle (Q3)</span>
             <ChevronDown size={14} className="text-slate-400" />
           </div>
         </div>
       </div>
 
-      {/* SECTION 1: PERFORMANCE • LAST 6 MONTHS (Exact match to screenshot) */}
+      {/* SECTION 1: PERFORMANCE • RECRUITMENT PIPELINE */}
       <div className="space-y-3">
         <div className="text-[11px] font-semibold uppercase tracking-wider text-slate-400">
-          PERFORMANCE • LAST 6 MONTHS
+          PERFORMANCE • RECRUITMENT PIPELINE
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           
-          {/* Card 1: Booked Value */}
+          {/* Card 1: Total Applicants */}
           <div 
             onClick={() => setActiveView('candidates')}
             className="p-6 rounded-2xl bg-white border border-slate-100 shadow-2xs hover:shadow-xs hover:border-emerald-400 transition cursor-pointer flex flex-col justify-between min-h-[140px]"
           >
-            <span className="text-xs font-normal text-slate-500">Booked Value</span>
+            <span className="text-xs font-normal text-slate-500">Total Applicants</span>
             <div className="mt-2">
               <span className="text-3xl font-bold text-[#00a86b] tracking-tight">
-                ₹9,08,00,000
+                {metrics.totalApplications}
               </span>
-              <p className="text-xs text-slate-400 font-normal mt-1">5 bookings ({metrics.totalApplications} applicants)</p>
+              <p className="text-xs text-slate-400 font-normal mt-1">{metrics.statusBreakdown.applied} new applications</p>
             </div>
           </div>
 
-          {/* Card 2: Pipeline Value */}
+          {/* Card 2: Active Pipeline */}
           <div 
             onClick={() => setActiveView('pipeline')}
             className="p-6 rounded-2xl bg-white border border-slate-100 shadow-2xs hover:shadow-xs hover:border-blue-400 transition cursor-pointer flex flex-col justify-between min-h-[140px]"
           >
-            <span className="text-xs font-normal text-slate-500">Pipeline Value</span>
+            <span className="text-xs font-normal text-slate-500">In Active Pipeline</span>
             <div className="mt-2">
               <span className="text-3xl font-bold text-[#2563eb] tracking-tight">
-                ₹19,66,15,000
+                {metrics.activeCandidates}
               </span>
-              <p className="text-xs text-slate-400 font-normal mt-1">16 units open • now ({jobs.length} jobs)</p>
+              <p className="text-xs text-slate-400 font-normal mt-1">across {jobs.length} open positions</p>
             </div>
           </div>
 
           {/* Card 3: Conversion */}
           <div className="p-6 rounded-2xl bg-white border border-slate-100 shadow-2xs flex flex-col justify-between min-h-[140px]">
-            <span className="text-xs font-normal text-slate-500">Conversion</span>
+            <span className="text-xs font-normal text-slate-500">Interview Conversion</span>
             <div className="mt-2">
               <span className="text-3xl font-bold text-[#f59e0b] tracking-tight">
-                42%
+                {metrics.overallConversionRate}%
               </span>
-              <p className="text-xs text-slate-400 font-normal mt-1">5 of 12 leads ({metrics.statusBreakdown.joined} hired)</p>
+              <p className="text-xs text-slate-400 font-normal mt-1">{metrics.statusBreakdown.joined} hired • {metrics.statusBreakdown.offered} offered</p>
             </div>
           </div>
 
-          {/* Card 4: Avg Ticket Size */}
+          {/* Card 4: Avg Time to Hire */}
           <div className="p-6 rounded-2xl bg-white border border-slate-100 shadow-2xs flex flex-col justify-between min-h-[140px]">
-            <span className="text-xs font-normal text-slate-500">Avg Ticket Size</span>
+            <span className="text-xs font-normal text-slate-500">Avg Time to Hire</span>
             <div className="mt-2">
               <span className="text-3xl font-bold text-[#0284c7] tracking-tight">
-                ₹1,81,60,000
+                {metrics.avgTimeToHireDays} <span className="text-xl font-medium text-slate-400">days</span>
               </span>
-              <p className="text-xs text-slate-400 font-normal mt-1">per booking ({metrics.avgTimeToHireDays} days hire)</p>
+              <p className="text-xs text-slate-400 font-normal mt-1">fast turnaround per candidate</p>
             </div>
           </div>
 
         </div>
       </div>
 
-      {/* SECTION 2: CALLS • TODAY (Exact match to screenshot) */}
+      {/* SECTION 2: PORTAL SOURCES • APPLICATIONS */}
       <div className="space-y-3">
         <div className="text-[11px] font-semibold uppercase tracking-wider text-slate-400">
-          CALLS • TODAY
+          PORTAL SOURCES • APPLICATIONS RECEIVED
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           
-          {/* Card 1: Calls Today */}
+          {/* Card 1: LinkedIn */}
           <div 
             onClick={() => handlePortalFilter('linkedin')}
             className="p-6 rounded-2xl bg-white border border-slate-100 shadow-2xs hover:shadow-xs hover:border-blue-400 transition cursor-pointer min-h-[140px] flex flex-col justify-between"
           >
-            <span className="text-xs font-normal text-slate-500">Calls Today</span>
+            <span className="text-xs font-normal text-slate-500">LinkedIn EasyApply</span>
             <div className="mt-2">
               <span className="text-3xl font-bold text-[#2563eb]">
-                0
+                {metrics.sourceBreakdown.linkedin || 0}
               </span>
-              <p className="text-xs text-slate-400 font-normal mt-1">via Exotel or manual</p>
+              <p className="text-xs text-slate-400 font-normal mt-1">synced candidate applications</p>
             </div>
           </div>
 
-          {/* Card 2: Connection Rate */}
+          {/* Card 2: Naukri */}
           <div 
             onClick={() => handlePortalFilter('naukri')}
             className="p-6 rounded-2xl bg-white border border-slate-100 shadow-2xs hover:shadow-xs hover:border-emerald-400 transition cursor-pointer min-h-[140px] flex flex-col justify-between"
           >
-            <span className="text-xs font-normal text-slate-500">Connection Rate</span>
+            <span className="text-xs font-normal text-slate-500">Naukri FastForward</span>
             <div className="mt-2">
               <span className="text-3xl font-bold text-[#00a86b]">
-                0%
+                {metrics.sourceBreakdown.naukri || 0}
               </span>
-              <p className="text-xs text-slate-400 font-normal mt-1">0 connected</p>
+              <p className="text-xs text-slate-400 font-normal mt-1">verified candidate profiles</p>
             </div>
           </div>
 
-          {/* Card 3: Not Called 3d+ */}
+          {/* Card 3: Indeed & Portals */}
           <div 
             onClick={() => handlePortalFilter('indeed')}
             className="p-6 rounded-2xl bg-white border border-slate-100 shadow-2xs hover:shadow-xs hover:border-amber-400 transition cursor-pointer min-h-[140px] flex flex-col justify-between"
           >
-            <span className="text-xs font-normal text-slate-500">Not Called 3d+</span>
+            <span className="text-xs font-normal text-slate-500">Indeed & Other Portals</span>
             <div className="mt-2">
               <span className="text-3xl font-bold text-[#f59e0b]">
-                0
+                {(metrics.sourceBreakdown.indeed || 0) + (metrics.sourceBreakdown.apna || 0) + (metrics.sourceBreakdown.urbangaon || 0)}
               </span>
-              <p className="text-xs text-slate-400 font-normal mt-1">active leads going stale</p>
+              <p className="text-xs text-slate-400 font-normal mt-1">active portal applicants</p>
             </div>
           </div>
 

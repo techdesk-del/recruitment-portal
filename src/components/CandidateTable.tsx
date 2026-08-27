@@ -105,36 +105,36 @@ export const CandidateTable: React.FC = () => {
           onClick={() => setFilters((prev) => ({ ...prev, status: 'all' }))}
           className="p-4 rounded-xl bg-white border border-slate-200 hover:border-blue-500 cursor-pointer transition shadow-2xs"
         >
-          <span className="text-[11px] font-normal text-slate-500 uppercase tracking-wider block">Total Applicants</span>
-          <span className="text-2xl font-semibold text-slate-800 mt-1 block">{totalCount}</span>
-          <span className="text-[11px] text-blue-600 font-normal mt-0.5 block">All Sourced Portals</span>
+          <span className="text-[11px] font-medium text-slate-500 uppercase tracking-wider block">Total Applicants</span>
+          <span className="text-2xl font-bold text-slate-900 mt-1 block">{totalCount}</span>
+          <span className="text-[11px] text-blue-600 font-medium mt-0.5 block">All Sourced Portals</span>
         </div>
 
         <div 
           onClick={() => setFilters((prev) => ({ ...prev, status: 'screening' }))}
           className="p-4 rounded-xl bg-white border border-slate-200 hover:border-blue-500 cursor-pointer transition shadow-2xs"
         >
-          <span className="text-[11px] font-normal text-slate-500 uppercase tracking-wider block">Under Review</span>
-          <span className="text-2xl font-semibold text-blue-600 mt-1 block">{inReviewCount}</span>
-          <span className="text-[11px] text-slate-400 font-normal mt-0.5 block">Screening / Shortlisted</span>
+          <span className="text-[11px] font-medium text-slate-500 uppercase tracking-wider block">Under Review</span>
+          <span className="text-2xl font-bold text-blue-600 mt-1 block">{inReviewCount}</span>
+          <span className="text-[11px] text-slate-400 font-medium mt-0.5 block">Screening / Shortlisted</span>
         </div>
 
         <div 
           onClick={() => setFilters((prev) => ({ ...prev, status: 'interview_r1' }))}
           className="p-4 rounded-xl bg-white border border-slate-200 hover:border-purple-500 cursor-pointer transition shadow-2xs"
         >
-          <span className="text-[11px] font-normal text-slate-500 uppercase tracking-wider block">In Interviews</span>
-          <span className="text-2xl font-semibold text-purple-600 mt-1 block">{interviewCount}</span>
-          <span className="text-[11px] text-slate-400 font-normal mt-0.5 block">Round 1 & Round 2</span>
+          <span className="text-[11px] font-medium text-slate-500 uppercase tracking-wider block">In Interviews</span>
+          <span className="text-2xl font-bold text-purple-600 mt-1 block">{interviewCount}</span>
+          <span className="text-[11px] text-slate-400 font-medium mt-0.5 block">Round 1 & Round 2</span>
         </div>
 
         <div 
           onClick={() => setFilters((prev) => ({ ...prev, status: 'joined' }))}
           className="p-4 rounded-xl bg-white border border-slate-200 hover:border-emerald-500 cursor-pointer transition shadow-2xs"
         >
-          <span className="text-[11px] font-normal text-slate-500 uppercase tracking-wider block">Selected / Hired</span>
-          <span className="text-2xl font-semibold text-emerald-600 mt-1 block">{hiredCount}</span>
-          <span className="text-[11px] text-emerald-700 font-normal mt-0.5 block">Offer Accepted</span>
+          <span className="text-[11px] font-medium text-slate-500 uppercase tracking-wider block">Selected / Hired</span>
+          <span className="text-2xl font-bold text-emerald-600 mt-1 block">{hiredCount}</span>
+          <span className="text-[11px] text-emerald-700 font-medium mt-0.5 block">Offer Accepted</span>
         </div>
       </div>
 
@@ -149,7 +149,7 @@ export const CandidateTable: React.FC = () => {
               placeholder="Search candidate name, role, skill, phone..."
               value={filters.searchQuery}
               onChange={(e) => setFilters((prev) => ({ ...prev, searchQuery: e.target.value }))}
-              className="w-full pl-9 pr-3 py-1.5 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:border-blue-500 focus:bg-white transition font-normal"
+              className="w-full pl-9 pr-3 py-1.5 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:border-blue-500 focus:bg-white transition font-medium"
             />
           </div>
 
@@ -157,7 +157,7 @@ export const CandidateTable: React.FC = () => {
           <select
             value={filters.jobId}
             onChange={(e) => setFilters((prev) => ({ ...prev, jobId: e.target.value }))}
-            className="px-3 py-1.5 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-700 focus:outline-none focus:border-blue-500 font-normal"
+            className="px-3 py-1.5 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-700 focus:outline-none focus:border-blue-500 font-medium"
           >
             <option value="all">All Positions ({jobs.length})</option>
             {jobs.map((j) => (
@@ -171,7 +171,7 @@ export const CandidateTable: React.FC = () => {
           <select
             value={filters.source}
             onChange={(e) => setFilters((prev) => ({ ...prev, source: e.target.value as any }))}
-            className="px-3 py-1.5 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-700 focus:outline-none focus:border-blue-500 font-normal"
+            className="px-3 py-1.5 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-700 focus:outline-none focus:border-blue-500 font-medium"
           >
             <option value="all">All Sources</option>
             <option value="naukri">Naukri.com</option>
@@ -187,7 +187,7 @@ export const CandidateTable: React.FC = () => {
           <select
             value={filters.status}
             onChange={(e) => setFilters((prev) => ({ ...prev, status: e.target.value as any }))}
-            className="px-3 py-1.5 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-700 focus:outline-none focus:border-blue-500 font-normal"
+            className="px-3 py-1.5 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-700 focus:outline-none focus:border-blue-500 font-medium"
           >
             <option value="all">All Stages</option>
             {statusOptions.map((s) => (
@@ -200,7 +200,7 @@ export const CandidateTable: React.FC = () => {
           {(filters.source !== 'all' || filters.status !== 'all' || filters.jobId !== 'all' || filters.searchQuery) && (
             <button
               onClick={resetFilters}
-              className="flex items-center gap-1 text-xs text-slate-500 hover:text-slate-900 px-2 py-1 transition font-normal"
+              className="flex items-center gap-1 text-xs text-slate-500 hover:text-slate-900 px-2 py-1 transition font-medium"
             >
               <RotateCcw size={12} /> Clear
             </button>
@@ -209,7 +209,7 @@ export const CandidateTable: React.FC = () => {
 
         <button
           onClick={exportToCSV}
-          className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-normal border border-slate-200 transition"
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold border border-slate-200 transition"
         >
           <Download size={13} />
           <span>Export CSV</span>
@@ -221,7 +221,7 @@ export const CandidateTable: React.FC = () => {
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
             <thead>
-              <tr className="bg-slate-50 border-b border-slate-200 text-[11px] font-medium text-slate-500 uppercase tracking-wider">
+              <tr className="bg-slate-50 border-b border-slate-200 text-[11px] font-semibold text-slate-500 uppercase tracking-wider">
                 <th className="py-3 px-5">Candidate Name & Contact</th>
                 <th className="py-3 px-4">Applied Job Role</th>
                 <th className="py-3 px-4">Source Portal</th>
@@ -236,10 +236,10 @@ export const CandidateTable: React.FC = () => {
                 <tr>
                   <td colSpan={6} className="py-12 text-center text-slate-400">
                     <User size={32} className="mx-auto text-slate-300 mb-2" />
-                    <p className="font-normal text-slate-600">No candidates match your current filter.</p>
+                    <p className="font-medium text-slate-600">No candidates match your current filter.</p>
                     <button
                       onClick={resetFilters}
-                      className="mt-2 text-xs text-blue-600 hover:underline inline-flex items-center gap-1 font-normal"
+                      className="mt-2 text-xs text-blue-600 hover:underline inline-flex items-center gap-1 font-semibold"
                     >
                       <RotateCcw size={11} /> Reset filters to see all applicants
                     </button>
@@ -258,13 +258,13 @@ export const CandidateTable: React.FC = () => {
                       {/* Candidate Name & Contact */}
                       <td className="py-3.5 px-5">
                         <div className="flex items-center gap-3">
-                          <div className="w-8 h-8 rounded-full bg-blue-100 text-blue-700 font-medium text-xs flex items-center justify-center shrink-0">
+                          <div className="w-8 h-8 rounded-full bg-blue-100 text-blue-700 font-semibold text-xs flex items-center justify-center shrink-0">
                             {cand.name.charAt(0)}
                           </div>
                           <div>
                             <button
                               onClick={() => setSelectedCandidate(cand)}
-                              className="font-medium text-slate-900 hover:text-blue-600 transition text-left text-sm"
+                              className="font-semibold text-slate-900 hover:text-blue-600 transition text-left text-sm"
                             >
                               {cand.name}
                             </button>
@@ -284,7 +284,7 @@ export const CandidateTable: React.FC = () => {
 
                       {/* Applied Job Role */}
                       <td className="py-3.5 px-4">
-                        <span className="font-medium text-slate-800 block text-sm">{cand.jobAppliedFor}</span>
+                        <span className="font-semibold text-slate-800 block text-sm">{cand.jobAppliedFor}</span>
                         <span className="text-[11px] text-slate-400 flex items-center gap-1 mt-0.5 font-normal">
                           <MapPin size={11} className="text-slate-400" /> {cand.location}
                         </span>
@@ -292,7 +292,7 @@ export const CandidateTable: React.FC = () => {
 
                       {/* Source Badge */}
                       <td className="py-3.5 px-4">
-                        <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-normal border ${source.class}`}>
+                        <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-medium border ${source.class}`}>
                           <span>{source.icon}</span>
                           <span>{source.label}</span>
                         </span>
@@ -300,11 +300,11 @@ export const CandidateTable: React.FC = () => {
 
                       {/* Experience & Expected CTC */}
                       <td className="py-3.5 px-4">
-                        <div className="text-slate-700 font-normal">
+                        <div className="text-slate-700 font-medium">
                           {cand.experienceYears} Years Exp
                         </div>
                         <div className="text-[11px] text-slate-400 mt-0.5 font-normal">
-                          CTC: <strong className="text-slate-600 font-medium">{cand.expectedSalary}</strong> • {cand.noticePeriod}
+                          CTC: <strong className="text-slate-700 font-semibold">{cand.expectedSalary}</strong> • {cand.noticePeriod}
                         </div>
                       </td>
 
@@ -313,7 +313,7 @@ export const CandidateTable: React.FC = () => {
                         <select
                           value={cand.status}
                           onChange={(e) => updateCandidateStatus(cand.id, e.target.value as CandidateStatus)}
-                          className={`px-2.5 py-1 rounded-lg text-xs font-normal border focus:outline-none cursor-pointer ${currentStatus.color}`}
+                          className={`px-2.5 py-1 rounded-lg text-xs font-semibold border focus:outline-none cursor-pointer ${currentStatus.color}`}
                         >
                           {statusOptions.map((opt) => (
                             <option key={opt.value} value={opt.value} className="bg-white text-slate-800">
@@ -329,7 +329,7 @@ export const CandidateTable: React.FC = () => {
                           <button
                             onClick={() => setSelectedCandidate(cand)}
                             title="View Candidate Profile"
-                            className="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 text-[11px] font-normal border border-slate-200 transition"
+                            className="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 text-[11px] font-semibold border border-slate-200 transition"
                           >
                             Profile
                           </button>
@@ -362,9 +362,9 @@ export const CandidateTable: React.FC = () => {
         {/* Pagination Bar */}
         <div className="p-3.5 bg-slate-50 border-t border-slate-200 flex items-center justify-between text-xs text-slate-500 font-normal">
           <div>
-            Showing <strong className="text-slate-700 font-medium">{filteredCandidates.length > 0 ? (currentPage - 1) * pageSize + 1 : 0}</strong> to{' '}
-            <strong className="text-slate-700 font-medium">{Math.min(currentPage * pageSize, filteredCandidates.length)}</strong> of{' '}
-            <strong className="text-slate-700 font-medium">{filteredCandidates.length}</strong> candidates
+            Showing <strong className="text-slate-700 font-semibold">{filteredCandidates.length > 0 ? (currentPage - 1) * pageSize + 1 : 0}</strong> to{' '}
+            <strong className="text-slate-700 font-semibold">{Math.min(currentPage * pageSize, filteredCandidates.length)}</strong> of{' '}
+            <strong className="text-slate-700 font-semibold">{filteredCandidates.length}</strong> candidates
           </div>
 
           <div className="flex items-center gap-2">
@@ -375,7 +375,7 @@ export const CandidateTable: React.FC = () => {
             >
               <ChevronLeft size={14} />
             </button>
-            <span className="px-2 text-slate-600 font-normal">
+            <span className="px-2 text-slate-600 font-medium">
               Page {currentPage} of {totalPages}
             </span>
             <button

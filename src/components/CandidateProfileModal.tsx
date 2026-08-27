@@ -59,8 +59,8 @@ export const CandidateProfileModal: React.FC = () => {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs animate-fade-in">
-      <div className="bg-white border border-slate-200 rounded-3xl w-full max-w-4xl max-h-[90vh] flex flex-col shadow-2xl overflow-hidden animate-slide-up text-slate-900">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 bg-slate-900/60 backdrop-blur-xs animate-fade-in">
+      <div className="bg-white border border-slate-200 rounded-3xl w-[96vw] max-w-[1420px] h-[94vh] max-h-[96vh] flex flex-col shadow-2xl overflow-hidden animate-slide-up text-slate-900">
         
         {/* Modal Top Header */}
         <div className="p-6 bg-slate-50 border-b border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-4">

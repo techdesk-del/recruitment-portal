@@ -6,17 +6,13 @@ import {
   FileText, 
   Star, 
   Sparkles, 
-  UserCheck, 
-  Award,
-  Clock,
-  Calendar,
-  Building2,
-  DollarSign,
-  ThumbsUp,
-  AlertTriangle,
-  ChevronRight,
+  ThumbsUp, 
+  AlertTriangle, 
+  ChevronDown, 
+  ChevronUp, 
   RotateCcw,
-  Sliders
+  UserCheck,
+  Layers
 } from 'lucide-react';
 import { Candidate, DetailedInterviewEvaluation, Scorecard } from '../types';
 import { generateEvaluationFormPdf } from '../utils/evaluationFormPdfGenerator';
@@ -64,7 +60,8 @@ export const InterviewEvaluationForm: React.FC<InterviewEvaluationFormProps> = (
   }));
 
   const [isSaved, setIsSaved] = useState(false);
-  const [activeSection, setActiveSection] = useState<'all' | 'logistics' | 'culture' | 'skills' | 'overall'>('all');
+  const [activeTab, setActiveTab] = useState<'all' | 'q1' | 'q2' | 'q3' | 'q4' | 'q5' | 'q6'>('all');
+  const [showLogistics, setShowLogistics] = useState(false);
 
   // Compute live aggregate score
   const scoreStats = useMemo(() => {
@@ -155,8 +152,8 @@ export const InterviewEvaluationForm: React.FC<InterviewEvaluationFormProps> = (
     }
   };
 
-  const handleSave = (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSave = (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
     const updatedScorecard: Scorecard = {
       technical: evaluation.technical.rp || 4,
       communication: evaluation.communication.rp || 4,
@@ -185,528 +182,359 @@ export const InterviewEvaluationForm: React.FC<InterviewEvaluationFormProps> = (
     { key: 'ss', label: 'SS', name: 'HR Department', badgeClass: 'bg-emerald-100 text-emerald-800 border-emerald-200' }
   ];
 
-  const ratingOptions = [
-    { score: 5, label: 'Exceptional', short: '5', activeClass: 'bg-emerald-600 text-white shadow-sm ring-2 ring-emerald-300 font-extrabold' },
-    { score: 4, label: 'Above Avg', short: '4', activeClass: 'bg-blue-600 text-white shadow-sm ring-2 ring-blue-300 font-extrabold' },
-    { score: 3, label: 'Average', short: '3', activeClass: 'bg-indigo-600 text-white shadow-sm ring-2 ring-indigo-300 font-extrabold' },
-    { score: 2, label: 'Satisfactory', short: '2', activeClass: 'bg-amber-500 text-white shadow-sm ring-2 ring-amber-300 font-extrabold' },
-    { score: 1, label: 'Unsatisfactory', short: '1', activeClass: 'bg-rose-600 text-white shadow-sm ring-2 ring-rose-300 font-extrabold' }
+  const ratingPills = [
+    { score: 5, label: 'Exceptional', activeClass: 'bg-emerald-600 text-white shadow-xs font-black' },
+    { score: 4, label: 'Above Avg', activeClass: 'bg-blue-600 text-white shadow-xs font-black' },
+    { score: 3, label: 'Average', activeClass: 'bg-indigo-600 text-white shadow-xs font-black' },
+    { score: 2, label: 'Satisfactory', activeClass: 'bg-amber-500 text-white shadow-xs font-black' },
+    { score: 1, label: 'Unsatisfactory', activeClass: 'bg-rose-600 text-white shadow-xs font-black' }
   ];
 
-  // Helper to render rating row for each reviewer with clean responsive buttons
-  const renderReviewerRow = (
-    sectionKey: 'coreValues' | 'personality' | 'communication' | 'adaptability' | 'technical' | 'overallImpression',
-    reviewer: typeof reviewers[0]
-  ) => {
-    const currentVal = evaluation[sectionKey][reviewer.key];
+  const criteriaList = [
+    {
+      id: 'q1',
+      key: 'coreValues' as const,
+      num: '01',
+      title: 'Core Values & Culture Fit',
+      desc: 'Alignment with company core values (Delight, Smile, Move Fast, Don\'t Waste, Keep it Simple).',
+      bullets: ['✨ Delight', '😊 Smile', '⚡ Move Fast', '🌱 Don’t Waste', '🎯 Keep it Simple']
+    },
+    {
+      id: 'q2',
+      key: 'personality' as const,
+      num: '02',
+      title: 'Personality Development',
+      desc: 'Personality, Grooming, Attitude, Attire, and time management skills.'
+    },
+    {
+      id: 'q3',
+      key: 'communication' as const,
+      num: '03',
+      title: 'Communication Skills',
+      desc: 'Interpersonal, verbal articulation, active listening, and composure.'
+    },
+    {
+      id: 'q4',
+      key: 'adaptability' as const,
+      num: '04',
+      title: 'Adaptability & Receptiveness',
+      desc: 'Ability to adapt, learn from hints, coachability, and self-motivation.'
+    },
+    {
+      id: 'q5',
+      key: 'technical' as const,
+      num: '05',
+      title: 'Technical Qualifications & Depth',
+      desc: 'Technical expertise, problem-solving speed, industry insights, and architecture knowledge.'
+    },
+    {
+      id: 'q6',
+      key: 'overallImpression' as const,
+      num: '06',
+      title: 'Overall Impression & Recommendation',
+      desc: 'Holistic perception of candidate strengths, growth potential, and offer readiness.'
+    }
+  ];
 
-    return (
-      <div 
-        key={reviewer.key}
-        className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 p-2.5 rounded-xl bg-slate-50 border border-slate-200/80 hover:bg-slate-100/70 transition-colors"
-      >
-        <div className="flex items-center gap-2.5">
-          <span className={`px-2 py-0.5 rounded-md font-mono font-bold text-xs border ${reviewer.badgeClass}`}>
-            {reviewer.label}
-          </span>
-          <span className="text-xs font-semibold text-slate-700">
-            {reviewer.name}
-          </span>
-        </div>
-
-        {/* 5-point segmented scale */}
-        <div className="flex items-center gap-1.5 self-end sm:self-auto">
-          {ratingOptions.map((opt) => {
-            const isSelected = currentVal === opt.score;
-            return (
-              <button
-                type="button"
-                key={opt.score}
-                onClick={() => handleRatingChange(sectionKey, reviewer.key, opt.score)}
-                title={`${reviewer.label}: ${opt.score} (${opt.label})`}
-                className={`min-w-[34px] h-[30px] px-2 rounded-lg text-xs transition-all flex items-center justify-center gap-1 cursor-pointer ${
-                  isSelected
-                    ? opt.activeClass
-                    : 'bg-white text-slate-600 hover:text-slate-900 hover:bg-slate-200 border border-slate-200 font-medium'
-                }`}
-              >
-                <span>{opt.short}</span>
-                {isSelected && <span className="text-[10px] hidden md:inline opacity-90">{opt.label}</span>}
-              </button>
-            );
-          })}
-        </div>
-      </div>
-    );
-  };
+  const filteredCriteria = activeTab === 'all' 
+    ? criteriaList 
+    : criteriaList.filter(c => c.id === activeTab);
 
   return (
-    <form onSubmit={handleSave} className="space-y-6 animate-fade-in pb-10 text-slate-900">
+    <div className="space-y-4 animate-fade-in text-slate-900 pb-4">
       
-      {/* 1. EXECUTIVE COMMAND HEADER & BENCHMARK BAR */}
-      <div className="p-5 sm:p-6 rounded-3xl bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 text-white shadow-xl flex flex-col lg:flex-row lg:items-center justify-between gap-5 border border-slate-700">
+      {/* 1. COMPACT EXECUTIVE HEADER BAR (NO VERTICAL WASTE) */}
+      <div className="p-3.5 sm:p-4 rounded-2xl bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 text-white shadow-md flex flex-col md:flex-row md:items-center justify-between gap-3 border border-slate-700">
         
-        <div className="space-y-1.5">
-          <div className="flex flex-wrap items-center gap-2">
-            <span className="text-[11px] font-mono font-bold px-2.5 py-0.5 rounded-full bg-blue-500/20 text-blue-300 border border-blue-400/30 tracking-wider">
-              2025/HRD/EF/Version-1
-            </span>
-            <span className="text-[11px] font-semibold px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-400/30 flex items-center gap-1">
-              <CheckCircle2 size={12} /> Standard HR Assessment Protocol
-            </span>
+        <div className="flex items-center gap-3">
+          <div className="w-9 h-9 rounded-xl bg-blue-600/20 border border-blue-400/30 flex items-center justify-center text-blue-400 font-black text-sm shrink-0">
+            ★
           </div>
-
-          <h2 className="text-xl sm:text-2xl font-black tracking-tight text-white flex items-center gap-2">
-            INTERVIEW EVALUATION DOSSIER
-          </h2>
-          <p className="text-xs text-slate-300 max-w-xl leading-relaxed">
-            Multi-panel appraisal matrix evaluating core values, soft skills, technical expertise, and final hiring recommendation.
-          </p>
+          <div>
+            <div className="flex items-center gap-2">
+              <span className="text-[10px] font-mono font-bold px-2 py-0.2 rounded bg-blue-500/20 text-blue-300 border border-blue-400/30">
+                2025/HRD/EF/Version-1
+              </span>
+              <span className="text-xs font-black tracking-tight text-white">
+                INTERVIEW EVALUATION DOSSIER
+              </span>
+            </div>
+            <p className="text-[11px] text-slate-300 truncate">
+              {candidate.name} • {candidate.jobAppliedFor} ({candidate.department})
+            </p>
+          </div>
         </div>
 
-        {/* Live Score KPI & Fast Actions */}
-        <div className="flex flex-wrap items-center gap-3">
+        {/* Live Score + Fast Actions */}
+        <div className="flex items-center gap-2 self-end md:self-auto">
           
-          {/* KPI Meter */}
-          <div className="px-4 py-2.5 rounded-2xl bg-slate-800/90 border border-slate-700 flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-blue-600/20 border border-blue-500/30 flex items-center justify-center text-blue-400 font-extrabold text-sm">
-              ★
-            </div>
-            <div>
-              <div className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Composite Score</div>
-              <div className="text-base font-black text-white flex items-baseline gap-1">
-                <span className="text-emerald-400">{scoreStats.average}</span>
-                <span className="text-xs text-slate-400 font-normal">/ 5.0 ({scoreStats.percentage}%)</span>
-              </div>
-            </div>
+          {/* Score Badge */}
+          <div className="px-3 py-1.5 rounded-xl bg-slate-800 border border-slate-700 flex items-center gap-2">
+            <span className="text-[10px] text-slate-400 font-bold uppercase">Score:</span>
+            <span className="text-sm font-black text-emerald-400">{scoreStats.average} / 5.0</span>
+            <span className="text-[10px] text-slate-400 hidden sm:inline">({scoreStats.percentage}%)</span>
           </div>
 
-          {/* Download PDF Button */}
           <button
             type="button"
             onClick={handleDownloadPdf}
-            className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold shadow-lg transition active:scale-95 cursor-pointer"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold shadow-xs transition active:scale-95 cursor-pointer"
           >
-            <Download size={15} />
-            <span>Download Official PDF</span>
+            <Download size={13} />
+            <span>Download PDF</span>
           </button>
 
-          {/* Save Scorecard Button */}
-          <button
-            type="submit"
-            className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold shadow-lg transition active:scale-95 cursor-pointer"
-          >
-            <Save size={15} />
-            <span>{isSaved ? 'Saved to ATS!' : 'Save Evaluation'}</span>
-          </button>
-        </div>
-
-      </div>
-
-      {/* 2. SCALE REFERENCE GUIDE & PRESET BAR */}
-      <div className="p-4 rounded-2xl bg-white border border-slate-200 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-3">
-        <div className="flex flex-wrap items-center gap-2">
-          <span className="text-xs font-bold text-slate-500 uppercase tracking-wider mr-1">Rating Scale:</span>
-          <span className="px-2.5 py-1 rounded-lg text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">5 – Exceptional</span>
-          <span className="px-2.5 py-1 rounded-lg text-xs font-bold bg-blue-50 text-blue-700 border border-blue-200">4 – Above Average</span>
-          <span className="px-2.5 py-1 rounded-lg text-xs font-bold bg-indigo-50 text-indigo-700 border border-indigo-200">3 – Average</span>
-          <span className="px-2.5 py-1 rounded-lg text-xs font-bold bg-amber-50 text-amber-700 border border-amber-200">2 – Satisfactory</span>
-          <span className="px-2.5 py-1 rounded-lg text-xs font-bold bg-rose-50 text-rose-700 border border-rose-200">1 – Unsatisfactory</span>
-        </div>
-
-        <div className="flex items-center gap-2">
           <button
             type="button"
-            onClick={() => handleApplyPreset('strong')}
-            className="text-[11px] font-semibold text-blue-600 hover:text-blue-800 bg-blue-50 hover:bg-blue-100 px-2.5 py-1 rounded-lg transition"
+            onClick={() => handleSave()}
+            className="flex items-center gap-1.5 px-4 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold shadow-xs transition active:scale-95 cursor-pointer"
           >
-            Fill Strong Hire Bar
-          </button>
-          <button
-            type="button"
-            onClick={() => handleApplyPreset('benchmark')}
-            className="text-[11px] font-semibold text-slate-600 hover:text-slate-900 bg-slate-100 hover:bg-slate-200 px-2.5 py-1 rounded-lg transition"
-          >
-            Reset to Standard
+            <Save size={13} />
+            <span>{isSaved ? 'Saved!' : 'Save Evaluation'}</span>
           </button>
         </div>
+
       </div>
 
-      {/* 3. CANDIDATE & INTERVIEW LOGISTICS SECTION */}
-      <div className="p-6 rounded-3xl bg-white border border-slate-200 shadow-xs space-y-4">
-        <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-          <h3 className="text-sm font-extrabold text-slate-900 uppercase tracking-wider flex items-center gap-2">
-            <FileText size={16} className="text-blue-600" />
-            Candidate & Interview Logistics
-          </h3>
-          <span className="text-xs text-slate-400 font-medium">Fields sync into official PDF</span>
-        </div>
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          <div className="space-y-1">
-            <label className="text-[11px] font-bold text-slate-600">Candidate Name</label>
-            <input
-              type="text"
-              readOnly
-              value={candidate.name}
-              className="w-full px-3 py-2 rounded-xl bg-slate-50 border border-slate-200 text-xs font-bold text-slate-900"
-            />
-          </div>
-
-          <div className="space-y-1">
-            <label className="text-[11px] font-bold text-slate-600">Conducted By</label>
-            <input
-              type="text"
-              value={evaluation.conductedBy}
-              onChange={(e) => setEvaluation({ ...evaluation, conductedBy: e.target.value })}
-              placeholder="e.g. Priya Sharma (HR Lead)"
-              className="w-full px-3 py-2 rounded-xl bg-white border border-slate-300 text-xs font-semibold text-slate-900 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
-            />
-          </div>
-
-          <div className="space-y-1">
-            <label className="text-[11px] font-bold text-slate-600">Interview Date</label>
-            <input
-              type="date"
-              value={evaluation.interviewDate}
-              onChange={(e) => setEvaluation({ ...evaluation, interviewDate: e.target.value })}
-              className="w-full px-3 py-2 rounded-xl bg-white border border-slate-300 text-xs font-semibold text-slate-900 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
-            />
-          </div>
-
-          <div className="space-y-1">
-            <label className="text-[11px] font-bold text-slate-600">Interview Start Time</label>
-            <input
-              type="text"
-              value={evaluation.interviewStartTime}
-              onChange={(e) => setEvaluation({ ...evaluation, interviewStartTime: e.target.value })}
-              placeholder="e.g. 11:30 AM"
-              className="w-full px-3 py-2 rounded-xl bg-white border border-slate-300 text-xs font-semibold text-slate-900 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
-            />
-          </div>
-
-          <div className="space-y-1">
-            <label className="text-[11px] font-bold text-slate-600">Contact Number</label>
-            <input
-              type="text"
-              readOnly
-              value={candidate.phone}
-              className="w-full px-3 py-2 rounded-xl bg-slate-50 border border-slate-200 text-xs font-semibold text-slate-900"
-            />
-          </div>
-
-          <div className="space-y-1">
-            <label className="text-[11px] font-bold text-slate-600">Email ID</label>
-            <input
-              type="text"
-              readOnly
-              value={candidate.email}
-              className="w-full px-3 py-2 rounded-xl bg-slate-50 border border-slate-200 text-xs font-semibold text-slate-900"
-            />
-          </div>
-
-          <div className="space-y-1">
-            <label className="text-[11px] font-bold text-slate-600">Position Applied For</label>
-            <input
-              type="text"
-              readOnly
-              value={candidate.jobAppliedFor}
-              className="w-full px-3 py-2 rounded-xl bg-slate-50 border border-slate-200 text-xs font-bold text-blue-700"
-            />
-          </div>
-
-          <div className="space-y-1">
-            <label className="text-[11px] font-bold text-slate-600">Department</label>
-            <input
-              type="text"
-              value={evaluation.department}
-              onChange={(e) => setEvaluation({ ...evaluation, department: e.target.value })}
-              className="w-full px-3 py-2 rounded-xl bg-white border border-slate-300 text-xs font-semibold text-slate-900 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
-            />
-          </div>
-
-          <div className="space-y-1">
-            <label className="text-[11px] font-bold text-slate-600">Current Salary</label>
-            <input
-              type="text"
-              value={evaluation.currentSalary}
-              onChange={(e) => setEvaluation({ ...evaluation, currentSalary: e.target.value })}
-              placeholder="e.g. ₹14 LPA"
-              className="w-full px-3 py-2 rounded-xl bg-white border border-slate-300 text-xs font-semibold text-slate-900 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
-            />
-          </div>
-
-          <div className="space-y-1">
-            <label className="text-[11px] font-bold text-slate-600">Expected Salary</label>
-            <input
-              type="text"
-              value={evaluation.expectedSalary}
-              onChange={(e) => setEvaluation({ ...evaluation, expectedSalary: e.target.value })}
-              placeholder="e.g. ₹18 LPA"
-              className="w-full px-3 py-2 rounded-xl bg-white border border-slate-300 text-xs font-semibold text-slate-900 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
-            />
-          </div>
-        </div>
-      </div>
-
-      {/* 4. THE 6 OFFICIAL EVALUATION CRITERIA (2025/HRD/EF/Version-1) */}
-      <div className="space-y-5">
+      {/* 2. MAIN 2-COLUMN SPLIT SCREEN (ZERO SCROLL COCKPIT) */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
         
-        {/* CRITERION 1: CORE VALUES / CULTURE FIT */}
-        <div className="p-6 rounded-3xl bg-white border border-slate-200 shadow-xs space-y-4 hover:border-blue-300 transition-all">
-          <div className="flex flex-col md:flex-row md:items-start justify-between gap-3">
-            <div>
-              <div className="flex items-center gap-2.5">
-                <span className="w-7 h-7 rounded-xl bg-blue-600 text-white font-black text-xs flex items-center justify-center shadow-xs">
-                  01
-                </span>
-                <h4 className="text-base font-extrabold text-slate-900">
-                  Core Values / Culture Fit
-                </h4>
-              </div>
-              <p className="text-xs text-slate-600 mt-1.5 leading-relaxed">
-                The candidate's responses demonstrated a strong alignment with the company's core values:
-              </p>
-
-              {/* 5 Core Values Highlight Badges */}
-              <div className="flex flex-wrap gap-2 mt-2.5">
-                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl bg-blue-50 text-blue-800 border border-blue-200 text-xs font-bold">
-                  <span>✨</span> Believe in Delight (wow)
-                </span>
-                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl bg-blue-50 text-blue-800 border border-blue-200 text-xs font-bold">
-                  <span>😊</span> Spread smile
-                </span>
-                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl bg-blue-50 text-blue-800 border border-blue-200 text-xs font-bold">
-                  <span>⚡</span> Move fast
-                </span>
-                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl bg-blue-50 text-blue-800 border border-blue-200 text-xs font-bold">
-                  <span>🌱</span> Don’t waste
-                </span>
-                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl bg-blue-50 text-blue-800 border border-blue-200 text-xs font-bold">
-                  <span>🎯</span> Keep it simple
-                </span>
-              </div>
+        {/* LEFT COLUMN: 6 EVALUATION QUESTIONS (7 OF 12 COLS) */}
+        <div className="lg:col-span-7 space-y-3">
+          
+          {/* Criterion Filter Pills + Presets */}
+          <div className="p-2 rounded-xl bg-white border border-slate-200 shadow-2xs flex items-center justify-between gap-2 overflow-x-auto">
+            <div className="flex items-center gap-1 shrink-0">
+              <button
+                type="button"
+                onClick={() => setActiveTab('all')}
+                className={`px-2.5 py-1 rounded-lg text-xs font-bold transition ${
+                  activeTab === 'all'
+                    ? 'bg-blue-600 text-white shadow-2xs'
+                    : 'text-slate-600 hover:bg-slate-100'
+                }`}
+              >
+                All 6 Criteria
+              </button>
+              {criteriaList.map((c) => (
+                <button
+                  type="button"
+                  key={c.id}
+                  onClick={() => setActiveTab(c.id as any)}
+                  className={`px-2 py-1 rounded-lg text-xs font-bold transition ${
+                    activeTab === c.id
+                      ? 'bg-blue-600 text-white shadow-2xs'
+                      : 'text-slate-600 hover:bg-slate-100'
+                  }`}
+                >
+                  {c.num}
+                </button>
+              ))}
             </div>
 
-            <div className="px-3 py-1.5 rounded-xl bg-slate-100 border border-slate-200 text-xs font-extrabold text-slate-800 shrink-0 self-start">
-              Avg: {((evaluation.coreValues.rp + evaluation.coreValues.yt + evaluation.coreValues.ss) / 3).toFixed(1)} / 5.0
+            <div className="flex items-center gap-1 shrink-0">
+              <button
+                type="button"
+                onClick={() => handleApplyPreset('strong')}
+                title="Fill Strong Bar (5s)"
+                className="text-[10px] font-bold text-blue-600 hover:bg-blue-50 px-2 py-0.5 rounded border border-blue-200 transition"
+              >
+                Preset 5★
+              </button>
+              <button
+                type="button"
+                onClick={() => handleApplyPreset('benchmark')}
+                title="Fill Standard Bar (4s)"
+                className="text-[10px] font-bold text-slate-600 hover:bg-slate-100 px-2 py-0.5 rounded border border-slate-200 transition"
+              >
+                Preset 4★
+              </button>
             </div>
           </div>
 
-          {/* Reviewers Rating Row */}
-          <div className="space-y-2 pt-2 border-t border-slate-100">
-            {reviewers.map((r) => renderReviewerRow('coreValues', r))}
+          {/* Criteria Cards List */}
+          <div className="space-y-2.5 max-h-[calc(94vh-220px)] overflow-y-auto pr-1">
+            {filteredCriteria.map((item) => {
+              const currentSection = evaluation[item.key];
+              const sectionAvg = ((currentSection.rp + currentSection.yt + currentSection.ss) / 3).toFixed(1);
+
+              return (
+                <div 
+                  key={item.id}
+                  className="p-3.5 rounded-2xl bg-white border border-slate-200 shadow-2xs space-y-2.5 hover:border-blue-300 transition-colors"
+                >
+                  {/* Criterion Header */}
+                  <div className="flex items-start justify-between gap-2">
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <span className="w-5 h-5 rounded-md bg-blue-600 text-white font-black text-[11px] flex items-center justify-center shrink-0">
+                          {item.num}
+                        </span>
+                        <h4 className="text-xs font-bold text-slate-900">
+                          {item.title}
+                        </h4>
+                      </div>
+                      <p className="text-[11px] text-slate-500 mt-0.5 leading-snug">
+                        {item.desc}
+                      </p>
+
+                      {/* Bullets for Core values */}
+                      {item.bullets && (
+                        <div className="flex flex-wrap gap-1 mt-1.5">
+                          {item.bullets.map((b, i) => (
+                            <span key={i} className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-blue-50 text-blue-700 border border-blue-100">
+                              {b}
+                            </span>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+
+                    <span className="text-[11px] font-extrabold px-2 py-0.5 rounded-lg bg-slate-100 text-slate-700 shrink-0">
+                      Avg: {sectionAvg}
+                    </span>
+                  </div>
+
+                  {/* 3 Reviewer Rating Rows (RP, YT, SS) */}
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-1.5 pt-1.5 border-t border-slate-100">
+                    {reviewers.map((r) => {
+                      const val = currentSection[r.key];
+                      return (
+                        <div key={r.key} className="flex items-center justify-between px-2 py-1.5 rounded-xl bg-slate-50 border border-slate-100 hover:bg-slate-100/70 transition-colors">
+                          <span className={`text-[10px] font-mono font-bold px-1.5 py-0.2 rounded border ${r.badgeClass}`}>
+                            {r.label}
+                          </span>
+
+                          <div className="flex items-center gap-1.5">
+                            <div className="flex items-center gap-0.5">
+                              {[1, 2, 3, 4, 5].map((starNum) => {
+                                const isFilled = starNum <= val;
+                                return (
+                                  <button
+                                    type="button"
+                                    key={starNum}
+                                    onClick={() => handleRatingChange(item.key, r.key, starNum)}
+                                    title={`${r.label}: ${starNum} Stars (${ratingPills.find(p => p.score === starNum)?.label})`}
+                                    className="p-0.5 transition-transform hover:scale-125 cursor-pointer"
+                                  >
+                                    <Star
+                                      size={14}
+                                      className={`transition-colors ${
+                                        isFilled
+                                          ? 'text-amber-400 fill-amber-400 drop-shadow-[0_1px_2px_rgba(251,191,36,0.3)]'
+                                          : 'text-slate-300 hover:text-amber-300'
+                                      }`}
+                                    />
+                                  </button>
+                                );
+                              })}
+                            </div>
+                            <span className="text-[10px] font-bold text-slate-700 font-mono min-w-[20px] text-right">
+                              {val}★
+                            </span>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+
+                  {/* Compact Note input */}
+                  <div>
+                    <input
+                      type="text"
+                      value={currentSection.comments}
+                      onChange={(e) => handleCommentChange(item.key, e.target.value)}
+                      placeholder="Add observation or notes for this section..."
+                      className="w-full px-2.5 py-1 rounded-lg bg-slate-50/70 border border-slate-200 text-[11px] text-slate-800 placeholder-slate-400 focus:outline-none focus:border-blue-500 focus:bg-white"
+                    />
+                  </div>
+                </div>
+              );
+            })}
           </div>
 
-          {/* Section Remarks */}
-          <div>
-            <input
-              type="text"
-              placeholder="Add specific cultural alignment observations (optional)..."
-              value={evaluation.coreValues.comments}
-              onChange={(e) => handleCommentChange('coreValues', e.target.value)}
-              className="w-full px-3.5 py-2 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:border-blue-500 focus:bg-white transition"
-            />
-          </div>
         </div>
 
-        {/* CRITERION 2: PERSONALITY DEVELOPMENT */}
-        <div className="p-6 rounded-3xl bg-white border border-slate-200 shadow-xs space-y-4 hover:border-blue-300 transition-all">
-          <div className="flex flex-col md:flex-row md:items-start justify-between gap-3">
-            <div>
-              <div className="flex items-center gap-2.5">
-                <span className="w-7 h-7 rounded-xl bg-blue-600 text-white font-black text-xs flex items-center justify-center shadow-xs">
-                  02
-                </span>
-                <h4 className="text-base font-extrabold text-slate-900">
-                  Personality Development
+        {/* RIGHT COLUMN: LOGISTICS, 360 FEEDBACK & DECISION (5 OF 12 COLS) */}
+        <div className="lg:col-span-5 space-y-3 max-h-[calc(94vh-180px)] overflow-y-auto pr-1">
+          
+          {/* A. COLLAPSIBLE LOGISTICS ACCORDION */}
+          <div className="p-3.5 rounded-2xl bg-white border border-slate-200 shadow-2xs space-y-2">
+            <div 
+              onClick={() => setShowLogistics(!showLogistics)}
+              className="flex items-center justify-between cursor-pointer"
+            >
+              <div className="flex items-center gap-2">
+                <FileText size={14} className="text-blue-600" />
+                <h4 className="text-xs font-bold text-slate-800 uppercase tracking-wider">
+                  Interview Logistics & Compensation
                 </h4>
               </div>
-              <p className="text-xs text-slate-600 mt-1.5 leading-relaxed">
-                Personality, Grooming, Attitude, Attire, and time management skills.
-              </p>
+              <button type="button" className="text-slate-400 hover:text-slate-700">
+                {showLogistics ? <ChevronUp size={15} /> : <ChevronDown size={15} />}
+              </button>
             </div>
 
-            <div className="px-3 py-1.5 rounded-xl bg-slate-100 border border-slate-200 text-xs font-extrabold text-slate-800 shrink-0 self-start">
-              Avg: {((evaluation.personality.rp + evaluation.personality.yt + evaluation.personality.ss) / 3).toFixed(1)} / 5.0
-            </div>
-          </div>
-
-          {/* Reviewers Rating Row */}
-          <div className="space-y-2 pt-2 border-t border-slate-100">
-            {reviewers.map((r) => renderReviewerRow('personality', r))}
-          </div>
-
-          <div>
-            <input
-              type="text"
-              placeholder="Notes on punctuality, grooming, attitude, and composure under pressure..."
-              value={evaluation.personality.comments}
-              onChange={(e) => handleCommentChange('personality', e.target.value)}
-              className="w-full px-3.5 py-2 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:border-blue-500 focus:bg-white transition"
-            />
-          </div>
-        </div>
-
-        {/* CRITERION 3: COMMUNICATION SKILLS */}
-        <div className="p-6 rounded-3xl bg-white border border-slate-200 shadow-xs space-y-4 hover:border-blue-300 transition-all">
-          <div className="flex flex-col md:flex-row md:items-start justify-between gap-3">
-            <div>
-              <div className="flex items-center gap-2.5">
-                <span className="w-7 h-7 rounded-xl bg-blue-600 text-white font-black text-xs flex items-center justify-center shadow-xs">
-                  03
-                </span>
-                <h4 className="text-base font-extrabold text-slate-900">
-                  Communication Skills
-                </h4>
+            {showLogistics && (
+              <div className="grid grid-cols-2 gap-2 pt-2 border-t border-slate-100 text-[11px]">
+                <div>
+                  <label className="text-[10px] font-bold text-slate-500 block">Conducted By</label>
+                  <input
+                    type="text"
+                    value={evaluation.conductedBy}
+                    onChange={(e) => setEvaluation({ ...evaluation, conductedBy: e.target.value })}
+                    className="w-full px-2 py-1 rounded bg-slate-50 border border-slate-200 text-xs text-slate-900 font-medium"
+                  />
+                </div>
+                <div>
+                  <label className="text-[10px] font-bold text-slate-500 block">Interview Date</label>
+                  <input
+                    type="date"
+                    value={evaluation.interviewDate}
+                    onChange={(e) => setEvaluation({ ...evaluation, interviewDate: e.target.value })}
+                    className="w-full px-2 py-1 rounded bg-slate-50 border border-slate-200 text-xs text-slate-900 font-medium"
+                  />
+                </div>
+                <div>
+                  <label className="text-[10px] font-bold text-slate-500 block">Current CTC</label>
+                  <input
+                    type="text"
+                    value={evaluation.currentSalary}
+                    onChange={(e) => setEvaluation({ ...evaluation, currentSalary: e.target.value })}
+                    className="w-full px-2 py-1 rounded bg-slate-50 border border-slate-200 text-xs text-slate-900 font-medium"
+                  />
+                </div>
+                <div>
+                  <label className="text-[10px] font-bold text-slate-500 block">Expected CTC</label>
+                  <input
+                    type="text"
+                    value={evaluation.expectedSalary}
+                    onChange={(e) => setEvaluation({ ...evaluation, expectedSalary: e.target.value })}
+                    className="w-full px-2 py-1 rounded bg-slate-50 border border-slate-200 text-xs text-slate-900 font-medium"
+                  />
+                </div>
               </div>
-              <p className="text-xs text-slate-600 mt-1.5 leading-relaxed">
-                How were the candidate’s communication skills during the interview? - Interpersonal Skills / Verbal / Passive Listening skills.
-              </p>
-            </div>
-
-            <div className="px-3 py-1.5 rounded-xl bg-slate-100 border border-slate-200 text-xs font-extrabold text-slate-800 shrink-0 self-start">
-              Avg: {((evaluation.communication.rp + evaluation.communication.yt + evaluation.communication.ss) / 3).toFixed(1)} / 5.0
-            </div>
+            )}
           </div>
 
-          {/* Reviewers Rating Row */}
-          <div className="space-y-2 pt-2 border-t border-slate-100">
-            {reviewers.map((r) => renderReviewerRow('communication', r))}
-          </div>
-
-          <div>
-            <input
-              type="text"
-              placeholder="Notes on clarity of thought, articulation, listening capability..."
-              value={evaluation.communication.comments}
-              onChange={(e) => handleCommentChange('communication', e.target.value)}
-              className="w-full px-3.5 py-2 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:border-blue-500 focus:bg-white transition"
-            />
-          </div>
-        </div>
-
-        {/* CRITERION 4: ADAPTABILITY & RECEPTIVENESS */}
-        <div className="p-6 rounded-3xl bg-white border border-slate-200 shadow-xs space-y-4 hover:border-blue-300 transition-all">
-          <div className="flex flex-col md:flex-row md:items-start justify-between gap-3">
-            <div>
-              <div className="flex items-center gap-2.5">
-                <span className="w-7 h-7 rounded-xl bg-blue-600 text-white font-black text-xs flex items-center justify-center shadow-xs">
-                  04
-                </span>
-                <h4 className="text-base font-extrabold text-slate-900">
-                  Adaptability and Receptiveness to Feedback
-                </h4>
-              </div>
-              <p className="text-xs text-slate-600 mt-1.5 leading-relaxed">
-                How did the candidate demonstrate their ability to adapt or improve based on new information or guidance? (Coachable / Self-motivated / Trainable / Receptive)
-              </p>
-            </div>
-
-            <div className="px-3 py-1.5 rounded-xl bg-slate-100 border border-slate-200 text-xs font-extrabold text-slate-800 shrink-0 self-start">
-              Avg: {((evaluation.adaptability.rp + evaluation.adaptability.yt + evaluation.adaptability.ss) / 3).toFixed(1)} / 5.0
-            </div>
-          </div>
-
-          {/* Reviewers Rating Row */}
-          <div className="space-y-2 pt-2 border-t border-slate-100">
-            {reviewers.map((r) => renderReviewerRow('adaptability', r))}
-          </div>
-
-          <div>
-            <input
-              type="text"
-              placeholder="Examples of how candidate adjusted code, design or assumptions upon interviewer hints..."
-              value={evaluation.adaptability.comments}
-              onChange={(e) => handleCommentChange('adaptability', e.target.value)}
-              className="w-full px-3.5 py-2 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:border-blue-500 focus:bg-white transition"
-            />
-          </div>
-        </div>
-
-        {/* CRITERION 5: TECHNICAL QUALIFICATIONS / EXPERIENCE */}
-        <div className="p-6 rounded-3xl bg-white border border-slate-200 shadow-xs space-y-4 hover:border-blue-300 transition-all">
-          <div className="flex flex-col md:flex-row md:items-start justify-between gap-3">
-            <div>
-              <div className="flex items-center gap-2.5">
-                <span className="w-7 h-7 rounded-xl bg-blue-600 text-white font-black text-xs flex items-center justify-center shadow-xs">
-                  05
-                </span>
-                <h4 className="text-base font-extrabold text-slate-900">
-                  Technical Qualifications / Experience
-                </h4>
-              </div>
-              <p className="text-xs text-slate-600 mt-1.5 leading-relaxed">
-                Does the candidate possess the technical expertise, industry insights, and company-specific knowledge essential for this role?
-              </p>
-            </div>
-
-            <div className="px-3 py-1.5 rounded-xl bg-slate-100 border border-slate-200 text-xs font-extrabold text-slate-800 shrink-0 self-start">
-              Avg: {((evaluation.technical.rp + evaluation.technical.yt + evaluation.technical.ss) / 3).toFixed(1)} / 5.0
-            </div>
-          </div>
-
-          {/* Reviewers Rating Row */}
-          <div className="space-y-2 pt-2 border-t border-slate-100">
-            {reviewers.map((r) => renderReviewerRow('technical', r))}
-          </div>
-
-          <div>
-            <input
-              type="text"
-              placeholder="Coding test performance, architecture depth, edge-case analysis..."
-              value={evaluation.technical.comments}
-              onChange={(e) => handleCommentChange('technical', e.target.value)}
-              className="w-full px-3.5 py-2 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:border-blue-500 focus:bg-white transition"
-            />
-          </div>
-        </div>
-
-        {/* CRITERION 6: OVERALL IMPRESSION, 3 POSITIVES & 3 NEGATIVES */}
-        <div className="p-6 rounded-3xl bg-white border border-slate-200 shadow-xs space-y-5 hover:border-blue-300 transition-all">
-          <div className="flex flex-col md:flex-row md:items-start justify-between gap-3">
-            <div>
-              <div className="flex items-center gap-2.5">
-                <span className="w-7 h-7 rounded-xl bg-blue-600 text-white font-black text-xs flex items-center justify-center shadow-xs">
-                  06
-                </span>
-                <h4 className="text-base font-extrabold text-slate-900">
-                  Overall Impression and Recommendation
-                </h4>
-              </div>
-              <p className="text-xs text-slate-600 mt-1.5 leading-relaxed">
-                Summary of your perceptions of the candidate’s strengths/weaknesses. Final comments and recommendations for proceeding with the candidate.
-              </p>
-            </div>
-
-            <div className="px-3 py-1.5 rounded-xl bg-slate-100 border border-slate-200 text-xs font-extrabold text-slate-800 shrink-0 self-start">
-              Avg: {((evaluation.overallImpression.rp + evaluation.overallImpression.yt + evaluation.overallImpression.ss) / 3).toFixed(1)} / 5.0
-            </div>
-          </div>
-
-          {/* Reviewers Rating Row */}
-          <div className="space-y-2 pt-2 border-t border-slate-100">
-            {reviewers.map((r) => renderReviewerRow('overallImpression', r))}
-          </div>
-
-          {/* Dual Column: 3 Positives & 3 Negatives */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-3">
+          {/* B. 360 FEEDBACK: 3 POSITIVES & 3 NEGATIVES */}
+          <div className="p-3.5 rounded-2xl bg-white border border-slate-200 shadow-2xs space-y-3">
             
-            {/* Positives Card */}
-            <div className="p-5 rounded-2xl bg-emerald-50/60 border border-emerald-200/90 space-y-3">
+            {/* 3 Positives */}
+            <div className="space-y-1.5">
               <div className="flex items-center justify-between">
-                <label className="text-xs font-black text-emerald-950 uppercase tracking-wider flex items-center gap-2">
-                  <ThumbsUp size={14} className="text-emerald-700" />
-                  Three Positive Aspects About Candidate
-                </label>
-                <span className="text-[10px] font-bold text-emerald-800 bg-emerald-200/70 px-2 py-0.5 rounded-full">
-                  Strengths
+                <span className="text-[11px] font-extrabold text-emerald-800 uppercase tracking-wider flex items-center gap-1.5">
+                  <ThumbsUp size={13} className="text-emerald-600" />
+                  3 Positive Aspects (Strengths)
+                </span>
+                <span className="text-[10px] font-bold text-emerald-700 bg-emerald-100 px-1.5 py-0.2 rounded">
+                  Highlights
                 </span>
               </div>
 
               {[0, 1, 2].map((idx) => (
-                <div key={idx} className="flex items-start gap-2.5">
-                  <span className="w-6 h-6 rounded-lg bg-emerald-600 text-white font-black text-xs flex items-center justify-center shrink-0 mt-0.5 shadow-xs">
+                <div key={idx} className="flex items-center gap-1.5">
+                  <span className="w-4 h-4 rounded bg-emerald-600 text-white font-black text-[9px] flex items-center justify-center shrink-0">
                     {idx + 1}
                   </span>
                   <input
@@ -714,35 +542,35 @@ export const InterviewEvaluationForm: React.FC<InterviewEvaluationFormProps> = (
                     value={evaluation.positives[idx] || ''}
                     onChange={(e) => handlePositiveChange(idx, e.target.value)}
                     placeholder={`Key strength #${idx + 1}...`}
-                    className="w-full px-3 py-2 rounded-xl bg-white border border-emerald-300 text-xs font-semibold text-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500 shadow-2xs"
+                    className="w-full px-2.5 py-1 rounded-lg bg-emerald-50/40 border border-emerald-200 text-xs text-slate-800 font-medium focus:bg-white focus:outline-none focus:ring-1 focus:ring-emerald-500"
                   />
                 </div>
               ))}
             </div>
 
-            {/* Negatives Card */}
-            <div className="p-5 rounded-2xl bg-rose-50/60 border border-rose-200/90 space-y-3">
+            {/* 3 Negatives */}
+            <div className="space-y-1.5 pt-2 border-t border-slate-100">
               <div className="flex items-center justify-between">
-                <label className="text-xs font-black text-rose-950 uppercase tracking-wider flex items-center gap-2">
-                  <AlertTriangle size={14} className="text-rose-700" />
-                  Three Negative Aspects About Candidate
-                </label>
-                <span className="text-[10px] font-bold text-rose-800 bg-rose-200/70 px-2 py-0.5 rounded-full">
-                  Improvement Areas
+                <span className="text-[11px] font-extrabold text-rose-800 uppercase tracking-wider flex items-center gap-1.5">
+                  <AlertTriangle size={13} className="text-rose-600" />
+                  3 Negative Aspects (Improvements)
+                </span>
+                <span className="text-[10px] font-bold text-rose-700 bg-rose-100 px-1.5 py-0.2 rounded">
+                  Caveats
                 </span>
               </div>
 
               {[0, 1, 2].map((idx) => (
-                <div key={idx} className="flex items-start gap-2.5">
-                  <span className="w-6 h-6 rounded-lg bg-rose-600 text-white font-black text-xs flex items-center justify-center shrink-0 mt-0.5 shadow-xs">
+                <div key={idx} className="flex items-center gap-1.5">
+                  <span className="w-4 h-4 rounded bg-rose-600 text-white font-black text-[9px] flex items-center justify-center shrink-0">
                     {idx + 1}
                   </span>
                   <input
                     type="text"
                     value={evaluation.negatives[idx] || ''}
                     onChange={(e) => handleNegativeChange(idx, e.target.value)}
-                    placeholder={`Area of development or caveat #${idx + 1}...`}
-                    className="w-full px-3 py-2 rounded-xl bg-white border border-rose-300 text-xs font-semibold text-slate-900 focus:outline-none focus:ring-2 focus:ring-rose-500 shadow-2xs"
+                    placeholder={`Improvement area #${idx + 1}...`}
+                    className="w-full px-2.5 py-1 rounded-lg bg-rose-50/40 border border-rose-200 text-xs text-slate-800 font-medium focus:bg-white focus:outline-none focus:ring-1 focus:ring-rose-500"
                   />
                 </div>
               ))}
@@ -750,113 +578,82 @@ export const InterviewEvaluationForm: React.FC<InterviewEvaluationFormProps> = (
 
           </div>
 
-          {/* 5. EXECUTIVE HIRING DECISION SELECTOR TILES */}
-          <div className="pt-3 border-t border-slate-100 space-y-3">
-            <label className="text-xs font-extrabold text-slate-900 uppercase tracking-wider block">
-              Final Hiring Decision & Recommendation
+          {/* C. FINAL HIRING DECISION & EXECUTIVE SUMMARY */}
+          <div className="p-3.5 rounded-2xl bg-white border border-slate-200 shadow-2xs space-y-3">
+            <label className="text-[11px] font-extrabold text-slate-800 uppercase tracking-wider block">
+              Final Recommendation Decision
             </label>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+            <div className="grid grid-cols-2 gap-2">
               {[
-                {
-                  id: 'strong_hire',
-                  label: 'Strong Hire',
-                  desc: 'Exceptional talent; fast-track offer rollout',
-                  badge: '🌟 Priority Offer',
-                  color: 'border-emerald-500 bg-emerald-50 text-emerald-900 ring-2 ring-emerald-400'
-                },
-                {
-                  id: 'hire',
-                  label: 'Hire',
-                  desc: 'Meets & exceeds role bar; proceed with offer',
-                  badge: '✅ Offer Recommended',
-                  color: 'border-blue-500 bg-blue-50 text-blue-900 ring-2 ring-blue-400'
-                },
-                {
-                  id: 'neutral',
-                  label: 'Hold / Need Info',
-                  desc: 'Requires additional interview round or check',
-                  badge: '⏳ Under Review',
-                  color: 'border-amber-500 bg-amber-50 text-amber-900 ring-2 ring-amber-400'
-                },
-                {
-                  id: 'do_not_hire',
-                  label: 'Do Not Hire',
-                  desc: 'Does not meet role or cultural requirements',
-                  badge: '❌ Archive Application',
-                  color: 'border-rose-500 bg-rose-50 text-rose-900 ring-2 ring-rose-400'
-                }
+                { id: 'strong_hire', label: 'Strong Hire', badge: '🌟 Priority', color: 'border-emerald-500 bg-emerald-50 text-emerald-900 ring-2 ring-emerald-400' },
+                { id: 'hire', label: 'Hire', badge: '✅ Recommended', color: 'border-blue-500 bg-blue-50 text-blue-900 ring-2 ring-blue-400' },
+                { id: 'neutral', label: 'Hold / Info', badge: '⏳ Review', color: 'border-amber-500 bg-amber-50 text-amber-900 ring-2 ring-amber-400' },
+                { id: 'do_not_hire', label: 'Do Not Hire', badge: '❌ Reject', color: 'border-rose-500 bg-rose-50 text-rose-900 ring-2 ring-rose-400' }
               ].map((item) => {
                 const isSelected = evaluation.overallRecommendation === item.id;
                 return (
-                  <div
+                  <button
+                    type="button"
                     key={item.id}
                     onClick={() => setEvaluation({ ...evaluation, overallRecommendation: item.id as any })}
-                    className={`p-3.5 rounded-2xl border cursor-pointer transition-all shadow-xs flex flex-col justify-between ${
+                    className={`p-2 rounded-xl border text-left transition flex items-center justify-between cursor-pointer ${
                       isSelected
                         ? item.color
-                        : 'border-slate-200 bg-white hover:border-slate-300 text-slate-700'
+                        : 'border-slate-200 bg-slate-50 hover:bg-slate-100 text-slate-700'
                     }`}
                   >
                     <div>
-                      <div className="flex items-center justify-between mb-1">
-                        <span className="font-extrabold text-sm">{item.label}</span>
-                        {isSelected && <CheckCircle2 size={16} className="text-current" />}
-                      </div>
-                      <p className="text-[11px] opacity-80 leading-snug">{item.desc}</p>
+                      <div className="text-xs font-bold">{item.label}</div>
+                      <div className="text-[9px] opacity-80">{item.badge}</div>
                     </div>
-                    <span className="text-[10px] font-bold mt-2 inline-block opacity-90">{item.badge}</span>
-                  </div>
+                    {isSelected && <CheckCircle2 size={14} className="text-current shrink-0" />}
+                  </button>
                 );
               })}
             </div>
-          </div>
 
-          {/* Final Executive Summary Notes */}
-          <div className="space-y-1.5 pt-1">
-            <label className="text-xs font-bold text-slate-800 block">
-              Final Evaluation Summary & Sign-off Notes:
-            </label>
-            <textarea
-              rows={3}
-              value={evaluation.finalComments}
-              onChange={(e) => setEvaluation({ ...evaluation, finalComments: e.target.value })}
-              placeholder="Provide final evaluation summary, salary remarks, joining urgency, or interviewer notes..."
-              className="w-full p-3 rounded-2xl bg-slate-50 border border-slate-300 text-xs font-medium text-slate-900 focus:outline-none focus:border-blue-500 focus:bg-white shadow-2xs"
-            />
+            {/* Final Comments */}
+            <div className="space-y-1">
+              <label className="text-[10px] font-bold text-slate-600 block">
+                Final Evaluation Summary Remarks:
+              </label>
+              <textarea
+                rows={2}
+                value={evaluation.finalComments}
+                onChange={(e) => setEvaluation({ ...evaluation, finalComments: e.target.value })}
+                placeholder="Final summary, salary remarks or joining notes..."
+                className="w-full p-2 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-900 focus:outline-none focus:border-blue-500 focus:bg-white"
+              />
+            </div>
+
+            {/* Quick Action Footer in Right Card */}
+            <div className="pt-2 border-t border-slate-100 flex items-center justify-between gap-2">
+              <button
+                type="button"
+                onClick={handleDownloadPdf}
+                className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl bg-slate-900 hover:bg-black text-white text-xs font-bold transition shadow-xs cursor-pointer"
+              >
+                <Download size={13} />
+                <span>PDF Form</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => handleSave()}
+                className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold transition shadow-xs cursor-pointer"
+              >
+                <Save size={13} />
+                <span>{isSaved ? 'Saved!' : 'Save Form'}</span>
+              </button>
+            </div>
+
           </div>
 
         </div>
 
       </div>
 
-      {/* 5. BOTTOM ACTION FOOTER */}
-      <div className="p-4 sm:p-5 rounded-3xl bg-white border border-slate-200 shadow-md flex flex-col sm:flex-row items-center justify-between gap-4">
-        <div className="flex items-center gap-2.5 text-xs text-slate-600 font-medium">
-          <Sparkles size={16} className="text-blue-600 shrink-0" />
-          <span>Form is certified under <strong>UrbanGaon HRD EF v1</strong> protocol. Instant PDF compilation ready.</span>
-        </div>
-
-        <div className="flex items-center gap-3 w-full sm:w-auto justify-end">
-          <button
-            type="button"
-            onClick={handleDownloadPdf}
-            className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-slate-900 hover:bg-black text-white text-xs font-bold shadow-md transition active:scale-95 cursor-pointer"
-          >
-            <Download size={14} />
-            <span>Download Official PDF</span>
-          </button>
-
-          <button
-            type="submit"
-            className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-6 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold shadow-md transition active:scale-95 cursor-pointer"
-          >
-            <Save size={14} />
-            <span>{isSaved ? 'Saved to ATS!' : 'Save Evaluation Form'}</span>
-          </button>
-        </div>
-      </div>
-
-    </form>
+    </div>
   );
 };

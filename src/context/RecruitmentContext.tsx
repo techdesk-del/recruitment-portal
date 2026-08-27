@@ -17,8 +17,8 @@ import { io } from 'socket.io-client';
 interface RecruitmentContextType {
   candidates: Candidate[];
   jobs: JobPosting[];
-  activeView: 'overview' | 'pipeline' | 'candidates' | 'jobs' | 'analytics';
-  setActiveView: (view: 'overview' | 'pipeline' | 'candidates' | 'jobs' | 'analytics') => void;
+  activeView: string;
+  setActiveView: (view: string) => void;
   filters: FilterState;
   setFilters: React.Dispatch<React.SetStateAction<FilterState>>;
   selectedCandidate: Candidate | null;
@@ -74,7 +74,7 @@ export const RecruitmentProvider: React.FC<{ children: React.ReactNode }> = ({ c
     }
   });
 
-  const [activeView, setActiveView] = useState<'overview' | 'pipeline' | 'candidates' | 'jobs' | 'analytics'>('candidates');
+  const [activeView, setActiveView] = useState<string>('dashboard');
   const [selectedCandidate, setSelectedCandidate] = useState<Candidate | null>(null);
   const [previewResumeCandidate, setPreviewResumeCandidate] = useState<Candidate | null>(null);
   const [isJobModalOpen, setIsJobModalOpen] = useState(false);

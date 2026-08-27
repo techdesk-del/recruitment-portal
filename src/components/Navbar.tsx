@@ -40,29 +40,29 @@ export const Navbar: React.FC = () => {
   };
 
   return (
-    <header className="sticky top-0 z-40 border-b border-slate-800 bg-slate-950/95 backdrop-blur-md">
+    <header className="sticky top-0 z-40 border-b border-slate-200 bg-white/95 backdrop-blur-md shadow-xs">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-20 gap-4">
           
           {/* Official UrbanGaon Brand Logo */}
           <div className="flex items-center gap-3">
-            <UrbanGaonLogo size="md" showTagline={true} taglineText="a perfect balance" />
+            <UrbanGaonLogo size="md" showTagline={true} taglineText="a perfect balance" theme="light" />
           </div>
 
           {/* Simple Main Navigation Tabs */}
-          <nav className="flex items-center gap-1.5 p-1 bg-slate-900/90 rounded-2xl border border-slate-800">
+          <nav className="flex items-center gap-1 p-1 bg-slate-100/90 rounded-2xl border border-slate-200">
             <button
               onClick={() => setActiveView('candidates')}
               className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold transition-all ${
                 activeView === 'candidates'
-                  ? 'bg-blue-600 text-white shadow-md shadow-blue-600/30'
-                  : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/60'
+                  ? 'bg-blue-600 text-white shadow-sm'
+                  : 'text-slate-600 hover:text-slate-900 hover:bg-white/80'
               }`}
             >
               <Users size={15} />
               <span>Candidates</span>
               <span className={`text-[11px] px-1.5 py-0.2 rounded-full font-extrabold ${
-                activeView === 'candidates' ? 'bg-blue-800/80 text-white' : 'bg-slate-800 text-slate-400'
+                activeView === 'candidates' ? 'bg-blue-800/80 text-white' : 'bg-slate-200 text-slate-600'
               }`}>
                 {candidates.length}
               </span>
@@ -72,14 +72,14 @@ export const Navbar: React.FC = () => {
               onClick={() => setActiveView('jobs')}
               className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold transition-all ${
                 activeView === 'jobs'
-                  ? 'bg-blue-600 text-white shadow-md shadow-blue-600/30'
-                  : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/60'
+                  ? 'bg-blue-600 text-white shadow-sm'
+                  : 'text-slate-600 hover:text-slate-900 hover:bg-white/80'
               }`}
             >
               <Briefcase size={15} />
               <span>Job Openings</span>
               <span className={`text-[11px] px-1.5 py-0.2 rounded-full font-extrabold ${
-                activeView === 'jobs' ? 'bg-blue-800/80 text-white' : 'bg-slate-800 text-slate-400'
+                activeView === 'jobs' ? 'bg-blue-800/80 text-white' : 'bg-slate-200 text-slate-600'
               }`}>
                 {jobs.length}
               </span>
@@ -89,20 +89,20 @@ export const Navbar: React.FC = () => {
               onClick={() => setActiveView('pipeline')}
               className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold transition-all ${
                 activeView === 'pipeline'
-                  ? 'bg-blue-600 text-white shadow-md shadow-blue-600/30'
-                  : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/60'
+                  ? 'bg-blue-600 text-white shadow-sm'
+                  : 'text-slate-600 hover:text-slate-900 hover:bg-white/80'
               }`}
             >
               <Kanban size={15} />
-              <span>Pipeline Stages</span>
+              <span>Hiring Stages (Pipeline)</span>
             </button>
 
             <button
               onClick={() => setActiveView('overview')}
               className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold transition-all ${
                 activeView === 'overview'
-                  ? 'bg-blue-600 text-white shadow-md shadow-blue-600/30'
-                  : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/60'
+                  ? 'bg-blue-600 text-white shadow-sm'
+                  : 'text-slate-600 hover:text-slate-900 hover:bg-white/80'
               }`}
             >
               <LayoutDashboard size={15} />
@@ -116,16 +116,16 @@ export const Navbar: React.FC = () => {
               onClick={handleSyncApplicants}
               disabled={isSyncing}
               title="Check for new applications from job portals"
-              className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-700 text-slate-200 hover:text-white text-xs font-semibold transition active:scale-95 shadow-sm"
+              className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 text-xs font-semibold transition active:scale-95 shadow-xs"
             >
-              <RefreshCw size={13} className={`text-blue-400 ${isSyncing ? 'animate-spin' : ''}`} />
+              <RefreshCw size={13} className={`text-blue-600 ${isSyncing ? 'animate-spin' : ''}`} />
               <span className="hidden sm:inline">{isSyncing ? 'Syncing...' : 'Sync Applicants'}</span>
             </button>
 
             <button
               onClick={exportToCSV}
               title="Download all candidate data as Excel/CSV"
-              className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold transition active:scale-95 shadow-md shadow-blue-600/20"
+              className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold transition active:scale-95 shadow-sm"
             >
               <Download size={13} />
               <span className="hidden sm:inline">Export Excel</span>

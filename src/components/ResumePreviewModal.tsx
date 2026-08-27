@@ -33,21 +33,21 @@ ${cand.resumeData.skills.join(', ')}`;
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/85 backdrop-blur-md animate-fade-in">
-      <div className="bg-slate-900 border border-slate-800 rounded-3xl w-full max-w-3xl max-h-[90vh] flex flex-col shadow-2xl overflow-hidden animate-slide-up">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs animate-fade-in">
+      <div className="bg-white border border-slate-200 rounded-3xl w-full max-w-3xl max-h-[90vh] flex flex-col shadow-2xl overflow-hidden animate-slide-up text-slate-900">
         
         {/* Top Control Bar */}
-        <div className="p-4 bg-slate-950 border-b border-slate-800 flex items-center justify-between gap-4">
+        <div className="p-4 bg-slate-50 border-b border-slate-200 flex items-center justify-between gap-4">
           <div className="flex items-center gap-3">
-            <UrbanGaonIcon size={26} />
+            <UrbanGaonIcon size={28} />
             <div>
-              <h3 className="text-sm font-bold text-white flex items-center gap-2">
-                <span>Verified ATS Dossier</span>
-                <span className="text-[10px] uppercase font-bold px-2 py-0.5 rounded bg-blue-500/20 text-blue-300 border border-blue-500/30">
+              <h3 className="text-sm font-bold text-slate-900 flex items-center gap-2">
+                <span>Candidate ATS Resume</span>
+                <span className="text-[10px] uppercase font-bold px-2 py-0.5 rounded bg-blue-50 text-blue-700 border border-blue-200">
                   {cand.source.toUpperCase()}
                 </span>
               </h3>
-              <p className="text-[11px] text-slate-400">{cand.name} • {cand.jobAppliedFor} • <span className="text-blue-400 font-semibold">UrbanGaon® a perfect balance</span></p>
+              <p className="text-[11px] text-slate-500">{cand.name} • {cand.jobAppliedFor}</p>
             </div>
           </div>
 
@@ -55,7 +55,7 @@ ${cand.resumeData.skills.join(', ')}`;
             <button
               onClick={handleCopyText}
               title="Copy details"
-              className="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 transition text-xs flex items-center gap-1"
+              className="p-2 rounded-xl bg-white hover:bg-slate-100 border border-slate-200 text-slate-600 transition text-xs flex items-center gap-1"
             >
               <Copy size={14} />
               <span className="hidden sm:inline">Copy Info</span>
@@ -63,21 +63,21 @@ ${cand.resumeData.skills.join(', ')}`;
             <button
               onClick={handlePrint}
               title="Print Resume"
-              className="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 transition text-xs flex items-center gap-1"
+              className="p-2 rounded-xl bg-white hover:bg-slate-100 border border-slate-200 text-slate-600 transition text-xs flex items-center gap-1"
             >
               <Printer size={14} />
               <span className="hidden sm:inline">Print</span>
             </button>
             <button
               onClick={() => downloadResume(cand.id)}
-              className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs shadow-md shadow-indigo-900/40 transition"
+              className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs shadow-xs transition"
             >
               <Download size={14} />
               <span>Download PDF</span>
             </button>
             <button
               onClick={() => setPreviewResumeCandidate(null)}
-              className="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white transition"
+              className="p-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-500 hover:text-slate-900 transition"
             >
               <X size={16} />
             </button>
@@ -85,8 +85,8 @@ ${cand.resumeData.skills.join(', ')}`;
         </div>
 
         {/* Resume Sheet Container (Scrollable) */}
-        <div className="flex-1 overflow-y-auto p-6 bg-slate-950/70">
-          <div className="bg-white text-slate-900 p-8 sm:p-10 rounded-xl shadow-2xl border border-slate-300 font-sans space-y-6 max-w-2xl mx-auto">
+        <div className="flex-1 overflow-y-auto p-6 bg-slate-100/70">
+          <div className="bg-white text-slate-900 p-8 sm:p-10 rounded-2xl shadow-sm border border-slate-200 font-sans space-y-6 max-w-2xl mx-auto">
             
             {/* Top Source Badge & Brand Header */}
             <div className="flex items-center justify-between pb-3 border-b-2 border-slate-900">
@@ -106,7 +106,7 @@ ${cand.resumeData.skills.join(', ')}`;
             {/* Candidate Header */}
             <div>
               <h1 className="text-2xl font-black text-slate-900">{cand.name}</h1>
-              <p className="text-sm font-bold text-indigo-700 uppercase tracking-wide mt-0.5">{cand.jobAppliedFor}</p>
+              <p className="text-sm font-bold text-blue-700 uppercase tracking-wide mt-0.5">{cand.jobAppliedFor}</p>
               
               <div className="flex flex-wrap items-center gap-4 text-xs text-slate-600 mt-2">
                 <span>📧 {cand.email}</span>
@@ -121,7 +121,7 @@ ${cand.resumeData.skills.join(', ')}`;
             {/* Summary */}
             {cand.resumeData.summary && (
               <div>
-                <h3 className="text-xs font-bold text-slate-900 border-b border-slate-300 pb-1 mb-2 tracking-wider">
+                <h3 className="text-xs font-bold text-slate-900 border-b border-slate-200 pb-1 mb-2 tracking-wider">
                   EXECUTIVE SUMMARY
                 </h3>
                 <p className="text-xs text-slate-700 leading-relaxed">{cand.resumeData.summary}</p>
@@ -131,7 +131,7 @@ ${cand.resumeData.skills.join(', ')}`;
             {/* Skills */}
             {cand.resumeData.skills.length > 0 && (
               <div>
-                <h3 className="text-xs font-bold text-slate-900 border-b border-slate-300 pb-1 mb-2 tracking-wider">
+                <h3 className="text-xs font-bold text-slate-900 border-b border-slate-200 pb-1 mb-2 tracking-wider">
                   CORE TECHNICAL PROFICIENCIES
                 </h3>
                 <p className="text-xs text-slate-800 font-semibold">{cand.resumeData.skills.join('   •   ')}</p>
@@ -141,7 +141,7 @@ ${cand.resumeData.skills.join(', ')}`;
             {/* Experience */}
             {cand.resumeData.experience.length > 0 && (
               <div>
-                <h3 className="text-xs font-bold text-slate-900 border-b border-slate-300 pb-1 mb-3 tracking-wider">
+                <h3 className="text-xs font-bold text-slate-900 border-b border-slate-200 pb-1 mb-3 tracking-wider">
                   PROFESSIONAL EXPERIENCE
                 </h3>
                 <div className="space-y-4">
@@ -151,7 +151,7 @@ ${cand.resumeData.skills.join(', ')}`;
                         <span>{exp.role}</span>
                         <span className="text-slate-500 font-normal">{exp.duration}</span>
                       </div>
-                      <div className="text-xs font-semibold text-indigo-700">{exp.company} — {exp.location}</div>
+                      <div className="text-xs font-semibold text-blue-700">{exp.company} — {exp.location}</div>
                       <ul className="text-xs text-slate-700 space-y-1 pt-1">
                         {exp.highlights.map((h, hIdx) => (
                           <li key={hIdx}>• {h}</li>
@@ -166,7 +166,7 @@ ${cand.resumeData.skills.join(', ')}`;
             {/* Education */}
             {cand.resumeData.education.length > 0 && (
               <div>
-                <h3 className="text-xs font-bold text-slate-900 border-b border-slate-300 pb-1 mb-2 tracking-wider">
+                <h3 className="text-xs font-bold text-slate-900 border-b border-slate-200 pb-1 mb-2 tracking-wider">
                   EDUCATION & CREDENTIALS
                 </h3>
                 {cand.resumeData.education.map((edu, idx) => (
@@ -182,9 +182,9 @@ ${cand.resumeData.skills.join(', ')}`;
             )}
 
             {/* Footer */}
-            <div className="pt-4 border-t border-slate-300 flex items-center justify-between text-[10px] text-slate-500">
+            <div className="pt-4 border-t border-slate-200 flex items-center justify-between text-[10px] text-slate-500">
               <span className="font-semibold text-slate-700">UrbanGaon® ATS — a perfect balance</span>
-              <span>100% Downloadable PDF Dossier Ready</span>
+              <span>100% Downloadable PDF Ready</span>
             </div>
 
           </div>

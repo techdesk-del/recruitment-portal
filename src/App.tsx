@@ -16,7 +16,7 @@ export const App: React.FC = () => {
   const { activeView } = useRecruitment();
 
   return (
-    <div className="min-h-screen bg-[#0a0f1d] text-slate-100 flex flex-col font-sans selection:bg-blue-600 selection:text-white">
+    <div className="min-h-screen bg-slate-50 text-slate-900 flex flex-col font-sans selection:bg-blue-600 selection:text-white">
       {/* Clean Modern Navbar */}
       <Navbar />
 
@@ -35,15 +35,15 @@ export const App: React.FC = () => {
       <ToastContainer />
 
       {/* Clean Footer */}
-      <footer className="border-t border-slate-800/80 bg-slate-950/90 py-5 text-xs text-slate-500">
+      <footer className="border-t border-slate-200 bg-white py-5 text-xs text-slate-500 shadow-sm">
         <div className="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-3">
-            <UrbanGaonLogo size="sm" showTagline={true} taglineText="a perfect balance" />
-            <span className="text-slate-700 hidden sm:inline">•</span>
-            <span className="text-slate-400 text-[11px] hidden sm:inline">HR Recruitment & Talent Portal</span>
+            <UrbanGaonLogo size="sm" showTagline={true} taglineText="a perfect balance" theme="light" />
+            <span className="text-slate-300 hidden sm:inline">•</span>
+            <span className="text-slate-500 text-[11px] hidden sm:inline">HR Recruitment & Talent Portal</span>
           </div>
-          <div className="flex items-center gap-4 text-[11px] text-slate-400">
-            <span className="flex items-center gap-1.5 text-emerald-400 font-medium">
+          <div className="flex items-center gap-4 text-[11px] text-slate-500">
+            <span className="flex items-center gap-1.5 text-emerald-600 font-medium">
               <CheckCircle2 size={13} /> Sourced via Naukri, LinkedIn, Indeed & UrbanGaon Portal
             </span>
           </div>

@@ -1,14 +1,11 @@
 import React from 'react';
 import { 
-  Plus, 
   Download, 
   Eye, 
   Star, 
   ChevronRight, 
   ChevronLeft, 
-  UserCheck, 
   Filter,
-  CheckCircle2,
   FileDown
 } from 'lucide-react';
 import { useRecruitment } from '../context/RecruitmentContext';
@@ -29,23 +26,23 @@ export const CandidateKanban: React.FC = () => {
   } = useRecruitment();
 
   const columns: { status: CandidateStatus; label: string; color: string; border: string; bg: string }[] = [
-    { status: 'applied', label: 'Applied', color: 'text-slate-300', border: 'border-slate-700', bg: 'bg-slate-900/60' },
-    { status: 'screening', label: 'Screening', color: 'text-blue-400', border: 'border-blue-500/30', bg: 'bg-blue-950/20' },
-    { status: 'shortlisted', label: 'Shortlisted', color: 'text-indigo-400', border: 'border-indigo-500/30', bg: 'bg-indigo-950/20' },
-    { status: 'interview_r1', label: 'Interview R1', color: 'text-purple-400', border: 'border-purple-500/30', bg: 'bg-purple-950/20' },
-    { status: 'interview_r2', label: 'Interview R2', color: 'text-fuchsia-400', border: 'border-fuchsia-500/30', bg: 'bg-fuchsia-950/20' },
-    { status: 'offered', label: 'Offered', color: 'text-amber-400', border: 'border-amber-500/30', bg: 'bg-amber-950/20' },
-    { status: 'joined', label: 'Joined / Hired', color: 'text-emerald-400', border: 'border-emerald-500/30', bg: 'bg-emerald-950/20' }
+    { status: 'applied', label: 'Applied', color: 'text-slate-700', border: 'border-slate-300', bg: 'bg-slate-100/90' },
+    { status: 'screening', label: 'Screening', color: 'text-blue-700', border: 'border-blue-200', bg: 'bg-blue-50/70' },
+    { status: 'shortlisted', label: 'Shortlisted', color: 'text-indigo-700', border: 'border-indigo-200', bg: 'bg-indigo-50/70' },
+    { status: 'interview_r1', label: 'Interview R1', color: 'text-purple-700', border: 'border-purple-200', bg: 'bg-purple-50/70' },
+    { status: 'interview_r2', label: 'Interview R2', color: 'text-fuchsia-700', border: 'border-fuchsia-200', bg: 'bg-fuchsia-50/70' },
+    { status: 'offered', label: 'Offered', color: 'text-amber-800', border: 'border-amber-200', bg: 'bg-amber-50/70' },
+    { status: 'joined', label: 'Joined / Hired', color: 'text-emerald-800', border: 'border-emerald-200', bg: 'bg-emerald-50/70' }
   ];
 
   const sourceBadges: Record<CandidateSource, { label: string; class: string }> = {
-    naukri: { label: 'Naukri', class: 'bg-blue-500/10 text-blue-400 border-blue-500/20' },
-    linkedin: { label: 'LinkedIn', class: 'bg-sky-500/10 text-sky-400 border-sky-500/20' },
-    indeed: { label: 'Indeed', class: 'bg-indigo-500/10 text-indigo-400 border-indigo-500/20' },
-    apna: { label: 'Apna.co', class: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' },
-    urbangaon: { label: 'UrbanGaon', class: 'bg-blue-500/10 text-blue-400 border-blue-500/20' },
-    internshala: { label: 'Internshala', class: 'bg-cyan-500/10 text-cyan-400 border-cyan-500/20' },
-    referral: { label: 'Referral', class: 'bg-purple-500/10 text-purple-400 border-purple-500/20' }
+    naukri: { label: 'Naukri', class: 'bg-blue-50 text-blue-700 border-blue-200' },
+    linkedin: { label: 'LinkedIn', class: 'bg-sky-50 text-sky-700 border-sky-200' },
+    indeed: { label: 'Indeed', class: 'bg-indigo-50 text-indigo-700 border-indigo-200' },
+    apna: { label: 'Apna.co', class: 'bg-emerald-50 text-emerald-700 border-emerald-200' },
+    urbangaon: { label: 'UrbanGaon', class: 'bg-blue-50 text-blue-700 border-blue-200' },
+    internshala: { label: 'Internshala', class: 'bg-cyan-50 text-cyan-700 border-cyan-200' },
+    referral: { label: 'Referral', class: 'bg-purple-50 text-purple-700 border-purple-200' }
   };
 
   // Filter candidates
@@ -77,13 +74,13 @@ export const CandidateKanban: React.FC = () => {
   };
 
   return (
-    <div className="space-y-6 animate-fade-in pb-12">
+    <div className="space-y-5 animate-fade-in pb-12">
       
-      {/* Top Filter Bar */}
-      <div className="glass-panel p-4 rounded-2xl border border-slate-800 flex flex-wrap items-center justify-between gap-4">
+      {/* Top Filter Bar in Light Mode */}
+      <div className="p-4 rounded-2xl bg-white border border-slate-200 flex flex-wrap items-center justify-between gap-4 shadow-xs">
         <div className="flex flex-wrap items-center gap-3">
-          <div className="flex items-center gap-2 text-xs text-slate-300 font-semibold">
-            <Filter size={14} className="text-indigo-400" />
+          <div className="flex items-center gap-2 text-xs text-slate-700 font-bold">
+            <Filter size={14} className="text-blue-600" />
             Filters:
           </div>
 
@@ -91,7 +88,7 @@ export const CandidateKanban: React.FC = () => {
           <select
             value={filters.source}
             onChange={(e) => setFilters((prev) => ({ ...prev, source: e.target.value as any }))}
-            className="px-3 py-1.5 rounded-lg bg-slate-900 border border-slate-800 text-xs text-slate-200 focus:outline-none focus:border-indigo-500"
+            className="px-3 py-1.5 rounded-lg bg-slate-50 border border-slate-200 text-xs text-slate-700 focus:outline-none focus:border-blue-500"
           >
             <option value="all">All Sources (Naukri, LinkedIn, Indeed...)</option>
             <option value="naukri">Naukri.com</option>
@@ -106,7 +103,7 @@ export const CandidateKanban: React.FC = () => {
           <select
             value={filters.jobId}
             onChange={(e) => setFilters((prev) => ({ ...prev, jobId: e.target.value }))}
-            className="px-3 py-1.5 rounded-lg bg-slate-900 border border-slate-800 text-xs text-slate-200 focus:outline-none focus:border-indigo-500 max-w-xs truncate"
+            className="px-3 py-1.5 rounded-lg bg-slate-50 border border-slate-200 text-xs text-slate-700 focus:outline-none focus:border-blue-500 max-w-xs truncate"
           >
             <option value="all">All Active Job Roles</option>
             {jobs.map((j) => (
@@ -120,7 +117,7 @@ export const CandidateKanban: React.FC = () => {
           {(filters.source !== 'all' || filters.jobId !== 'all' || filters.searchQuery) && (
             <button
               onClick={() => setFilters((prev) => ({ ...prev, source: 'all', jobId: 'all', searchQuery: '' }))}
-              className="text-xs text-indigo-400 hover:text-indigo-300 underline font-medium"
+              className="text-xs text-blue-600 hover:text-blue-700 underline font-medium"
             >
               Reset Filters
             </button>
@@ -128,15 +125,15 @@ export const CandidateKanban: React.FC = () => {
         </div>
 
         <div className="flex items-center gap-3">
-          <span className="text-xs text-slate-400">
-            Showing <strong className="text-slate-200">{filteredCandidates.length}</strong> candidates
+          <span className="text-xs text-slate-500">
+            Showing <strong className="text-slate-900">{filteredCandidates.length}</strong> candidates
           </span>
           <button
             onClick={() => bulkDownloadResumes(filteredCandidates.map(c => c.id))}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold border border-slate-700 transition"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold border border-slate-200 transition"
           >
             <FileDown size={13} />
-            Download Visible Resumes
+            <span>Download Visible Resumes</span>
           </button>
         </div>
       </div>
@@ -152,10 +149,10 @@ export const CandidateKanban: React.FC = () => {
               className={`w-80 shrink-0 flex flex-col rounded-2xl border ${col.border} ${col.bg} p-3.5 max-h-[calc(100vh-200px)]`}
             >
               {/* Column Header */}
-              <div className="flex items-center justify-between pb-3 border-b border-slate-800/80 mb-3">
+              <div className="flex items-center justify-between pb-3 border-b border-slate-200/80 mb-3">
                 <div className="flex items-center gap-2">
-                  <h3 className={`text-xs font-bold uppercase tracking-wider ${col.color}`}>{col.label}</h3>
-                  <span className="w-5 h-5 rounded-full bg-slate-800 border border-slate-700 flex items-center justify-center text-[11px] font-bold text-slate-300">
+                  <h3 className={`text-xs font-extrabold uppercase tracking-wider ${col.color}`}>{col.label}</h3>
+                  <span className="w-5 h-5 rounded-full bg-white border border-slate-200 flex items-center justify-center text-[11px] font-bold text-slate-700 shadow-2xs">
                     {colCandidates.length}
                   </span>
                 </div>
@@ -164,8 +161,8 @@ export const CandidateKanban: React.FC = () => {
               {/* Cards Container */}
               <div className="flex-1 overflow-y-auto space-y-3 pr-1">
                 {colCandidates.length === 0 ? (
-                  <div className="py-8 text-center border-2 border-dashed border-slate-800/60 rounded-xl">
-                    <p className="text-xs text-slate-500 font-medium">No candidates in {col.label}</p>
+                  <div className="py-8 text-center border-2 border-dashed border-slate-300 rounded-xl bg-white/50">
+                    <p className="text-xs text-slate-400 font-medium">No candidates in {col.label}</p>
                   </div>
                 ) : (
                   colCandidates.map((cand) => {
@@ -176,7 +173,7 @@ export const CandidateKanban: React.FC = () => {
                     return (
                       <div
                         key={cand.id}
-                        className="p-3.5 rounded-xl bg-slate-900/90 border border-slate-800 hover:border-indigo-500/40 transition-all shadow-md group flex flex-col justify-between gap-3"
+                        className="p-3.5 rounded-xl bg-white border border-slate-200 hover:border-blue-400 transition-all shadow-xs group flex flex-col justify-between gap-3"
                       >
                         <div>
                           {/* Top row: Source badge + ATS Match */}
@@ -184,7 +181,7 @@ export const CandidateKanban: React.FC = () => {
                             <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded border ${badge.class}`}>
                               {badge.label}
                             </span>
-                            <span className="text-[10px] font-mono font-bold text-emerald-400 bg-emerald-500/10 px-1.5 py-0.5 rounded border border-emerald-500/20">
+                            <span className="text-[10px] font-mono font-bold text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-200">
                               {cand.atsMatchScore}% ATS
                             </span>
                           </div>
@@ -192,21 +189,21 @@ export const CandidateKanban: React.FC = () => {
                           {/* Candidate Name & Role */}
                           <h4
                             onClick={() => setSelectedCandidate(cand)}
-                            className="text-xs font-bold text-white hover:text-indigo-400 cursor-pointer transition line-clamp-1"
+                            className="text-xs font-bold text-slate-900 hover:text-blue-600 cursor-pointer transition line-clamp-1"
                           >
                             {cand.name}
                           </h4>
-                          <p className="text-[11px] text-slate-400 line-clamp-1 mt-0.5">{cand.jobAppliedFor}</p>
+                          <p className="text-[11px] text-slate-500 line-clamp-1 mt-0.5">{cand.jobAppliedFor}</p>
 
                           {/* Quick Info Tags */}
-                          <div className="mt-2 flex flex-wrap items-center gap-1.5 text-[10px] text-slate-400">
-                            <span className="px-1.5 py-0.5 rounded bg-slate-800 text-slate-300">{cand.experienceYears}y Exp</span>
-                            <span className="px-1.5 py-0.5 rounded bg-slate-800 text-slate-300">{cand.expectedSalary}</span>
-                            <span className="px-1.5 py-0.5 rounded bg-slate-800 text-slate-300">{cand.noticePeriod}</span>
+                          <div className="mt-2 flex flex-wrap items-center gap-1.5 text-[10px] text-slate-600">
+                            <span className="px-1.5 py-0.5 rounded bg-slate-100 text-slate-700">{cand.experienceYears}y Exp</span>
+                            <span className="px-1.5 py-0.5 rounded bg-slate-100 text-slate-700">{cand.expectedSalary}</span>
+                            <span className="px-1.5 py-0.5 rounded bg-slate-100 text-slate-700">{cand.noticePeriod}</span>
                           </div>
 
                           {/* Recruiter & Star Rating */}
-                          <div className="mt-2.5 flex items-center justify-between text-[11px] text-slate-400">
+                          <div className="mt-2.5 flex items-center justify-between text-[11px] text-slate-500">
                             <span className="truncate max-w-[130px]">👤 {cand.recruiterAssigned || 'Unassigned'}</span>
                             <div className="flex items-center gap-0.5">
                               {[1, 2, 3, 4, 5].map((star) => (
@@ -219,8 +216,8 @@ export const CandidateKanban: React.FC = () => {
                                   }}
                                   className={`cursor-pointer ${
                                     star <= cand.rating
-                                      ? 'text-amber-400 fill-amber-400'
-                                      : 'text-slate-600 hover:text-amber-300'
+                                      ? 'text-amber-500 fill-amber-500'
+                                      : 'text-slate-300 hover:text-amber-400'
                                   }`}
                                 />
                               ))}
@@ -229,23 +226,23 @@ export const CandidateKanban: React.FC = () => {
                         </div>
 
                         {/* Card Bottom Row: Resume Download + Stage Navigation */}
-                        <div className="pt-2 border-t border-slate-800/80 flex items-center justify-between gap-1">
+                        <div className="pt-2 border-t border-slate-100 flex items-center justify-between gap-1">
                           {/* Resume Actions */}
                           <div className="flex items-center gap-1">
                             <button
                               onClick={() => setPreviewResumeCandidate(cand)}
                               title="Preview Resume"
-                              className="p-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 transition"
+                              className="p-1 rounded bg-slate-100 hover:bg-slate-200 text-slate-700 transition"
                             >
                               <Eye size={12} />
                             </button>
                             <button
                               onClick={() => downloadResume(cand.id)}
-                              title="Instant Real-Time PDF Download"
-                              className="px-2 py-1 rounded bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-[10px] flex items-center gap-1 transition shadow"
+                              title="Download PDF"
+                              className="px-2 py-1 rounded bg-blue-600 hover:bg-blue-700 text-white font-bold text-[10px] flex items-center gap-1 transition shadow-xs"
                             >
                               <Download size={11} />
-                              <span>Resume</span>
+                              <span>PDF</span>
                             </button>
                           </div>
 
@@ -255,7 +252,7 @@ export const CandidateKanban: React.FC = () => {
                               <button
                                 onClick={() => updateCandidateStatus(cand.id, prevSt)}
                                 title={`Move back to ${prevSt}`}
-                                className="p-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 transition"
+                                className="p-1 rounded bg-slate-100 hover:bg-slate-200 text-slate-700 transition"
                               >
                                 <ChevronLeft size={13} />
                               </button>
@@ -264,7 +261,7 @@ export const CandidateKanban: React.FC = () => {
                               <button
                                 onClick={() => updateCandidateStatus(cand.id, nextSt)}
                                 title={`Advance to ${nextSt}`}
-                                className="p-1 rounded bg-indigo-600/80 hover:bg-indigo-600 text-white transition flex items-center gap-0.5 px-1.5 text-[10px] font-bold"
+                                className="p-1 rounded bg-blue-50 text-blue-700 hover:bg-blue-100 transition flex items-center gap-0.5 px-1.5 text-[10px] font-bold border border-blue-200"
                               >
                                 <span>Advance</span>
                                 <ChevronRight size={13} />

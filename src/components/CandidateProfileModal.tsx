@@ -21,6 +21,7 @@ import {
 import { useRecruitment } from '../context/RecruitmentContext';
 import { CandidateStatus, Scorecard, CandidateSource } from '../types';
 import { PortalLogo } from './PortalLogo';
+import { InterviewEvaluationForm } from './InterviewEvaluationForm';
 
 export const CandidateProfileModal: React.FC = () => {
   const { 
@@ -36,17 +37,6 @@ export const CandidateProfileModal: React.FC = () => {
 
   const [activeTab, setActiveTab] = useState<'profile' | 'resume' | 'scorecard' | 'timeline'>('profile');
   const [noteText, setNoteText] = useState(selectedCandidate?.notes || '');
-  
-  // Scorecard state
-  const [scorecardState, setScorecardState] = useState<Scorecard>(() => ({
-    technical: selectedCandidate?.scorecard?.technical || 4,
-    problemSolving: selectedCandidate?.scorecard?.problemSolving || 4,
-    communication: selectedCandidate?.scorecard?.communication || 4,
-    cultureFit: selectedCandidate?.scorecard?.cultureFit || 4,
-    overallRecommendation: selectedCandidate?.scorecard?.overallRecommendation || 'hire',
-    evaluationNotes: selectedCandidate?.scorecard?.evaluationNotes || '',
-    evaluatedBy: 'Priya Sharma (HR Lead)'
-  }));
 
   if (!selectedCandidate) return null;
 
@@ -66,11 +56,6 @@ export const CandidateProfileModal: React.FC = () => {
 
   const handleSaveNotes = () => {
     updateCandidateNotes(cand.id, noteText);
-  };
-
-  const handleSaveScorecard = (e: React.FormEvent) => {
-    e.preventDefault();
-    updateCandidateScorecard(cand.id, scorecardState);
   };
 
   return (
@@ -345,59 +330,12 @@ export const CandidateProfileModal: React.FC = () => {
             </div>
           )}
 
-          {/* TAB 3: SCORECARD */}
+          {/* TAB 3: INTERVIEW EVALUATION FORM (2025/HRD/EF/Version-1) */}
           {activeTab === 'scorecard' && (
-            <form onSubmit={handleSaveScorecard} className="space-y-4">
-              <div className="p-6 rounded-2xl bg-white border border-slate-200 shadow-sm space-y-4">
-                <h3 className="text-xs font-bold text-slate-700 uppercase tracking-wider">Interview Evaluation Form</h3>
-                
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div>
-                    <label className="text-xs font-semibold text-slate-700 block mb-1">Technical Skills (1-5)</label>
-                    <input 
-                      type="number" 
-                      min="1" 
-                      max="5" 
-                      value={scorecardState.technical}
-                      onChange={(e) => setScorecardState({ ...scorecardState, technical: Number(e.target.value) })}
-                      className="w-full p-2.5 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-900"
-                    />
-                  </div>
-                  <div>
-                    <label className="text-xs font-semibold text-slate-700 block mb-1">Communication (1-5)</label>
-                    <input 
-                      type="number" 
-                      min="1" 
-                      max="5" 
-                      value={scorecardState.communication}
-                      onChange={(e) => setScorecardState({ ...scorecardState, communication: Number(e.target.value) })}
-                      className="w-full p-2.5 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-900"
-                    />
-                  </div>
-                </div>
-
-                <div>
-                  <label className="text-xs font-semibold text-slate-700 block mb-1">Recommendation</label>
-                  <select
-                    value={scorecardState.overallRecommendation}
-                    onChange={(e) => setScorecardState({ ...scorecardState, overallRecommendation: e.target.value as any })}
-                    className="w-full p-2.5 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-900"
-                  >
-                    <option value="strong_hire">Strong Hire</option>
-                    <option value="hire">Hire</option>
-                    <option value="neutral">Hold / Need More Info</option>
-                    <option value="do_not_hire">Reject / Do Not Hire</option>
-                  </select>
-                </div>
-
-                <button
-                  type="submit"
-                  className="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold transition shadow-xs"
-                >
-                  Save Scorecard
-                </button>
-              </div>
-            </form>
+            <InterviewEvaluationForm
+              candidate={cand}
+              onSave={(scorecard) => updateCandidateScorecard(cand.id, scorecard)}
+            />
           )}
 
           {/* TAB 4: ACTIVITY HISTORY */}

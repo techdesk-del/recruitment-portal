@@ -35,15 +35,48 @@ export interface ResumeData {
   languages?: string[];
 }
 
+export interface EvaluationCriteriaRating {
+  rp: number; // 1-5, 0 = unrated
+  yt: number; // 1-5, 0 = unrated
+  ss: number; // 1-5, 0 = unrated
+  comments: string;
+}
+
+export interface DetailedInterviewEvaluation {
+  conductedBy: string;
+  interviewDate: string;
+  interviewStartTime: string;
+  department: string;
+  currentSalary: string;
+  expectedSalary: string;
+  
+  // 6 Questions from 2025/HRD/EF/Version-1
+  coreValues: EvaluationCriteriaRating;
+  personality: EvaluationCriteriaRating;
+  communication: EvaluationCriteriaRating;
+  adaptability: EvaluationCriteriaRating;
+  technical: EvaluationCriteriaRating;
+  overallImpression: EvaluationCriteriaRating;
+
+  positives: [string, string, string];
+  negatives: [string, string, string];
+
+  overallRecommendation: 'strong_hire' | 'hire' | 'neutral' | 'do_not_hire';
+  finalComments: string;
+  evaluatedBy?: string;
+  evaluatedAt?: string;
+}
+
 export interface Scorecard {
   technical: number;       // 1-5
-  problemSolving: number;  // 1-5
+  problemSolving?: number;  // 1-5
   communication: number;   // 1-5
-  cultureFit: number;      // 1-5
+  cultureFit?: number;      // 1-5
   overallRecommendation: 'strong_hire' | 'hire' | 'neutral' | 'do_not_hire';
   evaluationNotes: string;
   evaluatedBy?: string;
   evaluatedAt?: string;
+  detailed?: DetailedInterviewEvaluation;
 }
 
 export interface ActivityLog {

@@ -74,7 +74,7 @@ export const TopHeader: React.FC = () => {
           className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#2563eb] hover:bg-blue-700 text-white font-medium text-xs shadow-xs transition active:scale-95"
         >
           <Plus size={14} />
-          <span>+ Add Candidate</span>
+          <span>Add Candidate</span>
         </button>
 
         {/* Role: Admin / HR Pill */}

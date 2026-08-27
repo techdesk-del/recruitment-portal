@@ -52,8 +52,8 @@ interface RecruitmentContextType {
 
 const RecruitmentContext = createContext<RecruitmentContextType | undefined>(undefined);
 
-const STORAGE_KEY_CANDIDATES = 'urbangaon_recruitment_candidates_v2';
-const STORAGE_KEY_JOBS = 'urbangaon_recruitment_jobs_v2';
+const STORAGE_KEY_CANDIDATES = 'urbangaon_recruitment_candidates_v3';
+const STORAGE_KEY_JOBS = 'urbangaon_recruitment_jobs_v3';
 
 export const RecruitmentProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [candidates, setCandidates] = useState<Candidate[]>(() => {

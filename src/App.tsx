@@ -6,7 +6,6 @@ import { CandidateTable } from './components/CandidateTable';
 import { JobsView } from './components/JobsView';
 import { CandidateKanban } from './components/CandidateKanban';
 import { InterviewScheduler } from './components/InterviewScheduler';
-import { CallingDesk } from './components/CallingDesk';
 import { CandidateProfileModal } from './components/CandidateProfileModal';
 import { ResumePreviewModal } from './components/ResumePreviewModal';
 import { JobPostingsModal } from './components/JobPostingsModal';
@@ -33,7 +32,6 @@ export const App: React.FC = () => {
           {(activeView === 'dashboard' || activeView === 'overview') && <MainDashboard />}
           {activeView === 'candidates' && <CandidateTable />}
           {isPortalView && <CandidateTable />}
-          {(activeView === 'calling' || activeView === 'telecalling') && <CallingDesk />}
           {activeView === 'jobs' && <JobsView />}
           {activeView === 'pipeline' && <CandidateKanban />}
           {(activeView === 'scheduler' || activeView === 'interview-scheduler') && <InterviewScheduler />}

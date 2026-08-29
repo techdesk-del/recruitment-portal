@@ -6,11 +6,12 @@ const ActivityLogSchema = new mongoose.Schema({
   details: { type: String, default: '' },
   performedBy: { type: String, default: 'System' },
   timestamp: { type: String, default: () => new Date().toISOString() },
-  type: { 
-    type: String, 
+  type: {
+    type: String,
     enum: ['status', 'note', 'scorecard', 'interview', 'ingestion'],
     default: 'status'
   }
+  //
 }, { _id: false });
 
 const WorkExperienceSchema = new mongoose.Schema({
@@ -47,8 +48,8 @@ const ScorecardSchema = new mongoose.Schema({
   problemSolving: { type: Number, min: 1, max: 5, default: 4 },
   communication: { type: Number, min: 1, max: 5, default: 4 },
   cultureFit: { type: Number, min: 1, max: 5, default: 4 },
-  overallRecommendation: { 
-    type: String, 
+  overallRecommendation: {
+    type: String,
     enum: ['strong_hire', 'hire', 'neutral', 'do_not_hire'],
     default: 'hire'
   },
@@ -63,8 +64,8 @@ const CandidateSchema = new mongoose.Schema({
   email: { type: String, required: true, trim: true, index: true },
   phone: { type: String, required: true, trim: true },
   location: { type: String, default: 'India' },
-  source: { 
-    type: String, 
+  source: {
+    type: String,
     enum: ['naukri', 'linkedin', 'indeed', 'apna', 'urbangaon', 'internshala', 'referral'],
     required: true,
     index: true
@@ -75,8 +76,8 @@ const CandidateSchema = new mongoose.Schema({
   department: { type: String, default: 'Engineering' },
   appliedDate: { type: String, default: () => new Date().toISOString() },
   lastUpdatedDate: { type: String, default: () => new Date().toISOString() },
-  status: { 
-    type: String, 
+  status: {
+    type: String,
     enum: ['applied', 'screening', 'shortlisted', 'interview_r1', 'interview_r2', 'offered', 'joined', 'rejected'],
     default: 'applied',
     index: true

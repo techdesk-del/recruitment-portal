@@ -142,6 +142,7 @@ export const InterviewEvaluationForm: React.FC<InterviewEvaluationFormProps> = (
       setEvaluation((prev) => ({
         ...prev,
         coreValues: { rp: 4, yt: 4, ss: 4, comments: prev.coreValues.comments },
+
         personality: { rp: 4, yt: 4, ss: 4, comments: prev.personality.comments },
         communication: { rp: 4, yt: 4, ss: 4, comments: prev.communication.comments },
         adaptability: { rp: 4, yt: 4, ss: 4, comments: prev.adaptability.comments },
@@ -309,8 +310,8 @@ export const InterviewEvaluationForm: React.FC<InterviewEvaluationFormProps> = (
                 type="button"
                 onClick={() => setActiveTab('all')}
                 className={`px-2.5 py-1 rounded-lg text-xs font-bold transition ${activeTab === 'all'
-                    ? 'bg-blue-600 text-white shadow-2xs'
-                    : 'text-slate-600 hover:bg-slate-100'
+                  ? 'bg-blue-600 text-white shadow-2xs'
+                  : 'text-slate-600 hover:bg-slate-100'
                   }`}
               >
                 All 6 Criteria
@@ -321,8 +322,8 @@ export const InterviewEvaluationForm: React.FC<InterviewEvaluationFormProps> = (
                   key={c.id}
                   onClick={() => setActiveTab(c.id as any)}
                   className={`px-2 py-1 rounded-lg text-xs font-bold transition ${activeTab === c.id
-                      ? 'bg-blue-600 text-white shadow-2xs'
-                      : 'text-slate-600 hover:bg-slate-100'
+                    ? 'bg-blue-600 text-white shadow-2xs'
+                    : 'text-slate-600 hover:bg-slate-100'
                     }`}
                 >
                   {c.num}
@@ -418,8 +419,8 @@ export const InterviewEvaluationForm: React.FC<InterviewEvaluationFormProps> = (
                                     <Star
                                       size={14}
                                       className={`transition-colors ${isFilled
-                                          ? 'text-amber-400 fill-amber-400 drop-shadow-[0_1px_2px_rgba(251,191,36,0.3)]'
-                                          : 'text-slate-300 hover:text-amber-300'
+                                        ? 'text-amber-400 fill-amber-400 drop-shadow-[0_1px_2px_rgba(251,191,36,0.3)]'
+                                        : 'text-slate-300 hover:text-amber-300'
                                         }`}
                                     />
                                   </button>
@@ -595,8 +596,8 @@ export const InterviewEvaluationForm: React.FC<InterviewEvaluationFormProps> = (
                     key={item.id}
                     onClick={() => setEvaluation({ ...evaluation, overallRecommendation: item.id as any })}
                     className={`p-2 rounded-xl border text-left transition flex items-center justify-between cursor-pointer ${isSelected
-                        ? item.color
-                        : 'border-slate-200 bg-slate-50 hover:bg-slate-100 text-slate-700'
+                      ? item.color
+                      : 'border-slate-200 bg-slate-50 hover:bg-slate-100 text-slate-700'
                       }`}
                   >
                     <div>

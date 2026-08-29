@@ -12,6 +12,10 @@ const ActivityLogSchema = new mongoose.Schema({
     default: 'status'
   }
   //
+
+  //
+
+
 }, { _id: false });
 
 const WorkExperienceSchema = new mongoose.Schema({

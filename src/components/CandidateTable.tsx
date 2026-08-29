@@ -5,13 +5,14 @@ import {
   Eye, 
   User, 
   Phone, 
+  PhoneCall,
   Mail, 
   MapPin, 
   ChevronLeft, 
   ChevronRight, 
-  RotateCcw,
-  ArrowRight,
-  Filter
+  RotateCcw, 
+  ArrowRight, 
+  Filter 
 } from 'lucide-react';
 import { useRecruitment } from '../context/RecruitmentContext';
 import { CandidateStatus, CandidateSource } from '../types';
@@ -26,6 +27,7 @@ export const CandidateTable: React.FC = () => {
     updateCandidateStatus, 
     setSelectedCandidate, 
     setPreviewResumeCandidate, 
+    setActiveDialerCandidate,
     downloadResume, 
     exportToCSV,
     activeView,
@@ -373,6 +375,18 @@ export const CandidateTable: React.FC = () => {
                       <td className="py-3.5 px-5 text-right">
                         <div className="flex items-center justify-end gap-1.5">
                           <button
+                            onClick={() => {
+                              setActiveDialerCandidate(cand);
+                              setActiveView('calling');
+                            }}
+                            title="Call Candidate (Launch Telecaller)"
+                            className="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-blue-50 hover:bg-blue-100 text-blue-700 text-[11px] font-bold border border-blue-200 transition"
+                          >
+                            <PhoneCall size={12} />
+                            <span>Call</span>
+                          </button>
+
+                          <button
                             onClick={() => setSelectedCandidate(cand)}
                             title="View Candidate Profile"
                             className="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 text-[11px] font-semibold border border-slate-200 transition"
@@ -383,7 +397,7 @@ export const CandidateTable: React.FC = () => {
                           <button
                             onClick={() => setPreviewResumeCandidate(cand)}
                             title="Preview Resume"
-                            className="p-1 rounded-lg bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 transition"
+                            className="p-1 rounded-lg bg-slate-50 hover:bg-slate-100 text-slate-700 border border-slate-200 transition"
                           >
                             <Eye size={13} />
                           </button>

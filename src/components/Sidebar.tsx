@@ -2,8 +2,10 @@ import React from 'react';
 import { 
   LayoutGrid, 
   Users, 
+  PhoneCall,
   Briefcase, 
-  Kanban, 
+  Kanban,
+  CalendarDays,
   Settings, 
   LogOut 
 } from 'lucide-react';
@@ -13,11 +15,15 @@ import { PortalLogo } from './PortalLogo';
 import { CandidateSource } from '../types';
 
 export const Sidebar: React.FC = () => {
-  const { activeView, setActiveView, candidates, jobs, setFilters } = useRecruitment();
+  const { activeView, setActiveView, candidates, jobs, interviews, callingMetrics, setFilters } = useRecruitment();
 
   const getPortalCount = (source: CandidateSource) => {
     return candidates.filter((c) => c.source === source).length;
   };
+
+  const activeInterviewsCount = interviews.filter(
+    (i) => i.status === 'scheduled' || i.status === 'confirmed' || i.status === 'in_progress' || i.status === 'rescheduled'
+  ).length;
 
   const handlePortalClick = (source: CandidateSource) => {
     setFilters({
@@ -83,6 +89,46 @@ export const Sidebar: React.FC = () => {
               activeView === 'candidates' ? 'bg-blue-800/80 text-white' : 'bg-slate-100 text-slate-500'
             }`}>
               {candidates.length}
+            </span>
+          </button>
+
+          {/* Candidate Calling & Tele-Screening Desk */}
+          <button
+            onClick={() => handleGeneralViewClick('calling')}
+            className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-[13px] transition-all tracking-tight ${
+              activeView === 'calling' || activeView === 'telecalling'
+                ? 'bg-[#2563eb] text-white font-medium shadow-xs'
+                : 'text-slate-500 hover:text-slate-900 hover:bg-slate-50 font-normal'
+            }`}
+          >
+            <div className="flex items-center gap-2.5">
+              <PhoneCall size={16} className={activeView === 'calling' || activeView === 'telecalling' ? 'text-white' : 'text-emerald-600'} />
+              <span className="font-medium">Telecalling Desk</span>
+            </div>
+            <span className={`text-[10px] font-bold px-1.5 py-0.2 rounded-full ${
+              activeView === 'calling' || activeView === 'telecalling' ? 'bg-blue-800/80 text-white' : 'bg-emerald-50 text-emerald-700'
+            }`}>
+              {callingMetrics.pendingCallsCount > 0 ? `${callingMetrics.pendingCallsCount} new` : 'Live'}
+            </span>
+          </button>
+
+          {/* Interview Scheduler */}
+          <button
+            onClick={() => handleGeneralViewClick('scheduler')}
+            className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-[13px] transition-all tracking-tight ${
+              activeView === 'scheduler' || activeView === 'interview-scheduler'
+                ? 'bg-[#2563eb] text-white font-medium shadow-xs'
+                : 'text-slate-500 hover:text-slate-900 hover:bg-slate-50 font-normal'
+            }`}
+          >
+            <div className="flex items-center gap-2.5">
+              <CalendarDays size={16} className={activeView === 'scheduler' || activeView === 'interview-scheduler' ? 'text-white' : 'text-blue-600'} />
+              <span className="font-medium">Interview Scheduler</span>
+            </div>
+            <span className={`text-[10px] font-bold px-1.5 py-0.2 rounded-full ${
+              activeView === 'scheduler' || activeView === 'interview-scheduler' ? 'bg-blue-800/80 text-white' : 'bg-blue-50 text-blue-700'
+            }`}>
+              {activeInterviewsCount}
             </span>
           </button>
 

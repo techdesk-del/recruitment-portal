@@ -8,15 +8,31 @@ import {
   FilterState, 
   Scorecard, 
   ToastMessage, 
-  DashboardMetrics 
+  DashboardMetrics,
+  InterviewSchedule,
+  InterviewStatus,
+  CallRecord,
+  CallDisposition,
+  CallingOverallStatus
 } from '../types';
-import { INITIAL_CANDIDATES, INITIAL_JOBS } from '../data/mockData';
+import { INITIAL_CANDIDATES, INITIAL_JOBS, INITIAL_INTERVIEWS, INITIAL_CALL_RECORDS } from '../data/mockData';
 import { downloadCandidateResume as downloadPdf, downloadBulkResumes as downloadBulkPdf } from '../utils/resumeGenerator';
 import { io } from 'socket.io-client';
+
+export interface CallingMetrics {
+  totalCallsMade: number;
+  connectedRate: number; // percentage
+  qualifiedRate: number; // percentage
+  followUpsTodayCount: number;
+  pendingCallsCount: number;
+  totalDurationMinutes: number;
+}
 
 interface RecruitmentContextType {
   candidates: Candidate[];
   jobs: JobPosting[];
+  interviews: InterviewSchedule[];
+  callRecords: CallRecord[];
   activeView: string;
   setActiveView: (view: string) => void;
   filters: FilterState;
@@ -25,6 +41,8 @@ interface RecruitmentContextType {
   setSelectedCandidate: (candidate: Candidate | null) => void;
   previewResumeCandidate: Candidate | null;
   setPreviewResumeCandidate: (candidate: Candidate | null) => void;
+  activeDialerCandidate: Candidate | null;
+  setActiveDialerCandidate: (candidate: Candidate | null) => void;
   isJobModalOpen: boolean;
   setIsJobModalOpen: (open: boolean) => void;
   isWebhookModalOpen: boolean;
@@ -35,6 +53,7 @@ interface RecruitmentContextType {
   
   // Metrics
   metrics: DashboardMetrics;
+  callingMetrics: CallingMetrics;
   
   // Actions
   updateCandidateStatus: (id: string, newStatus: CandidateStatus, details?: string) => void;
@@ -48,12 +67,32 @@ interface RecruitmentContextType {
   exportToCSV: () => void;
   simulateIncomingApplication: (source?: CandidateSource) => void;
   resetToDefaultData: () => void;
+
+  // Interview Scheduler Actions
+  scheduleInterview: (interviewData: Omit<InterviewSchedule, 'id' | 'createdAt' | 'updatedAt'>) => InterviewSchedule;
+  updateInterview: (id: string, updates: Partial<InterviewSchedule>) => void;
+  rescheduleInterview: (id: string, newDate: string, newStartTime: string, newEndTime: string, notes?: string) => void;
+  cancelInterview: (id: string, reason?: string) => void;
+  markInterviewCompleted: (id: string) => void;
+  deleteInterview: (id: string) => void;
+
+  // Telecalling & Screening Desk Actions
+  logCallRecord: (
+    recordData: Omit<CallRecord, 'id' | 'callTime'> & {
+      promoteToInterview?: boolean;
+      interviewData?: Partial<InterviewSchedule>;
+    }
+  ) => CallRecord;
+  deleteCallRecord: (callId: string) => void;
+  quickScheduleFollowUp: (candidateId: string, date: string, time: string, note?: string) => void;
 }
 
 const RecruitmentContext = createContext<RecruitmentContextType | undefined>(undefined);
 
 const STORAGE_KEY_CANDIDATES = 'urbangaon_recruitment_candidates_v3';
 const STORAGE_KEY_JOBS = 'urbangaon_recruitment_jobs_v3';
+const STORAGE_KEY_INTERVIEWS = 'urbangaon_recruitment_interviews_v1';
+const STORAGE_KEY_CALLS = 'urbangaon_recruitment_calls_v1';
 
 export const RecruitmentProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [candidates, setCandidates] = useState<Candidate[]>(() => {
@@ -74,9 +113,28 @@ export const RecruitmentProvider: React.FC<{ children: React.ReactNode }> = ({ c
     }
   });
 
+  const [interviews, setInterviews] = useState<InterviewSchedule[]>(() => {
+    try {
+      const saved = localStorage.getItem(STORAGE_KEY_INTERVIEWS);
+      return saved ? JSON.parse(saved) : INITIAL_INTERVIEWS;
+    } catch {
+      return INITIAL_INTERVIEWS;
+    }
+  });
+
+  const [callRecords, setCallRecords] = useState<CallRecord[]>(() => {
+    try {
+      const saved = localStorage.getItem(STORAGE_KEY_CALLS);
+      return saved ? JSON.parse(saved) : INITIAL_CALL_RECORDS;
+    } catch {
+      return INITIAL_CALL_RECORDS;
+    }
+  });
+
   const [activeView, setActiveView] = useState<string>('dashboard');
   const [selectedCandidate, setSelectedCandidate] = useState<Candidate | null>(null);
   const [previewResumeCandidate, setPreviewResumeCandidate] = useState<Candidate | null>(null);
+  const [activeDialerCandidate, setActiveDialerCandidate] = useState<Candidate | null>(null);
   const [isJobModalOpen, setIsJobModalOpen] = useState(false);
   const [isWebhookModalOpen, setIsWebhookModalOpen] = useState(false);
   const [toasts, setToasts] = useState<ToastMessage[]>([]);
@@ -108,6 +166,22 @@ export const RecruitmentProvider: React.FC<{ children: React.ReactNode }> = ({ c
       console.error('Failed to persist jobs to localStorage', e);
     }
   }, [jobs]);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(STORAGE_KEY_INTERVIEWS, JSON.stringify(interviews));
+    } catch (e) {
+      console.error('Failed to persist interviews to localStorage', e);
+    }
+  }, [interviews]);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(STORAGE_KEY_CALLS, JSON.stringify(callRecords));
+    } catch (e) {
+      console.error('Failed to persist calls to localStorage', e);
+    }
+  }, [callRecords]);
 
   // Real-Time Ingestion Socket Listener (Connects to Backend Webhook Server)
   useEffect(() => {
@@ -553,12 +627,385 @@ export const RecruitmentProvider: React.FC<{ children: React.ReactNode }> = ({ c
     );
   };
 
+  // Interview Scheduler Actions
+  const scheduleInterview = (interviewData: Omit<InterviewSchedule, 'id' | 'createdAt' | 'updatedAt'>): InterviewSchedule => {
+    const newInterview: InterviewSchedule = {
+      ...interviewData,
+      id: `int-${Date.now().toString().slice(-6)}`,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    };
+
+    setInterviews((prev) => [newInterview, ...prev]);
+
+    // Update candidate hiring stage and activity log
+    setCandidates((prev) =>
+      prev.map((c) => {
+        if (c.id === interviewData.candidateId) {
+          const nextStatus: CandidateStatus = interviewData.round.includes('Round 2')
+            ? 'interview_r2'
+            : interviewData.round.includes('Round 1')
+            ? 'interview_r1'
+            : c.status;
+
+          const actLog = {
+            id: `act-${Date.now()}`,
+            action: 'Interview Scheduled',
+            details: `${interviewData.round} scheduled on ${interviewData.date} at ${interviewData.startTime} with ${interviewData.interviewerName}`,
+            performedBy: interviewData.interviewerName,
+            timestamp: new Date().toISOString(),
+            type: 'interview' as const
+          };
+
+          return {
+            ...c,
+            status: nextStatus,
+            lastUpdatedDate: new Date().toISOString(),
+            activityHistory: [actLog, ...c.activityHistory]
+          };
+        }
+        return c;
+      })
+    );
+
+    showToast(
+      'success',
+      'Interview Scheduled',
+      `${interviewData.round} scheduled for ${interviewData.candidateName} on ${interviewData.date} (${interviewData.startTime}).`
+    );
+
+    return newInterview;
+  };
+
+  const updateInterview = (id: string, updates: Partial<InterviewSchedule>) => {
+    setInterviews((prev) =>
+      prev.map((item) =>
+        item.id === id
+          ? { ...item, ...updates, updatedAt: new Date().toISOString() }
+          : item
+      )
+    );
+    showToast('info', 'Interview Updated', 'Schedule details saved successfully.');
+  };
+
+  const rescheduleInterview = (id: string, newDate: string, newStartTime: string, newEndTime: string, notes?: string) => {
+    let candidateName = '';
+    let roundName = '';
+    let candId = '';
+
+    setInterviews((prev) =>
+      prev.map((item) => {
+        if (item.id === id) {
+          candidateName = item.candidateName;
+          roundName = item.round;
+          candId = item.candidateId;
+          return {
+            ...item,
+            date: newDate,
+            startTime: newStartTime,
+            endTime: newEndTime,
+            status: 'rescheduled',
+            notes: notes ? `${item.notes ? item.notes + ' | ' : ''}Rescheduled: ${notes}` : item.notes,
+            updatedAt: new Date().toISOString()
+          };
+        }
+        return item;
+      })
+    );
+
+    if (candId) {
+      setCandidates((prev) =>
+        prev.map((c) => {
+          if (c.id === candId) {
+            return {
+              ...c,
+              lastUpdatedDate: new Date().toISOString(),
+              activityHistory: [
+                {
+                  id: `act-${Date.now()}`,
+                  action: 'Interview Rescheduled',
+                  details: `${roundName} rescheduled to ${newDate} at ${newStartTime}`,
+                  performedBy: 'Hiring Lead',
+                  timestamp: new Date().toISOString(),
+                  type: 'interview' as const
+                },
+                ...c.activityHistory
+              ]
+            };
+          }
+          return c;
+        })
+      );
+    }
+
+    showToast('info', 'Interview Rescheduled', `${roundName} for ${candidateName || 'candidate'} moved to ${newDate} at ${newStartTime}.`);
+  };
+
+  const cancelInterview = (id: string, reason?: string) => {
+    let candidateName = '';
+    let candId = '';
+
+    setInterviews((prev) =>
+      prev.map((item) => {
+        if (item.id === id) {
+          candidateName = item.candidateName;
+          candId = item.candidateId;
+          return {
+            ...item,
+            status: 'cancelled',
+            notes: reason ? `${item.notes ? item.notes + ' | ' : ''}Cancelled: ${reason}` : item.notes,
+            updatedAt: new Date().toISOString()
+          };
+        }
+        return item;
+      })
+    );
+
+    if (candId) {
+      setCandidates((prev) =>
+        prev.map((c) => {
+          if (c.id === candId) {
+            return {
+              ...c,
+              lastUpdatedDate: new Date().toISOString(),
+              activityHistory: [
+                {
+                  id: `act-${Date.now()}`,
+                  action: 'Interview Cancelled',
+                  details: reason || 'Interview session cancelled by recruiter.',
+                  performedBy: 'Hiring Lead',
+                  timestamp: new Date().toISOString(),
+                  type: 'interview' as const
+                },
+                ...c.activityHistory
+              ]
+            };
+          }
+          return c;
+        })
+      );
+    }
+
+    showToast('warning', 'Interview Cancelled', `Interview for ${candidateName || 'candidate'} has been cancelled.`);
+  };
+
+  const markInterviewCompleted = (id: string) => {
+    setInterviews((prev) =>
+      prev.map((item) =>
+        item.id === id
+          ? { ...item, status: 'completed', feedbackStatus: 'submitted', updatedAt: new Date().toISOString() }
+          : item
+      )
+    );
+    showToast('success', 'Interview Completed', 'Marked interview session as completed.');
+  };
+
+  const deleteInterview = (id: string) => {
+    setInterviews((prev) => prev.filter((item) => item.id !== id));
+    showToast('info', 'Interview Removed', 'Interview schedule entry deleted.');
+  };
+
   const resetToDefaultData = () => {
     setCandidates(INITIAL_CANDIDATES);
     setJobs(INITIAL_JOBS);
+    setInterviews(INITIAL_INTERVIEWS);
+    setCallRecords(INITIAL_CALL_RECORDS);
     localStorage.removeItem(STORAGE_KEY_CANDIDATES);
     localStorage.removeItem(STORAGE_KEY_JOBS);
+    localStorage.removeItem(STORAGE_KEY_INTERVIEWS);
+    localStorage.removeItem(STORAGE_KEY_CALLS);
     showToast('info', 'Reset Complete', 'Dashboard reset to original demo dataset.');
+  };
+
+  // Telecalling & Screening Desk Actions
+  const logCallRecord = (
+    recordData: Omit<CallRecord, 'id' | 'callTime'> & {
+      promoteToInterview?: boolean;
+      interviewData?: Partial<InterviewSchedule>;
+    }
+  ): CallRecord => {
+    const callId = `call-${Date.now().toString().slice(-6)}`;
+    const nowIso = new Date().toISOString();
+
+    const newRecord: CallRecord = {
+      id: callId,
+      candidateId: recordData.candidateId,
+      candidateName: recordData.candidateName,
+      candidatePhone: recordData.candidatePhone,
+      jobTitle: recordData.jobTitle,
+      jobId: recordData.jobId,
+      recruiterName: recordData.recruiterName || 'Priya Sharma',
+      callTime: nowIso,
+      durationSeconds: recordData.durationSeconds || 0,
+      disposition: recordData.disposition,
+      notes: recordData.notes || '',
+      followUpDate: recordData.followUpDate,
+      followUpTime: recordData.followUpTime,
+      confirmedCurrentCtc: recordData.confirmedCurrentCtc,
+      confirmedExpectedCtc: recordData.confirmedExpectedCtc,
+      confirmedNoticePeriod: recordData.confirmedNoticePeriod,
+      relocationPreference: recordData.relocationPreference,
+      communicationRating: recordData.communicationRating,
+      technicalFitRating: recordData.technicalFitRating,
+      tags: recordData.tags || []
+    };
+
+    setCallRecords((prev) => [newRecord, ...prev]);
+
+    // Map disposition to overall status and candidate stage
+    let overallStatus: CallingOverallStatus = 'connected';
+    let newCandidateStatus: CandidateStatus | undefined;
+
+    switch (recordData.disposition) {
+      case 'connected_screening_passed':
+        overallStatus = 'qualified';
+        newCandidateStatus = 'shortlisted';
+        break;
+      case 'connected_interested':
+        overallStatus = 'connected';
+        newCandidateStatus = 'screening';
+        break;
+      case 'connected_callback_requested':
+        overallStatus = 'follow_up';
+        break;
+      case 'connected_screening_failed':
+      case 'connected_not_interested':
+        overallStatus = 'disqualified';
+        newCandidateStatus = 'rejected';
+        break;
+      case 'ringing_no_answer':
+      case 'busy':
+      case 'switched_off':
+      case 'wrong_number':
+        overallStatus = 'unreachable';
+        break;
+    }
+
+    // Sync candidate details
+    setCandidates((prev) =>
+      prev.map((cand) => {
+        if (cand.id === recordData.candidateId) {
+          const currentCalls = cand.callingDetails?.callHistory || [];
+          const updatedCallHistory = [newRecord, ...currentCalls];
+
+          const actLog = {
+            id: `act-${Date.now()}`,
+            action: `Telephonic Call Logged: ${recordData.disposition.replace(/_/g, ' ').toUpperCase()}`,
+            details: `Duration: ${Math.floor(recordData.durationSeconds / 60)}m ${recordData.durationSeconds % 60}s. Notes: ${recordData.notes || 'Screening updated.'}`,
+            performedBy: recordData.recruiterName || 'HR Recruiter',
+            timestamp: nowIso,
+            type: 'call' as const
+          };
+
+          const updated: Candidate = {
+            ...cand,
+            currentSalary: recordData.confirmedCurrentCtc || cand.currentSalary,
+            expectedSalary: recordData.confirmedExpectedCtc || cand.expectedSalary,
+            noticePeriod: recordData.confirmedNoticePeriod || cand.noticePeriod,
+            status: newCandidateStatus || cand.status,
+            lastUpdatedDate: nowIso,
+            callingDetails: {
+              totalCalls: (cand.callingDetails?.totalCalls || 0) + 1,
+              lastCallTime: nowIso,
+              lastDisposition: recordData.disposition,
+              lastCallNotes: recordData.notes,
+              nextFollowUpDate: recordData.followUpDate,
+              nextFollowUpTime: recordData.followUpTime,
+              callStatus: overallStatus,
+              confirmedCurrentSalary: recordData.confirmedCurrentCtc,
+              confirmedExpectedSalary: recordData.confirmedExpectedCtc,
+              confirmedNoticePeriod: recordData.confirmedNoticePeriod,
+              callHistory: updatedCallHistory
+            },
+            activityHistory: [actLog, ...cand.activityHistory]
+          };
+
+          if (selectedCandidate?.id === cand.id) {
+            setSelectedCandidate(updated);
+          }
+          return updated;
+        }
+        return cand;
+      })
+    );
+
+    // If candidate passed screening and schedule interview requested
+    if (recordData.promoteToInterview && recordData.interviewData) {
+      scheduleInterview({
+        candidateId: recordData.candidateId,
+        candidateName: recordData.candidateName,
+        candidateEmail: recordData.interviewData.candidateEmail || `${recordData.candidateName.toLowerCase().replace(/\s+/g, '.')}@example.com`,
+        candidatePhone: recordData.candidatePhone,
+        jobTitle: recordData.jobTitle,
+        jobId: recordData.jobId || 'job-general',
+        department: recordData.interviewData.department || 'Engineering',
+        round: (recordData.interviewData.round as any) || 'Round 1: Screening / Technical',
+        date: recordData.interviewData.date || new Date(Date.now() + 86400000).toISOString().split('T')[0],
+        startTime: recordData.interviewData.startTime || '11:00 AM',
+        endTime: recordData.interviewData.endTime || '12:00 PM',
+        durationMinutes: recordData.interviewData.durationMinutes || 60,
+        interviewerName: recordData.interviewData.interviewerName || 'Technical Lead',
+        interviewerRole: recordData.interviewData.interviewerRole || 'Senior Engineer',
+        interviewerEmail: recordData.interviewData.interviewerEmail || 'interviewer@urbangaon.com',
+        platform: recordData.interviewData.platform || 'google_meet',
+        meetingLink: recordData.interviewData.meetingLink || 'https://meet.google.com/ug-screening-call',
+        status: 'scheduled',
+        feedbackStatus: 'pending',
+        notes: `Scheduled following telephonic screening call on ${new Date().toLocaleDateString()}. Notes: ${recordData.notes}`,
+        atsMatchScore: 90
+      });
+    }
+
+    showToast(
+      'success',
+      'Call Record Saved',
+      `Call logged for ${recordData.candidateName} (${recordData.disposition.replace(/_/g, ' ')}). Synced with candidate file.`
+    );
+
+    return newRecord;
+  };
+
+  const deleteCallRecord = (callId: string) => {
+    setCallRecords((prev) => prev.filter((r) => r.id !== callId));
+    showToast('info', 'Call Log Removed', 'Call record deleted.');
+  };
+
+  const quickScheduleFollowUp = (candidateId: string, date: string, time: string, note?: string) => {
+    setCandidates((prev) =>
+      prev.map((c) => {
+        if (c.id === candidateId) {
+          const actLog = {
+            id: `act-${Date.now()}`,
+            action: 'Follow-up Call Scheduled',
+            details: `Scheduled on ${date} at ${time}. ${note ? `Note: ${note}` : ''}`,
+            performedBy: 'Telecaller',
+            timestamp: new Date().toISOString(),
+            type: 'call' as const
+          };
+          const updated: Candidate = {
+            ...c,
+            lastUpdatedDate: new Date().toISOString(),
+            callingDetails: {
+              totalCalls: c.callingDetails?.totalCalls || 0,
+              lastCallTime: c.callingDetails?.lastCallTime,
+              lastDisposition: 'connected_callback_requested',
+              lastCallNotes: note || c.callingDetails?.lastCallNotes,
+              nextFollowUpDate: date,
+              nextFollowUpTime: time,
+              callStatus: 'follow_up',
+              callHistory: c.callingDetails?.callHistory || []
+            },
+            activityHistory: [actLog, ...c.activityHistory]
+          };
+          if (selectedCandidate?.id === candidateId) {
+            setSelectedCandidate(updated);
+          }
+          return updated;
+        }
+        return c;
+      })
+    );
+    showToast('info', 'Follow-up Scheduled', `Follow-up call set for ${date} at ${time}.`);
   };
 
   // Calculate Real-Time Metrics
@@ -612,11 +1059,36 @@ export const RecruitmentProvider: React.FC<{ children: React.ReactNode }> = ({ c
     ]
   };
 
+  // Calling CRM Metrics
+  const totalCallsMade = callRecords.length;
+  const connectedCallsCount = callRecords.filter((r) =>
+    ['connected_interested', 'connected_screening_passed', 'connected_callback_requested', 'connected_not_interested', 'connected_screening_failed'].includes(r.disposition)
+  ).length;
+  const connectedRate = totalCallsMade > 0 ? Math.round((connectedCallsCount / totalCallsMade) * 100) : 0;
+  const qualifiedCallsCount = callRecords.filter((r) => r.disposition === 'connected_screening_passed').length;
+  const qualifiedRate = connectedCallsCount > 0 ? Math.round((qualifiedCallsCount / connectedCallsCount) * 100) : 0;
+  
+  const todayStr = new Date().toISOString().split('T')[0];
+  const followUpsTodayCount = candidates.filter((c) => c.callingDetails?.nextFollowUpDate === todayStr).length;
+  const pendingCallsCount = candidates.filter((c) => !c.callingDetails || c.callingDetails.totalCalls === 0).length;
+  const totalDurationMinutes = Math.round(callRecords.reduce((acc, r) => acc + (r.durationSeconds || 0), 0) / 60);
+
+  const callingMetrics: CallingMetrics = {
+    totalCallsMade,
+    connectedRate,
+    qualifiedRate,
+    followUpsTodayCount,
+    pendingCallsCount,
+    totalDurationMinutes
+  };
+
   return (
     <RecruitmentContext.Provider
       value={{
         candidates,
         jobs,
+        interviews,
+        callRecords,
         activeView,
         setActiveView,
         filters,
@@ -625,6 +1097,8 @@ export const RecruitmentProvider: React.FC<{ children: React.ReactNode }> = ({ c
         setSelectedCandidate,
         previewResumeCandidate,
         setPreviewResumeCandidate,
+        activeDialerCandidate,
+        setActiveDialerCandidate,
         isJobModalOpen,
         setIsJobModalOpen,
         isWebhookModalOpen,
@@ -633,6 +1107,7 @@ export const RecruitmentProvider: React.FC<{ children: React.ReactNode }> = ({ c
         showToast,
         removeToast,
         metrics,
+        callingMetrics,
         updateCandidateStatus,
         updateCandidateNotes,
         updateCandidateScorecard,
@@ -643,7 +1118,16 @@ export const RecruitmentProvider: React.FC<{ children: React.ReactNode }> = ({ c
         bulkUpdateStatus,
         exportToCSV,
         simulateIncomingApplication,
-        resetToDefaultData
+        resetToDefaultData,
+        scheduleInterview,
+        updateInterview,
+        rescheduleInterview,
+        cancelInterview,
+        markInterviewCompleted,
+        deleteInterview,
+        logCallRecord,
+        deleteCallRecord,
+        quickScheduleFollowUp
       }}
     >
       {children}
@@ -658,3 +1142,4 @@ export const useRecruitment = () => {
   }
   return context;
 };
+

@@ -1,15 +1,15 @@
 import React, { useState, useMemo } from 'react';
-import { 
-  Download, 
-  Save, 
-  CheckCircle2, 
-  FileText, 
-  Star, 
-  Sparkles, 
-  ThumbsUp, 
-  AlertTriangle, 
-  ChevronDown, 
-  ChevronUp, 
+import {
+  Download,
+  Save,
+  CheckCircle2,
+  FileText,
+  Star,
+  Sparkles,
+  ThumbsUp,
+  AlertTriangle,
+  ChevronDown,
+  ChevronUp,
   RotateCcw,
   UserCheck,
   Layers
@@ -236,16 +236,16 @@ export const InterviewEvaluationForm: React.FC<InterviewEvaluationFormProps> = (
     }
   ];
 
-  const filteredCriteria = activeTab === 'all' 
-    ? criteriaList 
+  const filteredCriteria = activeTab === 'all'
+    ? criteriaList
     : criteriaList.filter(c => c.id === activeTab);
 
   return (
     <div className="space-y-4 animate-fade-in text-slate-900 pb-4">
-      
+
       {/* 1. COMPACT EXECUTIVE HEADER BAR (NO VERTICAL WASTE) */}
       <div className="p-3.5 sm:p-4 rounded-2xl bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 text-white shadow-md flex flex-col md:flex-row md:items-center justify-between gap-3 border border-slate-700">
-        
+
         <div className="flex items-center gap-3">
           <div className="w-9 h-9 rounded-xl bg-blue-600/20 border border-blue-400/30 flex items-center justify-center text-blue-400 font-black text-sm shrink-0">
             ★
@@ -267,7 +267,7 @@ export const InterviewEvaluationForm: React.FC<InterviewEvaluationFormProps> = (
 
         {/* Live Score + Fast Actions */}
         <div className="flex items-center gap-2 self-end md:self-auto">
-          
+
           {/* Score Badge */}
           <div className="px-3 py-1.5 rounded-xl bg-slate-800 border border-slate-700 flex items-center gap-2">
             <span className="text-[10px] text-slate-400 font-bold uppercase">Score:</span>
@@ -298,21 +298,20 @@ export const InterviewEvaluationForm: React.FC<InterviewEvaluationFormProps> = (
 
       {/* 2. MAIN 2-COLUMN SPLIT SCREEN (ZERO SCROLL COCKPIT) */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
-        
+
         {/* LEFT COLUMN: 6 EVALUATION QUESTIONS (7 OF 12 COLS) */}
         <div className="lg:col-span-7 space-y-3">
-          
+
           {/* Criterion Filter Pills + Presets */}
           <div className="p-2 rounded-xl bg-white border border-slate-200 shadow-2xs flex items-center justify-between gap-2 overflow-x-auto">
             <div className="flex items-center gap-1 shrink-0">
               <button
                 type="button"
                 onClick={() => setActiveTab('all')}
-                className={`px-2.5 py-1 rounded-lg text-xs font-bold transition ${
-                  activeTab === 'all'
+                className={`px-2.5 py-1 rounded-lg text-xs font-bold transition ${activeTab === 'all'
                     ? 'bg-blue-600 text-white shadow-2xs'
                     : 'text-slate-600 hover:bg-slate-100'
-                }`}
+                  }`}
               >
                 All 6 Criteria
               </button>
@@ -321,11 +320,10 @@ export const InterviewEvaluationForm: React.FC<InterviewEvaluationFormProps> = (
                   type="button"
                   key={c.id}
                   onClick={() => setActiveTab(c.id as any)}
-                  className={`px-2 py-1 rounded-lg text-xs font-bold transition ${
-                    activeTab === c.id
+                  className={`px-2 py-1 rounded-lg text-xs font-bold transition ${activeTab === c.id
                       ? 'bg-blue-600 text-white shadow-2xs'
                       : 'text-slate-600 hover:bg-slate-100'
-                  }`}
+                    }`}
                 >
                   {c.num}
                 </button>
@@ -359,7 +357,7 @@ export const InterviewEvaluationForm: React.FC<InterviewEvaluationFormProps> = (
               const sectionAvg = ((currentSection.rp + currentSection.yt + currentSection.ss) / 3).toFixed(1);
 
               return (
-                <div 
+                <div
                   key={item.id}
                   className="p-3.5 rounded-2xl bg-white border border-slate-200 shadow-2xs space-y-2.5 hover:border-blue-300 transition-colors"
                 >
@@ -419,11 +417,10 @@ export const InterviewEvaluationForm: React.FC<InterviewEvaluationFormProps> = (
                                   >
                                     <Star
                                       size={14}
-                                      className={`transition-colors ${
-                                        isFilled
+                                      className={`transition-colors ${isFilled
                                           ? 'text-amber-400 fill-amber-400 drop-shadow-[0_1px_2px_rgba(251,191,36,0.3)]'
                                           : 'text-slate-300 hover:text-amber-300'
-                                      }`}
+                                        }`}
                                     />
                                   </button>
                                 );
@@ -457,10 +454,10 @@ export const InterviewEvaluationForm: React.FC<InterviewEvaluationFormProps> = (
 
         {/* RIGHT COLUMN: LOGISTICS, 360 FEEDBACK & DECISION (5 OF 12 COLS) */}
         <div className="lg:col-span-5 space-y-3 max-h-[calc(94vh-180px)] overflow-y-auto pr-1">
-          
+
           {/* A. COLLAPSIBLE LOGISTICS ACCORDION */}
           <div className="p-3.5 rounded-2xl bg-white border border-slate-200 shadow-2xs space-y-2">
-            <div 
+            <div
               onClick={() => setShowLogistics(!showLogistics)}
               className="flex items-center justify-between cursor-pointer"
             >
@@ -519,7 +516,7 @@ export const InterviewEvaluationForm: React.FC<InterviewEvaluationFormProps> = (
 
           {/* B. 360 FEEDBACK: 3 POSITIVES & 3 NEGATIVES */}
           <div className="p-3.5 rounded-2xl bg-white border border-slate-200 shadow-2xs space-y-3">
-            
+
             {/* 3 Positives */}
             <div className="space-y-1.5">
               <div className="flex items-center justify-between">
@@ -597,11 +594,10 @@ export const InterviewEvaluationForm: React.FC<InterviewEvaluationFormProps> = (
                     type="button"
                     key={item.id}
                     onClick={() => setEvaluation({ ...evaluation, overallRecommendation: item.id as any })}
-                    className={`p-2 rounded-xl border text-left transition flex items-center justify-between cursor-pointer ${
-                      isSelected
+                    className={`p-2 rounded-xl border text-left transition flex items-center justify-between cursor-pointer ${isSelected
                         ? item.color
                         : 'border-slate-200 bg-slate-50 hover:bg-slate-100 text-slate-700'
-                    }`}
+                      }`}
                   >
                     <div>
                       <div className="text-xs font-bold">{item.label}</div>

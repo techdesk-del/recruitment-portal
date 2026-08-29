@@ -85,7 +85,7 @@ export interface ActivityLog {
   details: string;
   performedBy: string;
   timestamp: string;
-  type: 'status' | 'note' | 'scorecard' | 'interview' | 'ingestion';
+  type: 'status' | 'note' | 'scorecard' | 'interview' | 'ingestion' | 'call';
 }
 
 export interface Candidate {
@@ -117,6 +117,7 @@ export interface Candidate {
   resumeUrl?: string;
   resumeData: ResumeData;
   scorecard?: Scorecard;
+  callingDetails?: CandidateCallingDetails;
   activityHistory: ActivityLog[];
 }
 
@@ -167,3 +168,105 @@ export interface ToastMessage {
   message: string;
   timestamp: string;
 }
+
+export type InterviewRoundType = 
+  | 'Round 1: Screening / Technical'
+  | 'Round 2: System Design & Coding'
+  | 'Round 3: HR & Culture Fit'
+  | 'Round 4: CEO / Leadership Round';
+
+export type InterviewPlatform = 'google_meet' | 'zoom' | 'teams' | 'onsite' | 'phone';
+
+export type InterviewStatus = 'scheduled' | 'confirmed' | 'in_progress' | 'completed' | 'rescheduled' | 'cancelled';
+
+export interface InterviewSchedule {
+  id: string;
+  candidateId: string;
+  candidateName: string;
+  candidateEmail: string;
+  candidatePhone?: string;
+  candidateLocation?: string;
+  candidateAvatar?: string;
+  jobTitle: string;
+  jobId: string;
+  department: string;
+  round: InterviewRoundType;
+  date: string; // YYYY-MM-DD (e.g. 2026-08-29)
+  startTime: string; // e.g. "10:30 AM" or "10:30"
+  endTime: string; // e.g. "11:30 AM" or "11:30"
+  durationMinutes?: number; // e.g. 45 or 60
+  interviewerName: string;
+  interviewerRole: string;
+  interviewerEmail: string;
+  platform: InterviewPlatform;
+  meetingLink?: string;
+  meetingId?: string;
+  meetingPasscode?: string;
+  location?: string;
+  status: InterviewStatus;
+  feedbackStatus: 'pending' | 'submitted';
+  notes?: string;
+  atsMatchScore?: number;
+  tags?: string[];
+  createdAt: string;
+  updatedAt: string;
+}
+
+// Candidate Telecalling & Telephonic Screening Types
+export type CallDisposition =
+  | 'connected_interested'            // Connected - Interested & Qualified
+  | 'connected_screening_passed'       // Screening Passed - Move to R1 Interview
+  | 'connected_callback_requested'     // Call Back Later / Follow-up Scheduled
+  | 'connected_not_interested'         // Connected - Not Interested / Declined
+  | 'connected_screening_failed'       // Screening Failed - Rejected
+  | 'ringing_no_answer'               // Ringing / Not Picked Up
+  | 'busy'                            // Busy / Call Waiting
+  | 'switched_off'                    // Switched Off / Out of Coverage
+  | 'wrong_number';                   // Wrong Number / Invalid
+
+export type CallingOverallStatus =
+  | 'pending'
+  | 'in_progress'
+  | 'connected'
+  | 'follow_up'
+  | 'qualified'
+  | 'disqualified'
+  | 'unreachable';
+
+export interface CallRecord {
+  id: string;
+  candidateId: string;
+  candidateName: string;
+  candidatePhone: string;
+  jobTitle: string;
+  jobId?: string;
+  recruiterName: string;
+  callTime: string; // ISO string
+  durationSeconds: number; // e.g. 185 (3m 5s)
+  disposition: CallDisposition;
+  notes: string;
+  followUpDate?: string; // YYYY-MM-DD
+  followUpTime?: string; // e.g. "03:30 PM"
+  confirmedCurrentCtc?: string;
+  confirmedExpectedCtc?: string;
+  confirmedNoticePeriod?: string;
+  relocationPreference?: 'Immediate Relocate' | 'Prefers Remote' | 'Current City Only' | 'Open to Hybrid';
+  communicationRating?: number; // 1-5
+  technicalFitRating?: number; // 1-5
+  tags?: string[];
+}
+
+export interface CandidateCallingDetails {
+  totalCalls: number;
+  lastCallTime?: string;
+  lastDisposition?: CallDisposition;
+  lastCallNotes?: string;
+  nextFollowUpDate?: string;
+  nextFollowUpTime?: string;
+  callStatus: CallingOverallStatus;
+  confirmedCurrentSalary?: string;
+  confirmedExpectedSalary?: string;
+  confirmedNoticePeriod?: string;
+  callHistory: CallRecord[];
+}
+

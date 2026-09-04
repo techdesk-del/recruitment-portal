@@ -39,6 +39,9 @@ interface RecruitmentContextType {
   setFilters: React.Dispatch<React.SetStateAction<FilterState>>;
   selectedCandidate: Candidate | null;
   setSelectedCandidate: (candidate: Candidate | null) => void;
+  candidateModalTab: 'profile' | 'resume' | 'scorecard' | 'calling' | 'timeline';
+  setCandidateModalTab: (tab: 'profile' | 'resume' | 'scorecard' | 'calling' | 'timeline') => void;
+  openCandidateModal: (candidate: Candidate, tab?: 'profile' | 'resume' | 'scorecard' | 'calling' | 'timeline') => void;
   previewResumeCandidate: Candidate | null;
   setPreviewResumeCandidate: (candidate: Candidate | null) => void;
   activeDialerCandidate: Candidate | null;
@@ -133,11 +136,17 @@ export const RecruitmentProvider: React.FC<{ children: React.ReactNode }> = ({ c
 
   const [activeView, setActiveView] = useState<string>('dashboard');
   const [selectedCandidate, setSelectedCandidate] = useState<Candidate | null>(null);
+  const [candidateModalTab, setCandidateModalTab] = useState<'profile' | 'resume' | 'scorecard' | 'calling' | 'timeline'>('profile');
   const [previewResumeCandidate, setPreviewResumeCandidate] = useState<Candidate | null>(null);
   const [activeDialerCandidate, setActiveDialerCandidate] = useState<Candidate | null>(null);
   const [isJobModalOpen, setIsJobModalOpen] = useState(false);
   const [isWebhookModalOpen, setIsWebhookModalOpen] = useState(false);
   const [toasts, setToasts] = useState<ToastMessage[]>([]);
+
+  const openCandidateModal = (candidate: Candidate, tab: 'profile' | 'resume' | 'scorecard' | 'calling' | 'timeline' = 'profile') => {
+    setSelectedCandidate(candidate);
+    setCandidateModalTab(tab);
+  };
 
   const [filters, setFilters] = useState<FilterState>({
     searchQuery: '',
@@ -865,6 +874,9 @@ export const RecruitmentProvider: React.FC<{ children: React.ReactNode }> = ({ c
         overallStatus = 'connected';
         newCandidateStatus = 'screening';
         break;
+      case 'connected_hold':
+        overallStatus = 'on_hold';
+        break;
       case 'connected_callback_requested':
         overallStatus = 'follow_up';
         break;
@@ -1062,7 +1074,7 @@ export const RecruitmentProvider: React.FC<{ children: React.ReactNode }> = ({ c
   // Calling CRM Metrics
   const totalCallsMade = callRecords.length;
   const connectedCallsCount = callRecords.filter((r) =>
-    ['connected_interested', 'connected_screening_passed', 'connected_callback_requested', 'connected_not_interested', 'connected_screening_failed'].includes(r.disposition)
+    ['connected_interested', 'connected_screening_passed', 'connected_hold', 'connected_callback_requested', 'connected_not_interested', 'connected_screening_failed'].includes(r.disposition)
   ).length;
   const connectedRate = totalCallsMade > 0 ? Math.round((connectedCallsCount / totalCallsMade) * 100) : 0;
   const qualifiedCallsCount = callRecords.filter((r) => r.disposition === 'connected_screening_passed').length;
@@ -1095,6 +1107,9 @@ export const RecruitmentProvider: React.FC<{ children: React.ReactNode }> = ({ c
         setFilters,
         selectedCandidate,
         setSelectedCandidate,
+        candidateModalTab,
+        setCandidateModalTab,
+        openCandidateModal,
         previewResumeCandidate,
         setPreviewResumeCandidate,
         activeDialerCandidate,

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   X, 
   Download, 
@@ -23,11 +23,15 @@ import { useRecruitment } from '../context/RecruitmentContext';
 import { CandidateStatus, Scorecard, CandidateSource } from '../types';
 import { PortalLogo } from './PortalLogo';
 import { InterviewEvaluationForm } from './InterviewEvaluationForm';
+import { CandidateCallTab } from './CandidateCallTab';
 
 export const CandidateProfileModal: React.FC = () => {
   const { 
     selectedCandidate, 
     setSelectedCandidate, 
+    candidateModalTab,
+    setCandidateModalTab,
+    callRecords,
     updateCandidateStatus, 
     updateCandidateNotes, 
     updateCandidateScorecard, 
@@ -42,9 +46,20 @@ export const CandidateProfileModal: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'profile' | 'resume' | 'scorecard' | 'calling' | 'timeline'>('profile');
   const [noteText, setNoteText] = useState(selectedCandidate?.notes || '');
 
+  useEffect(() => {
+    if (candidateModalTab) {
+      setActiveTab(candidateModalTab);
+    }
+  }, [candidateModalTab, selectedCandidate?.id]);
+
   if (!selectedCandidate) return null;
 
   const cand = selectedCandidate;
+
+  const candidateTotalCalls = [
+    ...callRecords.filter((r) => r.candidateId === cand.id || r.candidateName.toLowerCase() === cand.name.toLowerCase()),
+    ...(cand.callingDetails?.callHistory || [])
+  ].filter((c, i, s) => i === s.findIndex((x) => x.id === c.id)).length;
 
   const candScheduledInterview = interviews.find(
     (i) => (i.candidateId === cand.id || i.candidateName === cand.name) && i.status !== 'cancelled'
@@ -107,14 +122,17 @@ export const CandidateProfileModal: React.FC = () => {
           <div className="flex items-center gap-2 self-end sm:self-center">
             <button
               onClick={() => {
-                setActiveDialerCandidate(cand);
-                setSelectedCandidate(null);
-                setActiveView('calling');
+                setActiveTab('calling');
+                setCandidateModalTab('calling');
               }}
-              className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow-md transition active:scale-95 cursor-pointer"
+              className={`flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-white font-bold text-xs shadow-md transition active:scale-95 cursor-pointer ${
+                activeTab === 'calling'
+                  ? 'bg-emerald-700 ring-2 ring-emerald-300'
+                  : 'bg-emerald-600 hover:bg-emerald-700'
+              }`}
             >
               <PhoneCall size={14} />
-              <span>Call Candidate</span>
+              <span>{activeTab === 'calling' ? 'Calling Active' : 'Call Candidate'}</span>
             </button>
 
             {candScheduledInterview ? (
@@ -224,7 +242,10 @@ export const CandidateProfileModal: React.FC = () => {
             Candidate Profile
           </button>
           <button
-            onClick={() => setActiveTab('calling')}
+            onClick={() => {
+              setActiveTab('calling');
+              setCandidateModalTab('calling');
+            }}
             className={`px-4 py-3 text-xs font-bold border-b-2 transition flex items-center gap-1.5 ${
               activeTab === 'calling'
                 ? 'border-blue-600 text-blue-600'
@@ -232,7 +253,7 @@ export const CandidateProfileModal: React.FC = () => {
             }`}
           >
             <PhoneCall size={13} />
-            Calling & Screening ({cand.callingDetails?.callHistory?.length || 0})
+            Calling & Screening ({candidateTotalCalls})
           </button>
           <button
             onClick={() => setActiveTab('resume')}
@@ -344,126 +365,7 @@ export const CandidateProfileModal: React.FC = () => {
 
           {/* TAB: CALLING & TELE-SCREENING DOSSIER */}
           {activeTab === 'calling' && (
-            <div className="space-y-6">
-              
-              {/* Top Call Status Card */}
-              <div className="p-5 rounded-2xl bg-white border border-slate-200 shadow-2xs flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                <div className="flex items-center gap-3.5">
-                  <div className="w-12 h-12 rounded-2xl bg-blue-100 text-blue-700 flex items-center justify-center font-bold">
-                    <PhoneCall size={22} />
-                  </div>
-                  <div>
-                    <div className="flex items-center gap-2">
-                      <h3 className="font-bold text-slate-900 text-sm">Telephonic Screening Status</h3>
-                      <span className="text-xs font-bold px-2.5 py-0.5 rounded-full bg-blue-50 text-blue-700 border border-blue-200">
-                        {cand.callingDetails?.callStatus ? cand.callingDetails.callStatus.toUpperCase() : 'PENDING 1ST CALL'}
-                      </span>
-                    </div>
-                    <p className="text-xs text-slate-500 mt-0.5">
-                      Total Calls: <strong>{cand.callingDetails?.totalCalls || 0}</strong> • Candidate Phone:{' '}
-                      <strong className="text-slate-800">{cand.phone}</strong>
-                    </p>
-                  </div>
-                </div>
-
-                <button
-                  onClick={() => {
-                    setActiveDialerCandidate(cand);
-                    setSelectedCandidate(null);
-                    setActiveView('calling');
-                  }}
-                  className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs shadow-md transition active:scale-95 cursor-pointer"
-                >
-                  <PhoneCall size={14} />
-                  <span>Start Live Call Now</span>
-                </button>
-              </div>
-
-              {/* Verified Screening Checklist Details */}
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                <div className="p-3.5 rounded-xl bg-white border border-slate-200 shadow-2xs">
-                  <span className="text-[11px] text-slate-500 font-semibold block">Confirmed Current CTC</span>
-                  <p className="text-base font-bold text-slate-900 mt-1">
-                    {cand.callingDetails?.confirmedCurrentSalary || cand.currentSalary || 'N/A'}
-                  </p>
-                </div>
-                <div className="p-3.5 rounded-xl bg-white border border-slate-200 shadow-2xs">
-                  <span className="text-[11px] text-slate-500 font-semibold block">Confirmed Expected CTC</span>
-                  <p className="text-base font-bold text-blue-700 mt-1">
-                    {cand.callingDetails?.confirmedExpectedSalary || cand.expectedSalary}
-                  </p>
-                </div>
-                <div className="p-3.5 rounded-xl bg-white border border-slate-200 shadow-2xs">
-                  <span className="text-[11px] text-slate-500 font-semibold block">Verified Notice Period</span>
-                  <p className="text-base font-bold text-emerald-700 mt-1">
-                    {cand.callingDetails?.confirmedNoticePeriod || cand.noticePeriod}
-                  </p>
-                </div>
-                <div className="p-3.5 rounded-xl bg-white border border-slate-200 shadow-2xs">
-                  <span className="text-[11px] text-slate-500 font-semibold block">Next Scheduled Callback</span>
-                  <p className="text-xs font-bold text-purple-700 mt-1">
-                    {cand.callingDetails?.nextFollowUpDate 
-                      ? `${cand.callingDetails.nextFollowUpDate} @ ${cand.callingDetails.nextFollowUpTime || '04:00 PM'}` 
-                      : 'None Scheduled'}
-                  </p>
-                </div>
-              </div>
-
-              {/* Call History Timeline for this Candidate */}
-              <div className="p-6 rounded-2xl bg-white border border-slate-200 shadow-2xs space-y-4">
-                <h3 className="text-xs font-bold text-slate-700 uppercase tracking-wider">
-                  Past Telephonic Call Records ({cand.callingDetails?.callHistory?.length || 0})
-                </h3>
-
-                {(!cand.callingDetails?.callHistory || cand.callingDetails.callHistory.length === 0) ? (
-                  <div className="text-center py-8 text-slate-400 text-xs">
-                    <p>No phone calls logged for this candidate yet.</p>
-                    <button
-                      onClick={() => {
-                        setActiveDialerCandidate(cand);
-                        setSelectedCandidate(null);
-                        setActiveView('calling');
-                      }}
-                      className="mt-2 text-blue-600 font-bold hover:underline inline-flex items-center gap-1"
-                    >
-                      <PhoneCall size={12} /> Launch Telecaller to connect
-                    </button>
-                  </div>
-                ) : (
-                  <div className="space-y-3">
-                    {cand.callingDetails.callHistory.map((call) => {
-                      const mins = Math.floor(call.durationSeconds / 60);
-                      const secs = call.durationSeconds % 60;
-                      return (
-                        <div key={call.id} className="p-4 rounded-xl bg-slate-50 border border-slate-200 text-xs space-y-2">
-                          <div className="flex flex-wrap items-center justify-between gap-2">
-                            <div className="flex items-center gap-2">
-                              <span className="font-bold text-slate-900">
-                                Disposition: {call.disposition.replace(/_/g, ' ').toUpperCase()}
-                              </span>
-                              <span className="text-[11px] font-semibold text-blue-700 bg-blue-50 px-2 py-0.2 rounded border border-blue-200">
-                                ⏱ {mins}m {secs}s
-                              </span>
-                            </div>
-                            <span className="text-slate-400 font-normal">
-                              {new Date(call.callTime).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}
-                            </span>
-                          </div>
-
-                          <p className="text-slate-700 font-medium">"{call.notes}"</p>
-                          <div className="text-[10px] text-slate-400 flex items-center gap-3">
-                            <span>Logged by: <strong>{call.recruiterName}</strong></span>
-                            {call.communicationRating && <span>• Comm Rating: <strong>{call.communicationRating}/5 ⭐</strong></span>}
-                            {call.technicalFitRating && <span>• Tech Fit: <strong>{call.technicalFitRating}/5 ⭐</strong></span>}
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
-                )}
-              </div>
-
-            </div>
+            <CandidateCallTab candidate={cand} />
           )}
 
           {/* TAB 2: LIVE RESUME */}

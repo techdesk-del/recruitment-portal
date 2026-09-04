@@ -26,6 +26,7 @@ export const CandidateTable: React.FC = () => {
     setFilters, 
     updateCandidateStatus, 
     setSelectedCandidate, 
+    openCandidateModal,
     setPreviewResumeCandidate, 
     setActiveDialerCandidate,
     downloadResume, 
@@ -376,11 +377,10 @@ export const CandidateTable: React.FC = () => {
                         <div className="flex items-center justify-end gap-1.5">
                           <button
                             onClick={() => {
-                              setActiveDialerCandidate(cand);
-                              setActiveView('calling');
+                              openCandidateModal(cand, 'calling');
                             }}
-                            title="Call Candidate (Launch Telecaller)"
-                            className="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-blue-50 hover:bg-blue-100 text-blue-700 text-[11px] font-bold border border-blue-200 transition"
+                            title="Call Candidate & Screening Log"
+                            className="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-700 text-[11px] font-bold border border-emerald-200 transition cursor-pointer active:scale-95"
                           >
                             <PhoneCall size={12} />
                             <span>Call</span>

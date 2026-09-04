@@ -216,6 +216,7 @@ export interface InterviewSchedule {
 export type CallDisposition =
   | 'connected_interested'            // Connected - Interested & Qualified
   | 'connected_screening_passed'       // Screening Passed - Move to R1 Interview
+  | 'connected_hold'                  // Connected - Kept on Hold / Decision Pending
   | 'connected_callback_requested'     // Call Back Later / Follow-up Scheduled
   | 'connected_not_interested'         // Connected - Not Interested / Declined
   | 'connected_screening_failed'       // Screening Failed - Rejected
@@ -229,6 +230,7 @@ export type CallingOverallStatus =
   | 'in_progress'
   | 'connected'
   | 'follow_up'
+  | 'on_hold'
   | 'qualified'
   | 'disqualified'
   | 'unreachable';

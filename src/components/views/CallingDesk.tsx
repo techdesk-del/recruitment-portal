@@ -43,6 +43,54 @@ import { Flag } from '../common/Flag';
 import { COUNTRIES, findCountry, CountryItem } from '../../data/countries';
 import brandLogoJpg from '../../assets/urbangaon-brand-logo.jpg';
 import brandIconPng from '../../assets/urbangaon-icon.png';
+const CITY_METADATA_MAP: Record<string, { state: string; defaultPin: string; cleanName: string }> = {
+  mumbai: { state: 'Maharashtra', defaultPin: '400001', cleanName: 'Mumbai' },
+  pune: { state: 'Maharashtra', defaultPin: '411001', cleanName: 'Pune' },
+  bengaluru: { state: 'Karnataka', defaultPin: '560001', cleanName: 'Bengaluru' },
+  bangalore: { state: 'Karnataka', defaultPin: '560001', cleanName: 'Bengaluru' },
+  delhi: { state: 'Delhi', defaultPin: '110001', cleanName: 'New Delhi' },
+  'new delhi': { state: 'Delhi', defaultPin: '110001', cleanName: 'New Delhi' },
+  gurgaon: { state: 'Haryana', defaultPin: '122001', cleanName: 'Gurugram' },
+  gurugram: { state: 'Haryana', defaultPin: '122001', cleanName: 'Gurugram' },
+  noida: { state: 'Uttar Pradesh', defaultPin: '201301', cleanName: 'Noida' },
+  hyderabad: { state: 'Telangana', defaultPin: '500001', cleanName: 'Hyderabad' },
+  chennai: { state: 'Tamil Nadu', defaultPin: '600001', cleanName: 'Chennai' },
+  kolkata: { state: 'West Bengal', defaultPin: '700001', cleanName: 'Kolkata' },
+  jaipur: { state: 'Rajasthan', defaultPin: '302001', cleanName: 'Jaipur' },
+  ahmedabad: { state: 'Gujarat', defaultPin: '380001', cleanName: 'Ahmedabad' },
+  kochi: { state: 'Kerala', defaultPin: '682001', cleanName: 'Kochi' },
+  cochin: { state: 'Kerala', defaultPin: '682001', cleanName: 'Kochi' },
+  trivandrum: { state: 'Kerala', defaultPin: '695001', cleanName: 'Trivandrum' },
+  thiruvananthapuram: { state: 'Kerala', defaultPin: '695001', cleanName: 'Trivandrum' },
+  chandigarh: { state: 'Chandigarh', defaultPin: '160001', cleanName: 'Chandigarh' },
+  indore: { state: 'Madhya Pradesh', defaultPin: '452001', cleanName: 'Indore' },
+  bhopal: { state: 'Madhya Pradesh', defaultPin: '462001', cleanName: 'Bhopal' },
+  lucknow: { state: 'Uttar Pradesh', defaultPin: '226001', cleanName: 'Lucknow' },
+};
+
+export const parseLocationDetails = (locationRaw?: string) => {
+  if (!locationRaw) {
+    return { city: 'Jaipur', state: 'Rajasthan', pin: '302001', address: 'Jaipur, Rajasthan, India' };
+  }
+
+  // Remove trailing work-mode tags like / Remote, / Hybrid, / Onsite, / NCR
+  const cleaned = locationRaw
+    .replace(/\s*\/\s*(Remote|Hybrid|Onsite|NCR)/gi, '')
+    .replace(/\b(India)\b/gi, '')
+    .trim();
+
+  const parts = cleaned.split(',').map((s) => s.trim()).filter(Boolean);
+  const candidateCityRaw = parts[0] || 'Jaipur';
+  const cityKey = candidateCityRaw.toLowerCase();
+
+  const matched = CITY_METADATA_MAP[cityKey];
+  const city = matched ? matched.cleanName : candidateCityRaw;
+  const state = parts[1] || (matched ? matched.state : 'Rajasthan');
+  const pin = matched ? matched.defaultPin : '302001';
+  const address = `${city}, ${state}, India`;
+
+  return { city, state, pin, address };
+};
 
 export const CallingDesk: React.FC = () => {
   const { 
@@ -156,6 +204,17 @@ export const CallingDesk: React.FC = () => {
   const [quickFTime, setQuickFTime] = useState('04:00 PM');
   const [quickFNote, setQuickFNote] = useState('');
 
+  const handleCityChange = (newCity: string) => {
+    setConfirmedLocation(newCity);
+    const key = newCity.trim().toLowerCase();
+    const meta = CITY_METADATA_MAP[key];
+    if (meta) {
+      setStateName(meta.state);
+      setPinCode(meta.defaultPin);
+      setAddress(`${meta.cleanName}, ${meta.state}, India`);
+    }
+  };
+
   // When active dialer candidate is set, prefill screening form
   useEffect(() => {
     if (activeDialerCandidate) {
@@ -176,7 +235,11 @@ export const CallingDesk: React.FC = () => {
         setLastName(parts[parts.length - 1] || '');
       }
 
-      setSalutation('Mr.');
+      // Gender/Salutation detection based on common female Indian names
+      const femaleNames = ['priya', 'ananya', 'sneha', 'neha', 'kavita', 'ritu', 'pooja', 'shreya', 'divya', 'swati', 'tanvi', 'megha', 'ankita', 'aditi', 'deepa', 'roshni', 'sunita', 'preeti', 'aarti', 'jyoti', 'simran'];
+      const isFemale = femaleNames.includes((parts[0] || '').toLowerCase());
+      setSalutation(isFemale ? 'Ms.' : 'Mr.');
+
       // Country & International Dial Code initialization
       setCountry('India');
       setCountryIso('in');
@@ -189,9 +252,13 @@ export const CallingDesk: React.FC = () => {
       const cleanedPhone = (activeDialerCandidate.phone || '').replace(/[^0-9]/g, '');
       setMobileNumber(cleanedPhone.length >= 10 ? cleanedPhone.slice(-10) : (activeDialerCandidate.phone || ''));
       setEmailAddress(activeDialerCandidate.email || '');
-      setAddress(activeDialerCandidate.location ? `${activeDialerCandidate.location}, Tech Corridor` : 'House / Flat No., Street, Landmark...');
-      setPinCode('302006');
-      setStateName('Rajasthan');
+
+      // Dynamic Location Parsing (City, State, Pin, Address) - Sync with candidate profile
+      const locDetails = parseLocationDetails(activeDialerCandidate.location);
+      setConfirmedLocation(activeDialerCandidate.callingDetails?.confirmedLocation || locDetails.city);
+      setStateName(locDetails.state);
+      setPinCode(locDetails.pin);
+      setAddress(locDetails.address);
 
       setConfirmedCurrentCtc(activeDialerCandidate.currentSalary || '');
       setConfirmedExpectedCtc(activeDialerCandidate.expectedSalary || '');
@@ -203,11 +270,6 @@ export const CallingDesk: React.FC = () => {
         'Better Career Growth / Challenging Role'
       );
       setCustomReasonForLeaving('');
-      setConfirmedLocation(
-        activeDialerCandidate.callingDetails?.confirmedLocation ||
-        activeDialerCandidate.location ||
-        'Bengaluru'
-      );
       setCustomLocation('');
       setTentativeDate(
         activeDialerCandidate.callingDetails?.tentativeInterviewDate ||
@@ -241,7 +303,7 @@ export const CallingDesk: React.FC = () => {
       : reasonForLeaving;
     const finalLocation = confirmedLocation === 'Other' 
       ? (customLocation.trim() || activeDialerCandidate.location) 
-      : confirmedLocation;
+      : (confirmedLocation && stateName ? `${confirmedLocation}, ${stateName}` : confirmedLocation);
 
     const formattedPhone = mobileNumber.length === 10 ? `+91 ${mobileNumber}` : (mobileNumber || activeDialerCandidate.phone);
 
@@ -1021,11 +1083,17 @@ export const CallingDesk: React.FC = () => {
                   className="w-9 h-9 rounded-full object-cover shrink-0 shadow-xs border border-slate-100" 
                 />
                 <div>
-                  <h3 className="text-sm sm:text-base font-bold text-slate-900 tracking-tight leading-tight">
-                    UrbanGaon Customer Enquiry Form
+                  <h3 className="text-sm sm:text-base font-bold text-slate-900 tracking-tight leading-tight font-titillium">
+                    Candidate Calling & Screening Form
                   </h3>
-                  <p className="text-[11px] sm:text-xs text-slate-400 font-normal">
-                    Official real estate application with real-time international flag & dial code auto-sync
+                  <p className="text-[11px] sm:text-xs text-slate-500 font-normal font-titillium">
+                    {activeDialerCandidate ? (
+                      <span>
+                        Candidate: <strong className="text-slate-800 font-bold">{activeDialerCandidate.name}</strong> • Role: <strong className="text-blue-700 font-bold">{activeDialerCandidate.jobAppliedFor}</strong> • Live ATS Sync
+                      </span>
+                    ) : (
+                      'Official recruitment evaluation dossier with real-time ATS auto-sync'
+                    )}
                   </p>
                 </div>
               </div>
@@ -1169,11 +1237,19 @@ export const CallingDesk: React.FC = () => {
                     </label>
                     <input
                       type="text"
+                      list="screening-city-datalist"
                       value={confirmedLocation}
-                      onChange={(e) => setConfirmedLocation(e.target.value)}
-                      placeholder="Jaipur"
+                      onChange={(e) => handleCityChange(e.target.value)}
+                      placeholder="e.g. Mumbai, Bengaluru, Jaipur"
                       className="w-full px-3 py-2 rounded-xl bg-white border border-slate-200 text-slate-900 font-medium focus:outline-none focus:ring-2 focus:ring-[#3B8CFF] text-xs font-titillium"
                     />
+                    <datalist id="screening-city-datalist">
+                      {Object.values(CITY_METADATA_MAP).map((c) => (
+                        <option key={c.cleanName} value={c.cleanName}>
+                          {c.cleanName} ({c.state})
+                        </option>
+                      ))}
+                    </datalist>
                   </div>
 
                   <div>

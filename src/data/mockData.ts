@@ -1,5 +1,36 @@
 import { Candidate, JobPosting, InterviewSchedule, CallRecord } from '../types';
 
+export interface EmployeeReferrer {
+  id: string;
+  name: string;
+  employeeId: string;
+  designation: 'SDE-3' | 'CEO' | string;
+  department: string;
+  email: string;
+  avatarColor: string;
+}
+
+export const REFERRING_EMPLOYEES: EmployeeReferrer[] = [
+  {
+    id: 'emp-sde3',
+    name: 'Akash Das',
+    employeeId: 'EMP-1042',
+    designation: 'SDE-3',
+    department: 'Core Platform Engineering',
+    email: 'akash.das@urbangaon.com',
+    avatarColor: 'bg-blue-600'
+  },
+  {
+    id: 'emp-ceo',
+    name: 'Vikram Singhania',
+    employeeId: 'EMP-1001',
+    designation: 'CEO',
+    department: 'Executive Leadership',
+    email: 'vikram.singhania@urbangaon.com',
+    avatarColor: 'bg-amber-600'
+  }
+];
+
 export const INITIAL_JOBS: JobPosting[] = [
   {
     id: 'job-fe-01',
@@ -446,7 +477,17 @@ export const INITIAL_CANDIDATES: Candidate[] = [
     phone: '+91 99283 71625',
     location: 'Jaipur / NCR',
     source: 'referral',
-    sourceId: 'REF-EMP-041',
+    sourceId: 'REF-EMP-1001',
+    referralDetails: {
+      employeeName: 'Vikram Singhania',
+      employeeId: 'EMP-1001',
+      designation: 'CEO',
+      department: 'Executive Leadership',
+      email: 'vikram.singhania@urbangaon.com',
+      dateReferred: '2026-08-21',
+      bonusStatus: 'Approved',
+      notes: 'Direct referral by CEO. Strategic hire for consumer FinTech & growth initiatives.'
+    },
     jobAppliedFor: 'Senior Product Manager (FinTech/Growth)',
     jobId: 'job-pm-03',
     department: 'Product',
@@ -690,6 +731,228 @@ export const INITIAL_CANDIDATES: Candidate[] = [
         performedBy: 'Priya Sharma',
         timestamp: '2026-08-24T18:00:00Z',
         type: 'status'
+      }
+    ]
+  },
+  {
+    id: 'cand-009',
+    name: 'Tanvi Kashyap',
+    email: 'tanvi.kashyap@cloudstack.io',
+    phone: '+91 98118 45920',
+    location: 'Bengaluru / Hybrid',
+    source: 'referral',
+    sourceId: 'REF-EMP-1042',
+    referralDetails: {
+      employeeName: 'Akash Das',
+      employeeId: 'EMP-1042',
+      designation: 'SDE-3',
+      department: 'Core Platform Engineering',
+      email: 'akash.das@urbangaon.com',
+      dateReferred: '2026-08-25',
+      bonusStatus: 'In Review',
+      notes: 'Referred by Akash Das (SDE-3). Strong distributed systems background, excellent in Go, Kafka, and Kubernetes.'
+    },
+    jobAppliedFor: 'Lead Backend Developer (Node.js & Go)',
+    jobId: 'job-be-02',
+    department: 'Engineering',
+    appliedDate: '2026-08-25T09:30:00Z',
+    lastUpdatedDate: '2026-08-26T14:00:00Z',
+    status: 'shortlisted',
+    atsMatchScore: 95,
+    rating: 5,
+    experienceYears: 5.4,
+    currentCompany: 'Razorpay Software',
+    currentDesignation: 'Senior Backend Engineer',
+    currentSalary: '₹26 LPA',
+    expectedSalary: '₹34 - 38 LPA',
+    noticePeriod: '30 Days',
+    recruiterAssigned: 'Priya Sharma',
+    tags: ['Golang', 'Node.js', 'Distributed Systems', 'Kafka', 'PostgreSQL', 'Microservices'],
+    notes: 'Internal referral by SDE-3 Akash Das. Exceptional technical pedigree from Razorpay Core Payments.',
+    profileUrl: 'https://linkedin.com/in/tanvi-kashyap-tech',
+    resumeData: {
+      summary: 'Senior Backend Engineer with 5.4+ years architecting fault-tolerant financial microservices in Go and Node.js. Deep expertise in distributed message queues and high-throughput transactional databases.',
+      skills: ['Golang', 'Node.js', 'PostgreSQL', 'Apache Kafka', 'Redis Clustering', 'Docker & Kubernetes', 'gRPC', 'AWS'],
+      experience: [
+        {
+          company: 'Razorpay Software',
+          role: 'Senior Backend Engineer',
+          duration: 'Jul 2022 - Present',
+          location: 'Bengaluru, India',
+          highlights: [
+            'Engineered settlement reconciliation service handling 18M daily webhook events with 99.999% consistency.',
+            'Optimized SQL query plans and connection pooling reducing database CPU utilization by 34%.'
+          ]
+        }
+      ],
+      education: [
+        {
+          degree: 'B.Tech in Computer Engineering',
+          institution: 'Delhi Technological University (DTU)',
+          year: '2017 - 2021',
+          grade: 'CGPA: 9.1 / 10'
+        }
+      ],
+      certifications: ['AWS Certified Solutions Architect', 'Certified Kubernetes Administrator (CKA)']
+    },
+    scorecard: {
+      technical: 5,
+      problemSolving: 5,
+      communication: 4,
+      cultureFit: 5,
+      overallRecommendation: 'strong_hire',
+      evaluationNotes: 'High-caliber systems engineer. Clear hire recommendation from SDE-3.'
+    },
+    activityHistory: [
+      {
+        id: 'act-901',
+        action: 'Candidate Referred',
+        details: 'Internal employee referral submitted by Akash Das (SDE-3, EMP-1042).',
+        performedBy: 'Akash Das',
+        timestamp: '2026-08-25T09:30:00Z',
+        type: 'ingestion'
+      },
+      {
+        id: 'act-902',
+        action: 'Shortlisted by HR',
+        details: 'Fast-tracked profile for Round 1 technical evaluation.',
+        performedBy: 'Priya Sharma',
+        timestamp: '2026-08-26T14:00:00Z',
+        type: 'status'
+      }
+    ]
+  },
+  {
+    id: 'cand-010',
+    name: 'Rohan Mehra',
+    email: 'rohan.mehra.dev@gmail.com',
+    phone: '+91 98200 66144',
+    location: 'Gurgaon, Haryana',
+    source: 'referral',
+    sourceId: 'REF-EMP-1042-2',
+    referralDetails: {
+      employeeName: 'Akash Das',
+      employeeId: 'EMP-1042',
+      designation: 'SDE-3',
+      department: 'Core Platform Engineering',
+      email: 'akash.das@urbangaon.com',
+      dateReferred: '2026-08-27',
+      bonusStatus: 'Approved',
+      notes: 'Direct referral by SDE-3 Akash Das. Exceptional React 18 & micro-frontend architectural expertise.'
+    },
+    jobAppliedFor: 'Senior Frontend Engineer (React/TypeScript)',
+    jobId: 'job-fe-01',
+    department: 'Engineering',
+    appliedDate: '2026-08-27T11:00:00Z',
+    lastUpdatedDate: '2026-08-28T16:00:00Z',
+    status: 'interview_r1',
+    atsMatchScore: 94,
+    rating: 5,
+    experienceYears: 4.8,
+    currentCompany: 'Swiggy',
+    currentDesignation: 'Senior Software Engineer - Frontend',
+    currentSalary: '₹24 LPA',
+    expectedSalary: '₹30 - 34 LPA',
+    noticePeriod: '15 Days',
+    recruiterAssigned: 'Priya Sharma',
+    tags: ['React 18', 'TypeScript', 'Next.js', 'Redux Toolkit', 'Performance', 'SSR'],
+    notes: 'Referred by SDE-3 Akash Das. Outstanding hands-on experience in web performance.',
+    profileUrl: 'https://linkedin.com/in/rohan-mehra-frontend',
+    resumeData: {
+      summary: 'Frontend Engineer with 4.8 years optimizing large scale web apps. Led core checkout revamp with sub-second page loads.',
+      skills: ['React 18', 'TypeScript', 'Next.js', 'Tailwind CSS', 'Redux Toolkit', 'Jest'],
+      experience: [
+        {
+          company: 'Swiggy',
+          role: 'Senior Software Engineer',
+          duration: '2022 - Present',
+          location: 'Bengaluru, India',
+          highlights: ['Optimized checkout flow reducing bundle size by 38% and boosting checkout speed by 22%.']
+        }
+      ],
+      education: [
+        {
+          degree: 'B.Tech in Computer Science',
+          institution: 'Thapar Institute of Engineering & Technology',
+          year: '2018 - 2022'
+        }
+      ]
+    },
+    activityHistory: [
+      {
+        id: 'act-1001',
+        action: 'Candidate Referred',
+        details: 'Referred by Akash Das (SDE-3).',
+        performedBy: 'Akash Das',
+        timestamp: '2026-08-27T11:00:00Z',
+        type: 'ingestion'
+      }
+    ]
+  },
+  {
+    id: 'cand-011',
+    name: 'Pooja Sundaram',
+    email: 'pooja.sundaram@infraops.co',
+    phone: '+91 98450 77123',
+    location: 'Hyderabad / Hybrid',
+    source: 'referral',
+    sourceId: 'REF-EMP-1001-2',
+    referralDetails: {
+      employeeName: 'Vikram Singhania',
+      employeeId: 'EMP-1001',
+      designation: 'CEO',
+      department: 'Executive Leadership',
+      email: 'vikram.singhania@urbangaon.com',
+      dateReferred: '2026-08-28',
+      bonusStatus: 'Approved',
+      notes: 'Direct referral by CEO Vikram Singhania. Seasoned multi-cloud Kubernetes & Terraform infrastructure lead.'
+    },
+    jobAppliedFor: 'DevOps / Cloud Platform Engineer (AWS, K8s)',
+    jobId: 'job-devops-06',
+    department: 'Infrastructure',
+    appliedDate: '2026-08-28T14:30:00Z',
+    lastUpdatedDate: '2026-08-29T10:00:00Z',
+    status: 'interview_r2',
+    atsMatchScore: 96,
+    rating: 5,
+    experienceYears: 6.2,
+    currentCompany: 'Zerodha Tech',
+    currentDesignation: 'Lead DevOps Architect',
+    currentSalary: '₹28 LPA',
+    expectedSalary: '₹36 - 40 LPA',
+    noticePeriod: '30 Days',
+    recruiterAssigned: 'Amit Singh',
+    tags: ['Kubernetes', 'Terraform', 'AWS', 'Grafana', 'Prometheus', 'CI/CD', 'Helm'],
+    notes: 'CEO Priority referral. Top-tier infrastructure automation background.',
+    profileUrl: 'https://linkedin.com/in/pooja-sundaram-cloud',
+    resumeData: {
+      summary: 'Lead Cloud Infrastructure Engineer with 6.2 years maintaining resilient Kubernetes clusters and AWS infrastructure.',
+      skills: ['Kubernetes', 'Terraform', 'AWS EKS', 'ArgoCD', 'Prometheus', 'Python'],
+      experience: [
+        {
+          company: 'Zerodha Tech',
+          role: 'Lead DevOps Architect',
+          duration: '2021 - Present',
+          location: 'Bengaluru, India',
+          highlights: ['Scaled multi-cluster Kubernetes platform with zero-downtime blue/green deployments.']
+        }
+      ],
+      education: [
+        {
+          degree: 'B.Tech in Information Technology',
+          institution: 'Osmania University Hyderabad',
+          year: '2016 - 2020'
+        }
+      ]
+    },
+    activityHistory: [
+      {
+        id: 'act-1101',
+        action: 'Candidate Referred',
+        details: 'Referred by Vikram Singhania (CEO).',
+        performedBy: 'Vikram Singhania',
+        timestamp: '2026-08-28T14:30:00Z',
+        type: 'ingestion'
       }
     ]
   }

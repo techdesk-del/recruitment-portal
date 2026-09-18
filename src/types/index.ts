@@ -88,6 +88,18 @@ export interface ActivityLog {
   type: 'status' | 'note' | 'scorecard' | 'interview' | 'ingestion' | 'call';
 }
 
+export interface EmployeeReferralInfo {
+  employeeName: string;
+  employeeId: string;
+  designation: string; // e.g. 'SDE-3', 'CEO'
+  department?: string;
+  email?: string;
+  dateReferred?: string;
+  relation?: string;
+  bonusStatus?: 'Pending' | 'Approved' | 'Paid' | 'In Review';
+  notes?: string;
+}
+
 export interface Candidate {
   id: string;
   name: string;
@@ -96,6 +108,7 @@ export interface Candidate {
   location: string;
   source: CandidateSource;
   sourceId?: string; // external ID from Naukri, LinkedIn, etc.
+  referralDetails?: EmployeeReferralInfo;
   jobAppliedFor: string;
   jobId: string;
   department: string;
@@ -118,6 +131,10 @@ export interface Candidate {
   resumeData: ResumeData;
   scorecard?: Scorecard;
   callingDetails?: CandidateCallingDetails;
+  isCallingQueued?: boolean;
+  isSalaryNegotiable?: 'yes' | 'no';
+  reasonForLeaving?: string;
+  tentativeInterviewDate?: string;
   activityHistory: ActivityLog[];
 }
 
@@ -153,6 +170,7 @@ export interface DashboardMetrics {
 export interface FilterState {
   searchQuery: string;
   source: CandidateSource | 'all';
+  referrerId?: string;
   status: CandidateStatus | 'all';
   jobId: string | 'all';
   experienceRange: string | 'all'; // '0-2', '3-5', '6-10', '10+'
@@ -252,6 +270,10 @@ export interface CallRecord {
   confirmedCurrentCtc?: string;
   confirmedExpectedCtc?: string;
   confirmedNoticePeriod?: string;
+  isNegotiable?: 'yes' | 'no';
+  reasonForLeaving?: string;
+  confirmedLocation?: string;
+  tentativeInterviewDate?: string;
   relocationPreference?: 'Immediate Relocate' | 'Prefers Remote' | 'Current City Only' | 'Open to Hybrid';
   communicationRating?: number; // 1-5
   technicalFitRating?: number; // 1-5
@@ -269,6 +291,10 @@ export interface CandidateCallingDetails {
   confirmedCurrentSalary?: string;
   confirmedExpectedSalary?: string;
   confirmedNoticePeriod?: string;
+  isNegotiable?: 'yes' | 'no';
+  reasonForLeaving?: string;
+  confirmedLocation?: string;
+  tentativeInterviewDate?: string;
   callHistory: CallRecord[];
 }
 

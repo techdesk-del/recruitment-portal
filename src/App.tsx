@@ -1,25 +1,30 @@
 import React from 'react';
-import { Sidebar } from './components/Sidebar';
-import { TopHeader } from './components/TopHeader';
-import { MainDashboard } from './components/MainDashboard';
-import { CandidateTable } from './components/CandidateTable';
-import { JobsView } from './components/JobsView';
-import { CandidateKanban } from './components/CandidateKanban';
-import { InterviewScheduler } from './components/InterviewScheduler';
-import { CandidateProfileModal } from './components/CandidateProfileModal';
-import { ResumePreviewModal } from './components/ResumePreviewModal';
-import { JobPostingsModal } from './components/JobPostingsModal';
-import { ToastContainer } from './components/ToastContainer';
-import { useRecruitment } from './context/RecruitmentContext';
+import { Sidebar, TopHeader } from './components/layout';
+import { 
+  MainDashboard, 
+  CandidateTable, 
+  JobsView, 
+  CandidateKanban, 
+  InterviewScheduler,
+  CallingDesk 
+} from './components/views';
+import { 
+  CandidateProfileModal, 
+  ResumePreviewModal, 
+  JobPostingsModal,
+  WebhookSimulatorModal 
+} from './components/modals';
+import { ToastContainer } from './components/common';
+import { useRecruitment } from './context';
 
 export const App: React.FC = () => {
   const { activeView } = useRecruitment();
 
-  const isPortalView = ['linkedin', 'naukri', 'indeed', 'apna', 'urbangaon', 'internshala'].includes(activeView);
+  const isPortalView = ['linkedin', 'naukri', 'indeed', 'apna', 'urbangaon', 'internshala', 'referral'].includes(activeView);
 
   return (
     <div className="min-h-screen bg-[#f8fafc] text-slate-900 flex font-sans selection:bg-blue-600 selection:text-white">
-      {/* Left Sidebar Layout matching reference CRM */}
+      {/* Left Sidebar Layout */}
       <Sidebar />
 
       {/* Main App Content Area */}
@@ -35,6 +40,7 @@ export const App: React.FC = () => {
           {activeView === 'jobs' && <JobsView />}
           {activeView === 'pipeline' && <CandidateKanban />}
           {(activeView === 'scheduler' || activeView === 'interview-scheduler') && <InterviewScheduler />}
+          {(activeView === 'calling' || activeView === 'calling-desk') && <CallingDesk />}
         </main>
       </div>
 
@@ -42,6 +48,7 @@ export const App: React.FC = () => {
       <CandidateProfileModal />
       <ResumePreviewModal />
       <JobPostingsModal />
+      <WebhookSimulatorModal />
       <ToastContainer />
     </div>
   );

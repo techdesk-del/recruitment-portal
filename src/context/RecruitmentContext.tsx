@@ -1,19 +1,20 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import confetti from 'canvas-confetti';
-import { 
-  Candidate, 
-  CandidateSource, 
-  CandidateStatus, 
-  JobPosting, 
-  FilterState, 
-  Scorecard, 
-  ToastMessage, 
+import {
+  Candidate,
+  CandidateSource,
+  CandidateStatus,
+  JobPosting,
+  FilterState,
+  Scorecard,
+  ToastMessage,
   DashboardMetrics,
   InterviewSchedule,
   InterviewStatus,
   CallRecord,
   CallDisposition,
-  CallingOverallStatus
+  CallingOverallStatus,
+  ActivityLog
 } from '../types';
 import { INITIAL_CANDIDATES, INITIAL_JOBS, INITIAL_INTERVIEWS, INITIAL_CALL_RECORDS } from '../data/mockData';
 import { downloadCandidateResume as downloadPdf, downloadBulkResumes as downloadBulkPdf } from '../utils/resumeGenerator';
@@ -53,11 +54,11 @@ interface RecruitmentContextType {
   toasts: ToastMessage[];
   showToast: (type: ToastMessage['type'], title: string, message: string) => void;
   removeToast: (id: string) => void;
-  
+
   // Metrics
   metrics: DashboardMetrics;
   callingMetrics: CallingMetrics;
-  
+
   // Actions
   updateCandidateStatus: (id: string, newStatus: CandidateStatus, details?: string) => void;
   updateCandidateNotes: (id: string, notes: string) => void;
@@ -88,6 +89,7 @@ interface RecruitmentContextType {
   ) => CallRecord;
   deleteCallRecord: (callId: string) => void;
   quickScheduleFollowUp: (candidateId: string, date: string, time: string, note?: string) => void;
+  shiftCandidateToCalling: (candidate: Candidate) => void;
 }
 
 const RecruitmentContext = createContext<RecruitmentContextType | undefined>(undefined);
@@ -101,7 +103,13 @@ export const RecruitmentProvider: React.FC<{ children: React.ReactNode }> = ({ c
   const [candidates, setCandidates] = useState<Candidate[]>(() => {
     try {
       const saved = localStorage.getItem(STORAGE_KEY_CANDIDATES);
-      return saved ? JSON.parse(saved) : INITIAL_CANDIDATES;
+      if (saved) {
+        const parsed = JSON.parse(saved) as Candidate[];
+        const referralCandidates = INITIAL_CANDIDATES.filter((c) => c.source === 'referral');
+        const existingNonReferrals = parsed.filter((c) => c.source !== 'referral');
+        return [...existingNonReferrals, ...referralCandidates];
+      }
+      return INITIAL_CANDIDATES;
     } catch {
       return INITIAL_CANDIDATES;
     }
@@ -151,6 +159,7 @@ export const RecruitmentProvider: React.FC<{ children: React.ReactNode }> = ({ c
   const [filters, setFilters] = useState<FilterState>({
     searchQuery: '',
     source: 'all',
+    referrerId: undefined,
     status: 'all',
     jobId: 'all',
     experienceRange: 'all',
@@ -300,7 +309,7 @@ export const RecruitmentProvider: React.FC<{ children: React.ReactNode }> = ({ c
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ status: newStatus, details })
-    }).catch(() => {});
+    }).catch(() => { });
 
     if (newStatus === 'offered' || newStatus === 'joined') {
       confetti({
@@ -333,7 +342,7 @@ export const RecruitmentProvider: React.FC<{ children: React.ReactNode }> = ({ c
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ notes })
-    }).catch(() => {});
+    }).catch(() => { });
 
     showToast('success', 'Notes Saved', 'Candidate recruiter notes saved to MongoDB.');
   };
@@ -512,12 +521,12 @@ export const RecruitmentProvider: React.FC<{ children: React.ReactNode }> = ({ c
   const simulateIncomingApplication = (sourceOverride?: CandidateSource) => {
     const sources: CandidateSource[] = ['naukri', 'linkedin', 'indeed', 'urbangaon', 'internshala', 'referral'];
     const selectedSource = sourceOverride || sources[Math.floor(Math.random() * sources.length)];
-    
+
     const sampleProfiles = [
       {
         name: 'Arjun Nambiar',
-        email: `arjun.nambiar.${Math.floor(Math.random()*900 + 100)}@techhub.in`,
-        phone: '+91 98450 ' + Math.floor(Math.random()*90000 + 10000),
+        email: `arjun.nambiar.${Math.floor(Math.random() * 900 + 100)}@techhub.in`,
+        phone: '+91 98450 ' + Math.floor(Math.random() * 90000 + 10000),
         location: 'Bengaluru, India',
         jobId: 'job-fe-01',
         jobTitle: 'Senior Frontend Engineer (React/TypeScript)',
@@ -530,8 +539,8 @@ export const RecruitmentProvider: React.FC<{ children: React.ReactNode }> = ({ c
       },
       {
         name: 'Devika Singhania',
-        email: `devika.singh.${Math.floor(Math.random()*900 + 100)}@cloudmatrix.io`,
-        phone: '+91 97182 ' + Math.floor(Math.random()*90000 + 10000),
+        email: `devika.singh.${Math.floor(Math.random() * 900 + 100)}@cloudmatrix.io`,
+        phone: '+91 97182 ' + Math.floor(Math.random() * 90000 + 10000),
         location: 'Gurgaon / Remote',
         jobId: 'job-be-02',
         jobTitle: 'Lead Backend Developer (Node.js & Go)',
@@ -544,8 +553,8 @@ export const RecruitmentProvider: React.FC<{ children: React.ReactNode }> = ({ c
       },
       {
         name: 'Rohan Mukherjee',
-        email: `rohan.ux.${Math.floor(Math.random()*900 + 100)}@creativelab.com`,
-        phone: '+91 98201 ' + Math.floor(Math.random()*90000 + 10000),
+        email: `rohan.ux.${Math.floor(Math.random() * 900 + 100)}@creativelab.com`,
+        phone: '+91 98201 ' + Math.floor(Math.random() * 90000 + 10000),
         location: 'Mumbai, India',
         jobId: 'job-ux-05',
         jobTitle: 'UI/UX Product Designer (Figma/Design Systems)',
@@ -568,7 +577,7 @@ export const RecruitmentProvider: React.FC<{ children: React.ReactNode }> = ({ c
       phone: pick.phone,
       location: pick.location,
       source: selectedSource,
-      sourceId: `${selectedSource.toUpperCase()}-${Math.floor(Math.random()*900000 + 100000)}`,
+      sourceId: `${selectedSource.toUpperCase()}-${Math.floor(Math.random() * 900000 + 100000)}`,
       jobAppliedFor: pick.jobTitle,
       jobId: pick.jobId,
       department: pick.dept,
@@ -654,8 +663,8 @@ export const RecruitmentProvider: React.FC<{ children: React.ReactNode }> = ({ c
           const nextStatus: CandidateStatus = interviewData.round.includes('Round 2')
             ? 'interview_r2'
             : interviewData.round.includes('Round 1')
-            ? 'interview_r1'
-            : c.status;
+              ? 'interview_r1'
+              : c.status;
 
           const actLog = {
             id: `act-${Date.now()}`,
@@ -853,6 +862,10 @@ export const RecruitmentProvider: React.FC<{ children: React.ReactNode }> = ({ c
       confirmedCurrentCtc: recordData.confirmedCurrentCtc,
       confirmedExpectedCtc: recordData.confirmedExpectedCtc,
       confirmedNoticePeriod: recordData.confirmedNoticePeriod,
+      isNegotiable: recordData.isNegotiable,
+      reasonForLeaving: recordData.reasonForLeaving,
+      confirmedLocation: recordData.confirmedLocation,
+      tentativeInterviewDate: recordData.tentativeInterviewDate,
       relocationPreference: recordData.relocationPreference,
       communicationRating: recordData.communicationRating,
       technicalFitRating: recordData.technicalFitRating,
@@ -868,7 +881,7 @@ export const RecruitmentProvider: React.FC<{ children: React.ReactNode }> = ({ c
     switch (recordData.disposition) {
       case 'connected_screening_passed':
         overallStatus = 'qualified';
-        newCandidateStatus = 'shortlisted';
+        newCandidateStatus = recordData.promoteToInterview ? 'interview_r1' : 'shortlisted';
         break;
       case 'connected_interested':
         overallStatus = 'connected';
@@ -902,8 +915,8 @@ export const RecruitmentProvider: React.FC<{ children: React.ReactNode }> = ({ c
 
           const actLog = {
             id: `act-${Date.now()}`,
-            action: `Telephonic Call Logged: ${recordData.disposition.replace(/_/g, ' ').toUpperCase()}`,
-            details: `Duration: ${Math.floor(recordData.durationSeconds / 60)}m ${recordData.durationSeconds % 60}s. Notes: ${recordData.notes || 'Screening updated.'}`,
+            action: `Screening Completed: ${recordData.disposition.replace(/_/g, ' ').toUpperCase()}`,
+            details: `CTC: ${recordData.confirmedCurrentCtc || cand.currentSalary} (Cur) / ${recordData.confirmedExpectedCtc || cand.expectedSalary} (Exp) • Negotiable: ${recordData.isNegotiable === 'yes' ? 'Yes' : 'No'} • Notice: ${recordData.confirmedNoticePeriod || cand.noticePeriod}${recordData.tentativeInterviewDate ? ` • Tentative Interview: ${recordData.tentativeInterviewDate}` : ''}. Notes: ${recordData.notes || 'Screening updated.'}`,
             performedBy: recordData.recruiterName || 'HR Recruiter',
             timestamp: nowIso,
             type: 'call' as const
@@ -911,10 +924,19 @@ export const RecruitmentProvider: React.FC<{ children: React.ReactNode }> = ({ c
 
           const updated: Candidate = {
             ...cand,
+            name: recordData.candidateName || cand.name,
+            phone: recordData.candidatePhone || cand.phone,
+            email: recordData.interviewData?.candidateEmail || cand.email,
             currentSalary: recordData.confirmedCurrentCtc || cand.currentSalary,
             expectedSalary: recordData.confirmedExpectedCtc || cand.expectedSalary,
             noticePeriod: recordData.confirmedNoticePeriod || cand.noticePeriod,
+            location: recordData.confirmedLocation || cand.location,
+            reasonForLeaving: recordData.reasonForLeaving || cand.reasonForLeaving,
+            isSalaryNegotiable: recordData.isNegotiable || cand.isSalaryNegotiable,
+            tentativeInterviewDate: recordData.tentativeInterviewDate || cand.tentativeInterviewDate,
             status: newCandidateStatus || cand.status,
+            isCallingQueued: false,
+            notes: recordData.notes || cand.notes,
             lastUpdatedDate: nowIso,
             callingDetails: {
               totalCalls: (cand.callingDetails?.totalCalls || 0) + 1,
@@ -927,6 +949,10 @@ export const RecruitmentProvider: React.FC<{ children: React.ReactNode }> = ({ c
               confirmedCurrentSalary: recordData.confirmedCurrentCtc,
               confirmedExpectedSalary: recordData.confirmedExpectedCtc,
               confirmedNoticePeriod: recordData.confirmedNoticePeriod,
+              isNegotiable: recordData.isNegotiable || cand.callingDetails?.isNegotiable,
+              reasonForLeaving: recordData.reasonForLeaving || cand.callingDetails?.reasonForLeaving,
+              confirmedLocation: recordData.confirmedLocation || cand.callingDetails?.confirmedLocation,
+              tentativeInterviewDate: recordData.tentativeInterviewDate || cand.callingDetails?.tentativeInterviewDate,
               callHistory: updatedCallHistory
             },
             activityHistory: [actLog, ...cand.activityHistory]
@@ -952,7 +978,7 @@ export const RecruitmentProvider: React.FC<{ children: React.ReactNode }> = ({ c
         jobId: recordData.jobId || 'job-general',
         department: recordData.interviewData.department || 'Engineering',
         round: (recordData.interviewData.round as any) || 'Round 1: Screening / Technical',
-        date: recordData.interviewData.date || new Date(Date.now() + 86400000).toISOString().split('T')[0],
+        date: recordData.interviewData.date || recordData.tentativeInterviewDate || new Date(Date.now() + 86400000).toISOString().split('T')[0],
         startTime: recordData.interviewData.startTime || '11:00 AM',
         endTime: recordData.interviewData.endTime || '12:00 PM',
         durationMinutes: recordData.interviewData.durationMinutes || 60,
@@ -968,10 +994,20 @@ export const RecruitmentProvider: React.FC<{ children: React.ReactNode }> = ({ c
       });
     }
 
+    if (recordData.disposition === 'connected_screening_passed') {
+      try {
+        confetti({
+          particleCount: 60,
+          spread: 70,
+          origin: { y: 0.7 }
+        });
+      } catch (e) {}
+    }
+
     showToast(
       'success',
-      'Call Record Saved',
-      `Call logged for ${recordData.candidateName} (${recordData.disposition.replace(/_/g, ' ')}). Synced with candidate file.`
+      'Screening Synced Everywhere',
+      `Call & screening synced for ${recordData.candidateName}. CTC, stage (${newCandidateStatus || 'updated'}), and records updated.`
     );
 
     return newRecord;
@@ -1018,6 +1054,42 @@ export const RecruitmentProvider: React.FC<{ children: React.ReactNode }> = ({ c
       })
     );
     showToast('info', 'Follow-up Scheduled', `Follow-up call set for ${date} at ${time}.`);
+  };
+
+  const shiftCandidateToCalling = (candidate: Candidate) => {
+    setCandidates((prev) =>
+      prev.map((c) => {
+        if (c.id === candidate.id) {
+          const actLog: ActivityLog = {
+            id: `act-call-${Date.now()}`,
+            action: 'Shifted to Calling Desk',
+            details: 'Profile selected and shifted to Calling Desk for screening evaluation.',
+            performedBy: 'Akash Das',
+            timestamp: new Date().toISOString(),
+            type: 'call'
+          };
+          const updated: Candidate = {
+            ...c,
+            isCallingQueued: true,
+            callingDetails: {
+              totalCalls: c.callingDetails?.totalCalls || 0,
+              callStatus: 'in_progress',
+              callHistory: c.callingDetails?.callHistory || [],
+              ...c.callingDetails
+            },
+            activityHistory: [actLog, ...c.activityHistory]
+          };
+          if (selectedCandidate?.id === candidate.id) {
+            setSelectedCandidate(updated);
+          }
+          return updated;
+        }
+        return c;
+      })
+    );
+    setActiveDialerCandidate(candidate);
+    setActiveView('calling');
+    showToast('success', 'Profile Shifted to Calling Desk', `${candidate.name} is now active in Calling Desk.`);
   };
 
   // Calculate Real-Time Metrics
@@ -1079,7 +1151,7 @@ export const RecruitmentProvider: React.FC<{ children: React.ReactNode }> = ({ c
   const connectedRate = totalCallsMade > 0 ? Math.round((connectedCallsCount / totalCallsMade) * 100) : 0;
   const qualifiedCallsCount = callRecords.filter((r) => r.disposition === 'connected_screening_passed').length;
   const qualifiedRate = connectedCallsCount > 0 ? Math.round((qualifiedCallsCount / connectedCallsCount) * 100) : 0;
-  
+
   const todayStr = new Date().toISOString().split('T')[0];
   const followUpsTodayCount = candidates.filter((c) => c.callingDetails?.nextFollowUpDate === todayStr).length;
   const pendingCallsCount = candidates.filter((c) => !c.callingDetails || c.callingDetails.totalCalls === 0).length;
@@ -1142,7 +1214,8 @@ export const RecruitmentProvider: React.FC<{ children: React.ReactNode }> = ({ c
         deleteInterview,
         logCallRecord,
         deleteCallRecord,
-        quickScheduleFollowUp
+        quickScheduleFollowUp,
+        shiftCandidateToCalling
       }}
     >
       {children}

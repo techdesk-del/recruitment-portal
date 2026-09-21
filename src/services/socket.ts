@@ -15,6 +15,7 @@ export function getSocket(): Socket {
   return socketInstance;
 }
 
+
 export function closeSocket(): void {
   if (socketInstance) {
     socketInstance.disconnect();

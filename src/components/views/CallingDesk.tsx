@@ -68,6 +68,9 @@ const CITY_METADATA_MAP: Record<string, { state: string; defaultPin: string; cle
   lucknow: { state: 'Uttar Pradesh', defaultPin: '226001', cleanName: 'Lucknow' },
 };
 
+
+
+
 export const parseLocationDetails = (locationRaw?: string) => {
   if (!locationRaw) {
     return { city: 'Jaipur', state: 'Rajasthan', pin: '302001', address: 'Jaipur, Rajasthan, India' };

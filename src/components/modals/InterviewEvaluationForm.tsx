@@ -22,6 +22,7 @@ interface InterviewEvaluationFormProps {
   onSave: (scorecard: Scorecard) => void;
 }
 
+
 export const InterviewEvaluationForm: React.FC<InterviewEvaluationFormProps> = ({
   candidate,
   onSave
@@ -59,9 +60,12 @@ export const InterviewEvaluationForm: React.FC<InterviewEvaluationFormProps> = (
     evaluatedBy: existingDetailed?.evaluatedBy || 'Priya Sharma (HR Lead)'
   }));
 
+
   const [isSaved, setIsSaved] = useState(false);
   const [activeTab, setActiveTab] = useState<'all' | 'q1' | 'q2' | 'q3' | 'q4' | 'q5' | 'q6'>('all');
   const [showLogistics, setShowLogistics] = useState(false);
+
+
 
   // Compute live aggregate score
   const scoreStats = useMemo(() => {
@@ -138,6 +142,7 @@ export const InterviewEvaluationForm: React.FC<InterviewEvaluationFormProps> = (
         overallImpression: { rp: 5, yt: 5, ss: 5, comments: prev.overallImpression.comments },
         overallRecommendation: 'strong_hire'
       }));
+
     } else {
       setEvaluation((prev) => ({
         ...prev,

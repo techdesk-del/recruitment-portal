@@ -9,7 +9,6 @@ import {
 } from 'lucide-react';
 import { useRecruitment } from '../../context/RecruitmentContext';
 import { recruitmentApi } from '../../services/api';
-import { InstallAppButton } from '../common/InstallAppButton';
 
 export const TopHeader: React.FC = () => {
   const { 
@@ -69,9 +68,6 @@ export const TopHeader: React.FC = () => {
       {/* Right Action Controls */}
       <div className="flex items-center gap-3 shrink-0">
         
-        {/* Install Desktop App Button */}
-        <InstallAppButton variant="header" />
-
         {/* + Add Candidate Button */}
         <button
           onClick={() => simulateIncomingApplication()}

@@ -14,7 +14,6 @@ import { UrbanGaonLogo } from '../common/UrbanGaonLogo';
 import { PortalLogo } from '../common/PortalLogo';
 import { CandidateSource } from '../../types';
 import { REFERRING_EMPLOYEES } from '../../data/mockData';
-import { InstallAppButton } from '../common/InstallAppButton';
 
 export const Sidebar: React.FC = () => {
   const { activeView, setActiveView, candidates, jobs, interviews, filters, setFilters, callingMetrics } = useRecruitment();
@@ -325,9 +324,6 @@ export const Sidebar: React.FC = () => {
 
       {/* Bottom Settings & User Profile Footer */}
       <div className="p-3.5 border-t border-slate-100 space-y-2">
-        {/* Install to Desktop button */}
-        <InstallAppButton variant="sidebar" />
-
         <button
           onClick={() => handleGeneralViewClick('overview')}
           className="w-full flex items-center gap-2.5 px-3 py-1.5 text-[13px] font-normal text-slate-500 hover:text-slate-900 hover:bg-slate-50 rounded-xl transition tracking-tight"

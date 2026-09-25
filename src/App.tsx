@@ -23,17 +23,21 @@ export const App: React.FC = () => {
   const isPortalView = ['linkedin', 'naukri', 'indeed', 'apna', 'urbangaon', 'internshala', 'referral'].includes(activeView);
 
   return (
-    <div className="min-h-screen bg-[#f8fafc] text-slate-900 flex font-sans selection:bg-blue-600 selection:text-white">
+    <div className="h-screen bg-[#f8fafc] text-slate-900 flex font-sans selection:bg-blue-600 selection:text-white overflow-hidden">
       {/* Left Sidebar Layout */}
       <Sidebar />
 
       {/* Main App Content Area */}
-      <div className="flex-1 flex flex-col min-w-0 min-h-screen">
+      <div className="flex-1 flex flex-col min-w-0 h-screen overflow-hidden">
         {/* Top Header */}
         <TopHeader />
 
         {/* Dynamic Page Views */}
-        <main className="flex-1 max-w-7xl w-full mx-auto px-6 py-6 overflow-y-auto">
+        <main className={`flex-1 w-full mx-auto ${
+          activeView === 'pipeline' 
+            ? 'px-6 py-4 overflow-hidden flex flex-col max-w-full' 
+            : 'px-6 py-6 overflow-y-auto max-w-7xl'
+        }`}>
           {(activeView === 'dashboard' || activeView === 'overview') && <MainDashboard />}
           {activeView === 'candidates' && <CandidateTable />}
           {isPortalView && <CandidateTable />}

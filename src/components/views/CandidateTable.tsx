@@ -381,7 +381,6 @@ export const CandidateTable: React.FC = () => {
                 <th className="py-3 px-4">Applied Job Role</th>
                 <th className="py-3 px-4">Source Portal</th>
                 <th className="py-3 px-4">Employee Name & ID</th>
-                <th className="py-3 px-4">Experience & CTC</th>
                 <th className="py-3 px-4 whitespace-nowrap">Hiring Stage</th>
                 <th className="py-3 px-4 text-left whitespace-nowrap">Actions</th>
               </tr>
@@ -390,7 +389,7 @@ export const CandidateTable: React.FC = () => {
             <tbody className="divide-y divide-slate-100 text-xs">
               {paginatedCandidates.length === 0 ? (
                 <tr>
-                  <td colSpan={7} className="py-12 text-center text-slate-400">
+                  <td colSpan={6} className="py-12 text-center text-slate-400">
                     <User size={32} className="mx-auto text-slate-300 mb-2" />
                     <p className="font-medium text-slate-600">No candidates match your current filter.</p>
                     <button
@@ -505,16 +504,6 @@ export const CandidateTable: React.FC = () => {
                             <span className="text-[11px] text-slate-400 font-normal">Direct Portal</span>
                           </div>
                         )}
-                      </td>
-
-                      {/* Experience & Expected CTC */}
-                      <td className="py-3.5 px-4">
-                        <div className="text-slate-700 font-medium">
-                          {cand.experienceYears} Years Exp
-                        </div>
-                        <div className="text-[11px] text-slate-400 mt-0.5 font-normal">
-                          CTC: <strong className="text-slate-700 font-semibold">{cand.expectedSalary}</strong> • {cand.noticePeriod}
-                        </div>
                       </td>
 
                       {/* Stage Selector Dropdown */}

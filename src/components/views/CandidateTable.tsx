@@ -379,7 +379,6 @@ export const CandidateTable: React.FC = () => {
               <tr className="bg-slate-50 border-b border-slate-200 text-[11px] font-semibold text-slate-500 uppercase tracking-wider">
                 <th className="py-3 px-5">Candidate Name & Contact</th>
                 <th className="py-3 px-4">Applied Job Role</th>
-                <th className="py-3 px-4">Source Portal</th>
                 <th className="py-3 px-4">Employee Name & ID</th>
                 <th className="py-3 px-4 whitespace-nowrap">Hiring Stage</th>
                 <th className="py-3 px-4 text-left whitespace-nowrap">Actions</th>
@@ -389,7 +388,7 @@ export const CandidateTable: React.FC = () => {
             <tbody className="divide-y divide-slate-100 text-xs">
               {paginatedCandidates.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="py-12 text-center text-slate-400">
+                  <td colSpan={5} className="py-12 text-center text-slate-400">
                     <User size={32} className="mx-auto text-slate-300 mb-2" />
                     <p className="font-medium text-slate-600">No candidates match your current filter.</p>
                     <button
@@ -449,14 +448,6 @@ export const CandidateTable: React.FC = () => {
                         <span className="font-semibold text-slate-800 block text-sm">{cand.jobAppliedFor}</span>
                         <span className="text-[11px] text-slate-400 flex items-center gap-1 mt-0.5 font-normal">
                           <MapPin size={11} className="text-slate-400" /> {cand.location}
-                        </span>
-                      </td>
-
-                      {/* Source Badge */}
-                      <td className="py-3.5 px-4">
-                        <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[11px] font-medium border ${source.class}`}>
-                          <PortalLogo source={cand.source} size={13} />
-                          <span>{source.label}</span>
                         </span>
                       </td>
 

@@ -1,22 +1,20 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   Search, 
   Download, 
   Eye, 
   User, 
   Phone, 
-  PhoneCall,
+  PhoneCall, 
   Mail, 
   MapPin, 
-  ChevronLeft, 
-  ChevronRight, 
   RotateCcw, 
   ArrowRight, 
   Filter 
 } from 'lucide-react';
 import { useRecruitment } from '../../context/RecruitmentContext';
 import { CandidateStatus, CandidateSource } from '../../types';
-import { PortalLogo } from '../common/PortalLogo';
+import { PortalLogo, Pagination } from '../common';
 import { REFERRING_EMPLOYEES } from '../../data/mockData';
 
 export const CandidateTable: React.FC = () => {
@@ -38,7 +36,7 @@ export const CandidateTable: React.FC = () => {
   } = useRecruitment();
 
   const [currentPage, setCurrentPage] = useState(1);
-  const pageSize = 10;
+  const [pageSize, setPageSize] = useState(10);
 
   const sourceBadges: Record<CandidateSource, { label: string; class: string; icon: string }> = {
     naukri: { label: 'Naukri.com', class: 'bg-blue-50 text-blue-700 border-blue-200', icon: '🔵' },
@@ -66,6 +64,11 @@ export const CandidateTable: React.FC = () => {
     activeView === 'referral' 
       ? 'referral' 
       : (filters.source !== 'all' ? filters.source : 'all');
+
+  // Auto-reset page when filters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [filters, activeSource]);
 
   // Candidates in active portal or general scope
   const scopedCandidates = candidates.filter((cand) => {
@@ -325,7 +328,31 @@ export const CandidateTable: React.FC = () => {
             ))}
           </select>
 
-          {(filters.source !== 'all' || filters.status !== 'all' || filters.jobId !== 'all' || filters.searchQuery) && (
+          {/* Filter by Employee Referrer */}
+          <select
+            value={filters.referrerId || 'all'}
+            onChange={(e) => {
+              const val = e.target.value;
+              if (val === 'all') {
+                setFilters((prev) => ({ ...prev, referrerId: undefined }));
+              } else {
+                setFilters((prev) => ({ ...prev, source: 'referral', referrerId: val }));
+                if (activeView !== 'referral') {
+                  setActiveView('referral');
+                }
+              }
+            }}
+            className="px-3 py-1.5 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-700 focus:outline-none focus:border-blue-500 font-medium"
+          >
+            <option value="all">All Referrers</option>
+            {REFERRING_EMPLOYEES.map((emp) => (
+              <option key={emp.employeeId} value={emp.employeeId}>
+                {emp.name} ({emp.employeeId} - {emp.designation})
+              </option>
+            ))}
+          </select>
+
+          {(filters.source !== 'all' || filters.status !== 'all' || filters.jobId !== 'all' || filters.referrerId || filters.searchQuery) && (
             <button
               onClick={resetFilters}
               className="flex items-center gap-1 text-xs text-slate-500 hover:text-slate-900 px-2 py-1 transition font-medium"
@@ -353,16 +380,17 @@ export const CandidateTable: React.FC = () => {
                 <th className="py-3 px-5">Candidate Name & Contact</th>
                 <th className="py-3 px-4">Applied Job Role</th>
                 <th className="py-3 px-4">Source Portal</th>
+                <th className="py-3 px-4">Employee Name & ID</th>
                 <th className="py-3 px-4">Experience & CTC</th>
-                <th className="py-3 px-4">Hiring Stage</th>
-                <th className="py-3 px-5 text-right">Actions</th>
+                <th className="py-3 px-4 whitespace-nowrap">Hiring Stage</th>
+                <th className="py-3 px-4 text-left whitespace-nowrap">Actions</th>
               </tr>
             </thead>
 
             <tbody className="divide-y divide-slate-100 text-xs">
               {paginatedCandidates.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="py-12 text-center text-slate-400">
+                  <td colSpan={7} className="py-12 text-center text-slate-400">
                     <User size={32} className="mx-auto text-slate-300 mb-2" />
                     <p className="font-medium text-slate-600">No candidates match your current filter.</p>
                     <button
@@ -427,28 +455,54 @@ export const CandidateTable: React.FC = () => {
 
                       {/* Source Badge */}
                       <td className="py-3.5 px-4">
-                        <span className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md text-[11px] font-medium border ${source.class}`}>
+                        <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[11px] font-medium border ${source.class}`}>
                           <PortalLogo source={cand.source} size={13} />
                           <span>{source.label}</span>
                         </span>
-                        {cand.referralDetails && (
-                          <div className="mt-1 flex flex-col gap-0.5">
-                            <div className="flex items-center gap-1 text-[11px] text-slate-700 font-medium">
-                              <span className="text-slate-400 font-normal">By:</span>
-                              <span className="font-semibold">{cand.referralDetails.employeeName}</span>
-                              <span
-                                className={`text-[9px] font-bold px-1 py-0.1 rounded border ${
-                                  cand.referralDetails.designation === 'CEO'
-                                    ? 'bg-amber-100 text-amber-800 border-amber-200'
-                                    : 'bg-blue-100 text-blue-700 border-blue-200'
-                                }`}
-                              >
-                                {cand.referralDetails.designation}
-                              </span>
+                      </td>
+
+                      {/* Employee Name & ID Column */}
+                      <td className="py-3.5 px-4">
+                        {cand.referralDetails ? (
+                          <div 
+                            onClick={() => setFilters((prev) => ({ ...prev, source: 'referral', referrerId: cand.referralDetails?.employeeId }))}
+                            className="group/emp cursor-pointer inline-flex items-center gap-2.5 py-1 px-2 -mx-2 rounded-xl hover:bg-slate-100/80 transition"
+                            title={`Filter by ${cand.referralDetails.employeeName} (${cand.referralDetails.employeeId})`}
+                          >
+                            <div
+                              className={`w-7 h-7 rounded-lg flex items-center justify-center font-bold text-xs shrink-0 shadow-2xs ${
+                                cand.referralDetails.designation === 'CEO'
+                                  ? 'bg-amber-100 text-amber-900 border border-amber-300'
+                                  : 'bg-blue-100 text-blue-900 border border-blue-300'
+                              }`}
+                            >
+                              {cand.referralDetails.employeeName.charAt(0)}
                             </div>
-                            <span className="font-mono text-[10px] text-slate-400">
-                              ID: {cand.referralDetails.employeeId}
-                            </span>
+                            <div>
+                              <div className="flex items-center gap-1.5">
+                                <span className="font-bold text-slate-900 text-xs group-hover/emp:text-blue-600 transition">
+                                  {cand.referralDetails.employeeName}
+                                </span>
+                                <span
+                                  className={`text-[9px] font-bold px-1.5 py-0.2 rounded border ${
+                                    cand.referralDetails.designation === 'CEO'
+                                      ? 'bg-amber-100 text-amber-800 border-amber-300'
+                                      : 'bg-blue-100 text-blue-700 border-blue-300'
+                                  }`}
+                                >
+                                  {cand.referralDetails.designation}
+                                </span>
+                              </div>
+                              <div className="flex items-center gap-1 text-[11px] font-mono mt-0.5">
+                                <span className="text-slate-400 font-sans text-[10px]">ID:</span>
+                                <span className="font-semibold text-slate-700">{cand.referralDetails.employeeId}</span>
+                              </div>
+                            </div>
+                          </div>
+                        ) : (
+                          <div className="flex items-center gap-1 text-slate-400 text-xs">
+                            <span className="text-slate-300">—</span>
+                            <span className="text-[11px] text-slate-400 font-normal">Direct Portal</span>
                           </div>
                         )}
                       </td>
@@ -479,8 +533,8 @@ export const CandidateTable: React.FC = () => {
                       </td>
 
                       {/* HR Quick Actions */}
-                      <td className="py-3.5 px-5 text-right">
-                        <div className="flex items-center justify-end gap-1.5">
+                      <td className="py-3.5 px-4 whitespace-nowrap">
+                        <div className="flex items-center gap-1.5">
                           <button
                             onClick={() => shiftCandidateToCalling(cand)}
                             title={`Select & Shift ${cand.name} to Calling Desk`}
@@ -528,33 +582,15 @@ export const CandidateTable: React.FC = () => {
         </div>
 
         {/* Pagination Bar */}
-        <div className="p-3.5 bg-slate-50 border-t border-slate-200 flex items-center justify-between text-xs text-slate-500 font-normal">
-          <div>
-            Showing <strong className="text-slate-700 font-semibold">{filteredCandidates.length > 0 ? (currentPage - 1) * pageSize + 1 : 0}</strong> to{' '}
-            <strong className="text-slate-700 font-semibold">{Math.min(currentPage * pageSize, filteredCandidates.length)}</strong> of{' '}
-            <strong className="text-slate-700 font-semibold">{filteredCandidates.length}</strong> candidates
-          </div>
-
-          <div className="flex items-center gap-2">
-            <button
-              onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
-              disabled={currentPage === 1}
-              className="p-1 rounded-lg bg-white border border-slate-200 hover:bg-slate-100 text-slate-600 disabled:opacity-30 disabled:pointer-events-none transition"
-            >
-              <ChevronLeft size={14} />
-            </button>
-            <span className="px-2 text-slate-600 font-medium">
-              Page {currentPage} of {totalPages}
-            </span>
-            <button
-              onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages))}
-              disabled={currentPage === totalPages}
-              className="p-1 rounded-lg bg-white border border-slate-200 hover:bg-slate-100 text-slate-600 disabled:opacity-30 disabled:pointer-events-none transition"
-            >
-              <ChevronRight size={14} />
-            </button>
-          </div>
-        </div>
+        <Pagination
+          currentPage={currentPage}
+          totalItems={filteredCandidates.length}
+          pageSize={pageSize}
+          onPageChange={setCurrentPage}
+          onPageSizeChange={setPageSize}
+          pageSizeOptions={[5, 10, 20, 50]}
+          itemLabel="candidates"
+        />
 
       </div>
     </div>

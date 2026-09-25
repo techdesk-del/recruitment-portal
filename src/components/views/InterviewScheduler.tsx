@@ -36,6 +36,7 @@ import {
 } from 'lucide-react';
 import { useRecruitment } from '../../context/RecruitmentContext';
 import { InterviewSchedule, InterviewRoundType, InterviewPlatform, InterviewStatus, Candidate } from '../../types';
+import { Pagination } from '../common';
 
 export const InterviewScheduler: React.FC = () => {
   const {
@@ -134,6 +135,21 @@ export const InterviewScheduler: React.FC = () => {
       return matchSearch && matchRound && matchStatus && matchInterviewer;
     });
   }, [interviews, searchQuery, roundFilter, statusFilter, interviewerFilter]);
+
+  // List View Pagination
+  const [interviewPage, setInterviewPage] = useState(1);
+  const [interviewPageSize, setInterviewPageSize] = useState(8);
+
+  useEffect(() => {
+    setInterviewPage(1);
+  }, [searchQuery, roundFilter, statusFilter, interviewerFilter]);
+
+  const paginatedInterviews = useMemo(() => {
+    return filteredInterviews.slice(
+      (interviewPage - 1) * interviewPageSize,
+      interviewPage * interviewPageSize
+    );
+  }, [filteredInterviews, interviewPage, interviewPageSize]);
 
   // Key Metrics
   const todayStr = '2026-08-29';
@@ -1143,7 +1159,7 @@ export const InterviewScheduler: React.FC = () => {
                     </td>
                   </tr>
                 ) : (
-                  filteredInterviews.map((item) => (
+                  paginatedInterviews.map((item) => (
                     <tr key={item.id} className="hover:bg-slate-50/80 transition group">
                       {/* Candidate */}
                       <td className="py-3.5 px-4">
@@ -1228,6 +1244,17 @@ export const InterviewScheduler: React.FC = () => {
               </tbody>
             </table>
           </div>
+
+          {/* Interview List Pagination */}
+          <Pagination
+            currentPage={interviewPage}
+            totalItems={filteredInterviews.length}
+            pageSize={interviewPageSize}
+            onPageChange={setInterviewPage}
+            onPageSizeChange={setInterviewPageSize}
+            pageSizeOptions={[5, 8, 15, 25]}
+            itemLabel="interviews"
+          />
         </div>
       )}
 

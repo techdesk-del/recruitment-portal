@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { 
   Calendar, 
   ChevronDown, 
@@ -7,6 +7,7 @@ import {
 } from 'lucide-react';
 import { useRecruitment } from '../../context/RecruitmentContext';
 import { CandidateSource } from '../../types';
+import { Pagination } from '../common';
 
 export const MainDashboard: React.FC = () => {
   const { 
@@ -18,6 +19,14 @@ export const MainDashboard: React.FC = () => {
     setSelectedCandidate, 
     downloadResume 
   } = useRecruitment();
+
+  const [dashPage, setDashPage] = useState(1);
+  const [dashPageSize, setDashPageSize] = useState(5);
+
+  const paginatedRecentCandidates = candidates.slice(
+    (dashPage - 1) * dashPageSize,
+    dashPage * dashPageSize
+  );
 
   const handlePortalFilter = (source: CandidateSource, referrerId?: string) => {
     setFilters({
@@ -33,8 +42,6 @@ export const MainDashboard: React.FC = () => {
     });
     setActiveView(source);
   };
-
-  const recentCandidates = candidates.slice(0, 5);
 
   return (
     <div className="space-y-8 animate-fade-in pb-12 font-sans">
@@ -241,13 +248,14 @@ export const MainDashboard: React.FC = () => {
                   <th className="py-3 px-5">Candidate</th>
                   <th className="py-3 px-4">Applied Role</th>
                   <th className="py-3 px-4">Portal</th>
+                  <th className="py-3 px-4">Employee Name & ID</th>
                   <th className="py-3 px-4">Experience</th>
-                  <th className="py-3 px-4">Hiring Stage</th>
-                  <th className="py-3 px-5 text-right">Actions</th>
+                  <th className="py-3 px-4 whitespace-nowrap">Hiring Stage</th>
+                  <th className="py-3 px-4 text-left whitespace-nowrap">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 text-xs">
-                {recentCandidates.map((cand) => (
+                {paginatedRecentCandidates.map((cand) => (
                   <tr key={cand.id} className="hover:bg-slate-50/70 transition">
                     <td className="py-3.5 px-5">
                       <div className="flex items-center gap-3">
@@ -267,14 +275,31 @@ export const MainDashboard: React.FC = () => {
                     </td>
                     <td className="py-3.5 px-4 font-medium text-slate-800">{cand.jobAppliedFor}</td>
                     <td className="py-3.5 px-4 capitalize text-slate-600 font-medium">{cand.source}</td>
+                    <td className="py-3.5 px-4">
+                      {cand.referralDetails ? (
+                        <div className="flex items-center gap-1.5 flex-wrap">
+                          <span className="font-semibold text-slate-800">{cand.referralDetails.employeeName}</span>
+                          <span className={`text-[9px] font-bold px-1 rounded border ${
+                            cand.referralDetails.designation === 'CEO' 
+                              ? 'bg-amber-100 text-amber-800 border-amber-200' 
+                              : 'bg-blue-100 text-blue-700 border-blue-200'
+                          }`}>
+                            {cand.referralDetails.designation}
+                          </span>
+                          <span className="font-mono text-[10px] text-slate-400">({cand.referralDetails.employeeId})</span>
+                        </div>
+                      ) : (
+                        <span className="text-slate-400 font-normal">—</span>
+                      )}
+                    </td>
                     <td className="py-3.5 px-4 text-slate-600 font-normal">{cand.experienceYears} Years</td>
                     <td className="py-3.5 px-4">
                       <span className="px-2.5 py-0.5 rounded-md bg-blue-50 text-blue-700 border border-blue-200 text-[11px] font-semibold capitalize">
                         {cand.status.replace('_', ' ')}
                       </span>
                     </td>
-                    <td className="py-3.5 px-5 text-right">
-                      <div className="flex items-center justify-end gap-1.5">
+                    <td className="py-3.5 px-4 text-left whitespace-nowrap">
+                      <div className="flex items-center gap-1.5">
                         <button
                           onClick={() => setSelectedCandidate(cand)}
                           className="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-[11px] transition"
@@ -294,6 +319,17 @@ export const MainDashboard: React.FC = () => {
               </tbody>
             </table>
           </div>
+
+          {/* Recent Candidates Pagination */}
+          <Pagination
+            currentPage={dashPage}
+            totalItems={candidates.length}
+            pageSize={dashPageSize}
+            onPageChange={setDashPage}
+            onPageSizeChange={setDashPageSize}
+            pageSizeOptions={[5, 10, 15]}
+            itemLabel="candidates"
+          />
         </div>
       </div>
 

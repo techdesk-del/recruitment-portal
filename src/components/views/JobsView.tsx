@@ -1,11 +1,19 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Briefcase, MapPin, Users, ArrowRight, CheckCircle2, DollarSign, Calendar } from 'lucide-react';
 import { useRecruitment } from '../../context/RecruitmentContext';
 import { CandidateSource } from '../../types';
-import { PortalLogo } from '../common/PortalLogo';
+import { PortalLogo, Pagination } from '../common';
 
 export const JobsView: React.FC = () => {
   const { jobs, candidates, setFilters, setActiveView } = useRecruitment();
+
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(4);
+
+  const paginatedJobs = jobs.slice(
+    (currentPage - 1) * pageSize,
+    currentPage * pageSize
+  );
 
   const platformLabels: Record<CandidateSource, { name: string; color: string }> = {
     naukri: { name: 'Naukri.com', color: 'bg-blue-50 text-blue-700 border-blue-200' },
@@ -55,7 +63,7 @@ export const JobsView: React.FC = () => {
 
       {/* Job Cards Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {jobs.map((job) => {
+        {paginatedJobs.map((job) => {
           const applicantCount = candidates.filter((c) => c.jobId === job.id).length;
 
           return (
@@ -135,6 +143,19 @@ export const JobsView: React.FC = () => {
             </div>
           );
         })}
+      </div>
+
+      {/* Jobs Pagination */}
+      <div className="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-2xs">
+        <Pagination
+          currentPage={currentPage}
+          totalItems={jobs.length}
+          pageSize={pageSize}
+          onPageChange={setCurrentPage}
+          onPageSizeChange={setPageSize}
+          pageSizeOptions={[4, 6, 8, 12]}
+          itemLabel="job requisitions"
+        />
       </div>
     </div>
   );

@@ -38,7 +38,7 @@ import {
 } from 'lucide-react';
 import { useRecruitment } from '../../context/RecruitmentContext';
 import { Candidate, CallRecord, CallDisposition, CandidateSource, CallingOverallStatus } from '../../types';
-import { PortalLogo } from '../common/PortalLogo';
+import { PortalLogo, Pagination } from '../common';
 import { Flag } from '../common/Flag';
 import { COUNTRIES, findCountry, CountryItem } from '../../data/countries';
 import brandLogoJpg from '../../assets/urbangaon-brand-logo.jpg';
@@ -406,6 +406,28 @@ export const CallingDesk: React.FC = () => {
     if (!a.isCallingQueued && b.isCallingQueued) return 1;
     return 0;
   });
+
+  // Calling Queue Pagination
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
+
+  // Auto-reset page when filters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [activeTab, searchQuery, selectedJobId, selectedPortal, selectedRecruiter]);
+
+  const paginatedCandidates = filteredCandidates.slice(
+    (currentPage - 1) * pageSize,
+    currentPage * pageSize
+  );
+
+  // Call Logs Pagination
+  const [logsCurrentPage, setLogsCurrentPage] = useState(1);
+  const [logsPageSize, setLogsPageSize] = useState(10);
+  const paginatedCallRecords = callRecords.slice(
+    (logsCurrentPage - 1) * logsPageSize,
+    logsCurrentPage * logsPageSize
+  );
 
   // Source badges
   const sourceBadges: Record<CandidateSource, { label: string; class: string }> = {
@@ -828,7 +850,7 @@ export const CallingDesk: React.FC = () => {
                     </td>
                   </tr>
                 ) : (
-                  filteredCandidates.map((cand) => {
+                  paginatedCandidates.map((cand) => {
                     const source = sourceBadges[cand.source];
                     const cDetails = cand.callingDetails;
                     const hasFollowUp = cDetails?.nextFollowUpDate;
@@ -970,6 +992,17 @@ export const CallingDesk: React.FC = () => {
               </tbody>
             </table>
           </div>
+
+          {/* Calling Queue Pagination */}
+          <Pagination
+            currentPage={currentPage}
+            totalItems={filteredCandidates.length}
+            pageSize={pageSize}
+            onPageChange={setCurrentPage}
+            onPageSizeChange={setPageSize}
+            pageSizeOptions={[5, 10, 20, 50]}
+            itemLabel="candidates in calling queue"
+          />
         </div>
       )}
 
@@ -990,7 +1023,7 @@ export const CallingDesk: React.FC = () => {
             {callRecords.length === 0 ? (
               <p className="text-center text-slate-400 py-8 text-xs">No calls recorded yet.</p>
             ) : (
-              callRecords.map((record) => {
+              paginatedCallRecords.map((record) => {
                 const durationMin = Math.floor(record.durationSeconds / 60);
                 const durationSec = record.durationSeconds % 60;
 
@@ -1064,6 +1097,17 @@ export const CallingDesk: React.FC = () => {
               })
             )}
           </div>
+
+          {/* Call Logs Pagination */}
+          <Pagination
+            currentPage={logsCurrentPage}
+            totalItems={callRecords.length}
+            pageSize={logsPageSize}
+            onPageChange={setLogsCurrentPage}
+            onPageSizeChange={setLogsPageSize}
+            pageSizeOptions={[5, 10, 20]}
+            itemLabel="call logs"
+          />
         </div>
       )}
 

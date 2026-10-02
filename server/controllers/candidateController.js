@@ -91,3 +91,35 @@ export async function updateCandidateScorecard(req, res) {
 
   res.json({ success: true, id, scorecard });
 }
+
+export async function createCandidate(req, res) {
+  try {
+    const candidateData = req.body;
+    if (!candidateData || !candidateData.name) {
+      return res.status(400).json({ error: 'Candidate name is required' });
+    }
+    const saved = await persistCandidate(candidateData);
+    res.status(201).json({ success: true, candidate: saved });
+  } catch (err) {
+    console.error('Error creating candidate:', err);
+    res.status(500).json({ error: 'Failed to create candidate' });
+  }
+}
+
+export async function bulkCreateCandidates(req, res) {
+  try {
+    const { candidates } = req.body;
+    const list = Array.isArray(candidates) ? candidates : [req.body];
+    const results = [];
+    for (const c of list) {
+      if (c && c.name) {
+        const saved = await persistCandidate(c);
+        results.push(saved);
+      }
+    }
+    res.status(201).json({ success: true, count: results.length, candidates: results });
+  } catch (err) {
+    console.error('Error in bulkCreateCandidates:', err);
+    res.status(500).json({ error: 'Failed to process bulk candidates' });
+  }
+}

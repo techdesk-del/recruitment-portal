@@ -72,6 +72,7 @@ export const TopHeader: React.FC = () => {
         <button
           onClick={() => simulateIncomingApplication()}
           className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#2563eb] hover:bg-blue-700 text-white font-medium text-xs shadow-xs transition active:scale-95"
+          title="Add simulated application"
         >
           <Plus size={14} />
           <span>Add Candidate</span>
@@ -88,26 +89,29 @@ export const TopHeader: React.FC = () => {
           onClick={handleSync}
           disabled={isSyncing}
           title="Sync candidate portals"
-          className="p-2 rounded-xl bg-white hover:bg-slate-50 border border-slate-200 text-slate-600 transition"
+          className="h-9 w-9 rounded-xl bg-white hover:bg-slate-50 border border-slate-200 text-slate-600 transition flex items-center justify-center cursor-pointer shadow-2xs"
         >
           <RefreshCw size={14} className={isSyncing ? 'animate-spin' : ''} />
         </button>
 
-        {/* Export Excel Button */}
+        {/* Export Excel / CSV Button */}
         <button
           onClick={exportToCSV}
-          title="Export CSV"
-          className="p-2 rounded-xl bg-white hover:bg-slate-50 border border-slate-200 text-slate-600 transition"
+          title="Export candidate database to CSV"
+          className="h-9 w-9 rounded-xl bg-white hover:bg-slate-50 border border-slate-200 text-slate-600 transition flex items-center justify-center cursor-pointer shadow-2xs"
         >
           <Download size={14} />
         </button>
 
         {/* Notification Bell */}
         <div className="relative">
-          <button className="p-2 rounded-xl bg-white hover:bg-slate-50 border border-slate-200 text-slate-600 transition">
+          <button 
+            title="Notifications"
+            className="h-9 w-9 rounded-xl bg-white hover:bg-slate-50 border border-slate-200 text-slate-600 transition flex items-center justify-center cursor-pointer shadow-2xs"
+          >
             <Bell size={14} />
           </button>
-          <span className="absolute top-1 right-1 w-2 h-2 rounded-full bg-blue-600 ring-2 ring-white"></span>
+          <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-blue-600 ring-2 ring-white"></span>
         </div>
 
       </div>

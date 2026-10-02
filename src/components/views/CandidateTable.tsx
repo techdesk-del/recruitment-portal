@@ -262,19 +262,44 @@ export const CandidateTable: React.FC = () => {
       </div>
 
       {/* Clean Filters & Search Bar */}
-      <div className="p-3.5 rounded-2xl bg-white border border-slate-200 flex flex-wrap items-center justify-between gap-3 shadow-2xs">
-        <div className="flex flex-wrap items-center gap-2.5 flex-1">
+      <div className="p-4 rounded-2xl bg-white border border-slate-200 shadow-2xs space-y-3">
+        {/* Top Row: Search Input + Candidate Count + Export CSV Button */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           {/* Search Box */}
-          <div className="relative min-w-[220px] flex-1 max-w-md">
+          <div className="relative flex-1 max-w-md">
             <Search size={14} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
             <input
               type="text"
               placeholder="Search candidate name, role, skill, phone..."
               value={filters.searchQuery}
               onChange={(e) => setFilters((prev) => ({ ...prev, searchQuery: e.target.value }))}
-              className="w-full pl-9 pr-3 py-1.5 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:border-blue-500 focus:bg-white transition font-medium"
+              className="w-full pl-9 pr-3 py-2 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:border-blue-500 focus:bg-white transition font-medium"
             />
           </div>
+
+          {/* Right Action: Candidate Count Badge & Export CSV Button */}
+          <div className="flex items-center gap-2.5 shrink-0 self-end sm:self-center">
+            <span className="text-xs text-slate-500 font-medium px-2.5 py-1.5 rounded-xl bg-slate-50 border border-slate-200 hidden md:inline">
+              Showing <strong>{filteredCandidates.length}</strong> of <strong>{candidates.length}</strong> candidates
+            </span>
+
+            <button
+              onClick={exportToCSV}
+              className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold transition shadow-xs active:scale-95 cursor-pointer shrink-0"
+              title="Export filtered candidate list to CSV"
+            >
+              <Download size={13} />
+              <span>Export CSV</span>
+            </button>
+          </div>
+        </div>
+
+        {/* Bottom Row: Filter Dropdowns */}
+        <div className="pt-2.5 border-t border-slate-100 flex flex-wrap items-center gap-2">
+          <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider mr-1 flex items-center gap-1">
+            <Filter size={12} className="text-slate-400" />
+            Filter:
+          </span>
 
           {/* Filter by Job Role */}
           <select
@@ -355,20 +380,12 @@ export const CandidateTable: React.FC = () => {
           {(filters.source !== 'all' || filters.status !== 'all' || filters.jobId !== 'all' || filters.referrerId || filters.searchQuery) && (
             <button
               onClick={resetFilters}
-              className="flex items-center gap-1 text-xs text-slate-500 hover:text-slate-900 px-2 py-1 transition font-medium"
+              className="flex items-center gap-1 text-xs text-rose-600 hover:text-rose-700 px-2 py-1 transition font-semibold"
             >
-              <RotateCcw size={12} /> Clear
+              <RotateCcw size={12} /> Clear Filters
             </button>
           )}
         </div>
-
-        <button
-          onClick={exportToCSV}
-          className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold border border-slate-200 transition"
-        >
-          <Download size={13} />
-          <span>Export CSV</span>
-        </button>
       </div>
 
       {/* Main Candidate Table in Light Mode */}

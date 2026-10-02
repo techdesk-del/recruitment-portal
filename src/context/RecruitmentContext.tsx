@@ -51,6 +51,8 @@ interface RecruitmentContextType {
   setIsJobModalOpen: (open: boolean) => void;
   isWebhookModalOpen: boolean;
   setIsWebhookModalOpen: (open: boolean) => void;
+  isBulkUploadModalOpen: boolean;
+  setIsBulkUploadModalOpen: (open: boolean) => void;
   toasts: ToastMessage[];
   showToast: (type: ToastMessage['type'], title: string, message: string) => void;
   removeToast: (id: string) => void;
@@ -70,6 +72,7 @@ interface RecruitmentContextType {
   bulkUpdateStatus: (candidateIds: string[], status: CandidateStatus) => void;
   exportToCSV: () => void;
   simulateIncomingApplication: (source?: CandidateSource) => void;
+  bulkAddCandidates: (newCandidates: Candidate[]) => void;
   resetToDefaultData: () => void;
 
   // Interview Scheduler Actions
@@ -149,6 +152,7 @@ export const RecruitmentProvider: React.FC<{ children: React.ReactNode }> = ({ c
   const [activeDialerCandidate, setActiveDialerCandidate] = useState<Candidate | null>(null);
   const [isJobModalOpen, setIsJobModalOpen] = useState(false);
   const [isWebhookModalOpen, setIsWebhookModalOpen] = useState(false);
+  const [isBulkUploadModalOpen, setIsBulkUploadModalOpen] = useState(false);
   const [toasts, setToasts] = useState<ToastMessage[]>([]);
 
   const openCandidateModal = (candidate: Candidate, tab: 'profile' | 'resume' | 'scorecard' | 'calling' | 'timeline' = 'profile') => {
@@ -648,6 +652,56 @@ export const RecruitmentProvider: React.FC<{ children: React.ReactNode }> = ({ c
       'success',
       `⚡ Live Ingestion: ${newCandidate.name}`,
       `New application received from ${selectedSource.toUpperCase()} for ${pick.jobTitle}!`
+    );
+  };
+
+  // Bulk Ingest Candidates from Resumes
+  const bulkAddCandidates = (newCandidates: Candidate[]) => {
+    if (!newCandidates || newCandidates.length === 0) return;
+
+    setCandidates((prev) => {
+      const existingIds = new Set(prev.map((c) => c.id));
+      const existingEmails = new Set(prev.map((c) => c.email.toLowerCase()));
+      const uniqueNew = newCandidates.filter(
+        (c) => !existingIds.has(c.id) && !existingEmails.has(c.email.toLowerCase())
+      );
+      return [...uniqueNew, ...prev];
+    });
+
+    // Update job counts
+    const jobCountsMap: Record<string, number> = {};
+    newCandidates.forEach((c) => {
+      if (c.jobId) {
+        jobCountsMap[c.jobId] = (jobCountsMap[c.jobId] || 0) + 1;
+      }
+    });
+
+    setJobs((prev) =>
+      prev.map((j) => {
+        const added = jobCountsMap[j.id] || 0;
+        return added > 0 ? { ...j, applicantsCount: j.applicantsCount + added } : j;
+      })
+    );
+
+    // Sync to backend MongoDB API if online
+    newCandidates.forEach((cand) => {
+      fetch('http://localhost:5000/api/candidates', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(cand)
+      }).catch(() => {});
+    });
+
+    confetti({
+      particleCount: 110,
+      spread: 75,
+      origin: { y: 0.6 }
+    });
+
+    showToast(
+      'success',
+      `🚀 ${newCandidates.length} Resumes Ingested!`,
+      `Bulk candidate profiles extracted, matched to open roles, and updated across the dashboard.`
     );
   };
 
@@ -1196,6 +1250,8 @@ export const RecruitmentProvider: React.FC<{ children: React.ReactNode }> = ({ c
         setIsJobModalOpen,
         isWebhookModalOpen,
         setIsWebhookModalOpen,
+        isBulkUploadModalOpen,
+        setIsBulkUploadModalOpen,
         toasts,
         showToast,
         removeToast,
@@ -1211,6 +1267,7 @@ export const RecruitmentProvider: React.FC<{ children: React.ReactNode }> = ({ c
         bulkUpdateStatus,
         exportToCSV,
         simulateIncomingApplication,
+        bulkAddCandidates,
         resetToDefaultData,
         scheduleInterview,
         updateInterview,

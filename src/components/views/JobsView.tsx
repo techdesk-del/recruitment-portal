@@ -39,6 +39,7 @@ export const JobsView: React.FC = () => {
     setActiveView('candidates');
   };
 
+  
   return (
     <div className="space-y-6 animate-fade-in pb-12">
       {/* Top Header */}

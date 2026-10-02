@@ -34,7 +34,8 @@ import {
   History,
   Printer,
   ChevronDown,
-  X
+  X,
+  UploadCloud
 } from 'lucide-react';
 import { useRecruitment } from '../../context/RecruitmentContext';
 import { Candidate, CallRecord, CallDisposition, CandidateSource, CallingOverallStatus } from '../../types';
@@ -108,6 +109,7 @@ export const CallingDesk: React.FC = () => {
     activeDialerCandidate,
     setActiveDialerCandidate,
     setActiveView,
+    setIsBulkUploadModalOpen,
     showToast
   } = useRecruitment();
 
@@ -518,10 +520,20 @@ export const CallingDesk: React.FC = () => {
         </div>
 
         <div className="flex items-center gap-2">
+          {/* Bulk Upload Resumes Button directly inside Calling Desk */}
+          <button
+            onClick={() => setIsBulkUploadModalOpen(true)}
+            className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white text-xs font-bold shadow-md shadow-blue-500/20 transition active:scale-95 cursor-pointer"
+            title="Upload multiple resumes directly for telephonic screening and calling"
+          >
+            <UploadCloud size={14} />
+            <span>Bulk Upload Resumes</span>
+          </button>
+
           {candidates.length > 0 && (
             <button
               onClick={() => handleStartCall(queuedCandidate || filteredCandidates[0] || candidates[0])}
-              className="flex items-center gap-2 px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold shadow-md shadow-blue-600/20 transition active:scale-95 cursor-pointer"
+              className="flex items-center gap-2 px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold shadow-md shadow-emerald-600/20 transition active:scale-95 cursor-pointer"
             >
               <Play size={13} className="fill-white" />
               <span>Start Next Call</span>
@@ -811,8 +823,18 @@ export const CallingDesk: React.FC = () => {
           )}
         </div>
 
-        <div className="text-slate-500 text-[11px] font-medium">
-          Showing <strong>{filteredCandidates.length}</strong> matching candidates
+        <div className="flex items-center gap-3">
+          <span className="text-slate-500 text-[11px] font-medium hidden sm:inline">
+            Showing <strong>{filteredCandidates.length}</strong> matching candidates
+          </span>
+          <button
+            onClick={() => setIsBulkUploadModalOpen(true)}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 text-xs font-bold transition active:scale-95 cursor-pointer shadow-2xs"
+            title="Upload multiple resumes directly into calling queue"
+          >
+            <UploadCloud size={13} className="text-blue-600" />
+            <span>Upload Resumes</span>
+          </button>
         </div>
       </div>
 
@@ -838,15 +860,24 @@ export const CallingDesk: React.FC = () => {
                     <td colSpan={6} className="py-12 text-center text-slate-400">
                       <PhoneCall size={32} className="mx-auto text-slate-300 mb-2" />
                       <p className="font-medium text-slate-600">No candidates found in this calling filter.</p>
-                      <button
-                        onClick={() => {
-                          setActiveTab('all');
-                          setSearchQuery('');
-                        }}
-                        className="mt-2 text-xs text-blue-600 hover:underline font-semibold"
-                      >
-                        Reset filters to view all queue
-                      </button>
+                      <div className="flex items-center justify-center gap-3 mt-3">
+                        <button
+                          onClick={() => {
+                            setActiveTab('all');
+                            setSearchQuery('');
+                          }}
+                          className="text-xs text-blue-600 hover:underline font-semibold"
+                        >
+                          Reset filters to view all queue
+                        </button>
+                        <span className="text-slate-300">•</span>
+                        <button
+                          onClick={() => setIsBulkUploadModalOpen(true)}
+                          className="text-xs text-blue-600 hover:underline font-semibold inline-flex items-center gap-1"
+                        >
+                          <UploadCloud size={12} /> Upload Resumes to Calling Queue
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ) : (

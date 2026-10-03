@@ -1,7 +1,12 @@
 import { Candidate } from '../models/Candidate.js';
 import { getMongoConnectionStatus } from '../config/database.js';
 import { getAllCandidatesFromStore, persistCandidate, deleteCandidateFromStore } from '../services/candidateStore.js';
-import { broadcastStatusUpdate, broadcastNewCandidate } from '../sockets/socketHandler.js';
+import { 
+  broadcastStatusUpdate, 
+  broadcastNewCandidate, 
+  broadcastCandidateUpdated, 
+  broadcastCandidateDeleted 
+} from '../sockets/socketHandler.js';
 
 // Helper to update candidate fields in MongoDB
 async function updateCandidateField(id, updates, extraPush = null) {
@@ -97,6 +102,7 @@ export async function updateCandidateNotes(req, res) {
   const { id } = req.params;
   const { notes } = req.body;
   const updated = await updateCandidateField(id, { notes });
+  broadcastCandidateUpdated(updated || { id, notes });
   res.json({ success: true, id, notes, candidate: updated || undefined });
 }
 
@@ -105,6 +111,7 @@ export async function updateCandidateRating(req, res) {
   const { id } = req.params;
   const { rating } = req.body;
   const updated = await updateCandidateField(id, { rating });
+  broadcastCandidateUpdated(updated || { id, rating });
   res.json({ success: true, id, rating, candidate: updated || undefined });
 }
 
@@ -113,6 +120,7 @@ export async function updateCandidateRecruiter(req, res) {
   const { id } = req.params;
   const { recruiter } = req.body;
   const updated = await updateCandidateField(id, { recruiterAssigned: recruiter });
+  broadcastCandidateUpdated(updated || { id, recruiterAssigned: recruiter });
   res.json({ success: true, id, recruiter, candidate: updated || undefined });
 }
 
@@ -136,6 +144,7 @@ export async function updateCandidateScorecard(req, res) {
     { activityHistory: { $each: [activityItem], $position: 0 } }
   );
 
+  broadcastCandidateUpdated(updated || { id, scorecard });
   res.json({ success: true, id, scorecard, candidate: updated || undefined });
 }
 
@@ -150,6 +159,7 @@ export async function updateCandidateCallingDetails(req, res) {
   };
 
   const updated = await updateCandidateField(id, payload);
+  broadcastCandidateUpdated(updated || { id, ...payload });
   res.json({ success: true, id, updates, candidate: updated || undefined });
 }
 
@@ -160,6 +170,7 @@ export async function updateCandidate(req, res) {
   delete updates._id;
 
   const updated = await updateCandidateField(id, updates);
+  broadcastCandidateUpdated(updated || { id, ...updates });
   res.json({ success: true, id, candidate: updated || updates });
 }
 
@@ -168,6 +179,7 @@ export async function deleteCandidate(req, res) {
   const { id } = req.params;
   try {
     await deleteCandidateFromStore(id);
+    broadcastCandidateDeleted(id);
     res.json({ success: true, id });
   } catch (err) {
     console.error('Failed to delete candidate:', err.message);

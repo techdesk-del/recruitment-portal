@@ -1,6 +1,7 @@
 import { Interview } from '../models/Interview.js';
 import { Candidate } from '../models/Candidate.js';
 import { getMongoConnectionStatus } from '../config/database.js';
+import { broadcastInterviewCreated, broadcastInterviewUpdated, broadcastInterviewDeleted } from '../sockets/socketHandler.js';
 
 export async function getInterviews(req, res) {
   try {
@@ -45,8 +46,10 @@ export async function createInterview(req, res) {
         }
       ).catch(() => {});
 
+      broadcastInterviewCreated(saved);
       return res.status(201).json(saved);
     }
+    broadcastInterviewCreated(data);
     res.status(201).json(data);
   } catch (err) {
     console.error('Error creating interview in MongoDB:', err);
@@ -64,8 +67,10 @@ export async function updateInterview(req, res) {
         { $set: { ...updates, updatedAt: new Date().toISOString() } },
         { new: true }
       );
+      broadcastInterviewUpdated(updated || { id, ...updates });
       return res.json({ success: true, interview: updated });
     }
+    broadcastInterviewUpdated({ id, ...updates });
     res.json({ success: true, id, updates });
   } catch (err) {
     console.error('Error updating interview in MongoDB:', err);
@@ -79,6 +84,7 @@ export async function deleteInterview(req, res) {
     if (getMongoConnectionStatus()) {
       await Interview.findOneAndDelete({ id });
     }
+    broadcastInterviewDeleted(id);
     res.json({ success: true, id });
   } catch (err) {
     console.error('Error deleting interview in MongoDB:', err);

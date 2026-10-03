@@ -233,13 +233,17 @@ export const RecruitmentProvider: React.FC<{ children: React.ReactNode }> = ({ c
     return () => { isMounted = false; };
   }, []);
 
-  // --- Real-Time Socket.io Ingestion Listener ---
+  // --- Real-Time Socket.io Live Multi-Device Sync ---
   useEffect(() => {
     const socket = getSocket();
+
+    // 1. New Candidate Ingested (Single / Bulk / Webhook)
     socket.on('NEW_CANDIDATE_INGESTED', (newCand: Candidate) => {
       setCandidates((prev) => {
         if (prev.some((c) => c.id === newCand.id || c.email === newCand.email)) return prev;
-        return [newCand, ...prev];
+        const updated = [newCand, ...prev];
+        try { localStorage.setItem(STORAGE_KEYS.candidates, JSON.stringify(updated)); } catch (e) {}
+        return updated;
       });
 
       setJobs((prev) =>
@@ -249,8 +253,147 @@ export const RecruitmentProvider: React.FC<{ children: React.ReactNode }> = ({ c
       showToast('success', `⚡ Live Ingestion: ${newCand.name}`, `Application received from ${newCand.source.toUpperCase()}!`);
     });
 
+    // 2. Candidate Status Updated across any device
+    socket.on('CANDIDATE_STATUS_UPDATED', ({ id, status, activityItem }: { id: string; status: CandidateStatus; activityItem?: any }) => {
+      setCandidates((prev) => {
+        const next = prev.map((c) => {
+          if (c.id === id) {
+            const nextHistory = activityItem ? [activityItem, ...c.activityHistory] : c.activityHistory;
+            return { ...c, status, activityHistory: nextHistory, lastUpdatedDate: new Date().toISOString() };
+          }
+          return c;
+        });
+        try { localStorage.setItem(STORAGE_KEYS.candidates, JSON.stringify(next)); } catch (e) {}
+        return next;
+      });
+    });
+
+    // 3. Generic Candidate Update (Scorecard, Notes, Rating, Recruiter, etc.)
+    socket.on('CANDIDATE_UPDATED', (candUpdate: Partial<Candidate> & { id: string }) => {
+      setCandidates((prev) => {
+        const next = prev.map((c) => (c.id === candUpdate.id ? { ...c, ...candUpdate, lastUpdatedDate: new Date().toISOString() } : c));
+        try { localStorage.setItem(STORAGE_KEYS.candidates, JSON.stringify(next)); } catch (e) {}
+        return next;
+      });
+    });
+
+    // 4. Candidate Deleted
+    socket.on('CANDIDATE_DELETED', ({ id }: { id: string }) => {
+      setCandidates((prev) => {
+        const next = prev.filter((c) => c.id !== id);
+        try { localStorage.setItem(STORAGE_KEYS.candidates, JSON.stringify(next)); } catch (e) {}
+        return next;
+      });
+    });
+
+    // 5. Interview Scheduled / Updated / Deleted
+    socket.on('INTERVIEW_CREATED', (newInt: InterviewSchedule) => {
+      setInterviews((prev) => (prev.some((i) => i.id === newInt.id) ? prev : [newInt, ...prev]));
+    });
+
+    socket.on('INTERVIEW_UPDATED', (updatedInt: Partial<InterviewSchedule> & { id: string }) => {
+      setInterviews((prev) => prev.map((i) => (i.id === updatedInt.id ? { ...i, ...updatedInt } : i)));
+    });
+
+    socket.on('INTERVIEW_DELETED', ({ id }: { id: string }) => {
+      setInterviews((prev) => prev.filter((i) => i.id !== id));
+    });
+
+    // 6. Calling Log Created / Deleted
+    socket.on('CALL_RECORD_CREATED', (newCall: CallRecord) => {
+      setCallRecords((prev) => (prev.some((c) => c.id === newCall.id) ? prev : [newCall, ...prev]));
+    });
+
+    socket.on('CALL_RECORD_DELETED', ({ id }: { id: string }) => {
+      setCallRecords((prev) => prev.filter((c) => c.id !== id));
+    });
+
     return () => {
       closeSocket();
+    };
+  }, []);
+
+  // --- Real-Time Global Cloud Poller (Heartbeat for All PCs Worldwide) ---
+  useEffect(() => {
+    let isMounted = true;
+
+    const pollAtlasSync = async () => {
+      if (typeof document !== 'undefined' && document.visibilityState !== 'visible') {
+        return; // Don't burn bandwidth if tab is hidden
+      }
+
+      try {
+        const [cloudCandidates, cloudInterviews, cloudCalls] = await Promise.allSettled([
+          recruitmentApi.fetchCandidates(),
+          recruitmentApi.fetchInterviews(),
+          recruitmentApi.fetchCalls()
+        ]);
+
+        if (!isMounted) return;
+
+        // Sync Candidates
+        if (cloudCandidates.status === 'fulfilled' && Array.isArray(cloudCandidates.value) && cloudCandidates.value.length > 0) {
+          const remoteList = cloudCandidates.value.filter(
+            (c: any) => c.id !== 'cand-010651' && c.email !== 'test@gmail.com' && c.name?.toLowerCase() !== 'test'
+          );
+
+          setCandidates((current) => {
+            // Check if there are updates
+            if (current.length !== remoteList.length) {
+              try { localStorage.setItem(STORAGE_KEYS.candidates, JSON.stringify(remoteList)); } catch (e) {}
+              return remoteList;
+            }
+
+            const currentMap = new Map(current.map((c) => [c.id, c]));
+            let hasChanged = false;
+            for (const rem of remoteList) {
+              const loc = currentMap.get(rem.id);
+              if (!loc || loc.status !== rem.status || loc.lastUpdatedDate !== rem.lastUpdatedDate || loc.notes !== rem.notes) {
+                hasChanged = true;
+                break;
+              }
+            }
+
+            if (hasChanged) {
+              try { localStorage.setItem(STORAGE_KEYS.candidates, JSON.stringify(remoteList)); } catch (e) {}
+              return remoteList;
+            }
+            return current;
+          });
+        }
+
+        // Sync Interviews
+        if (cloudInterviews.status === 'fulfilled' && Array.isArray(cloudInterviews.value) && cloudInterviews.value.length > 0) {
+          setInterviews((curr) => (curr.length !== cloudInterviews.value.length ? cloudInterviews.value : curr));
+        }
+
+        // Sync Calling Logs
+        if (cloudCalls.status === 'fulfilled' && Array.isArray(cloudCalls.value) && cloudCalls.value.length > 0) {
+          setCallRecords((curr) => (curr.length !== cloudCalls.value.length ? cloudCalls.value : curr));
+        }
+      } catch (err) {
+        // Silent background fallback
+      }
+    };
+
+    // Poll every 4.5 seconds for instant multi-device sync
+    const syncInterval = setInterval(pollAtlasSync, 4500);
+
+    // Instant re-sync when tab becomes active / focused
+    const handleRevalidate = () => {
+      if (document.visibilityState === 'visible') {
+        pollAtlasSync();
+      }
+    };
+
+    window.addEventListener('visibilitychange', handleRevalidate);
+    window.addEventListener('focus', handleRevalidate);
+
+    return () => {
+      isMounted = false;
+      clearInterval(syncInterval);
+      window.removeEventListener('visibilitychange', handleRevalidate);
+      window.removeEventListener('focus', handleRevalidate);
     };
   }, []);
 

@@ -1,6 +1,7 @@
 import { CallRecord } from '../models/CallRecord.js';
 import { Candidate } from '../models/Candidate.js';
 import { getMongoConnectionStatus } from '../config/database.js';
+import { broadcastCallRecordCreated, broadcastCallRecordDeleted } from '../sockets/socketHandler.js';
 
 export async function getCalls(req, res) {
   try {
@@ -82,8 +83,10 @@ export async function createCall(req, res) {
         }
       ).catch((err) => console.warn('Candidate sync after call warning:', err.message));
 
+      broadcastCallRecordCreated(saved);
       return res.status(201).json(saved);
     }
+    broadcastCallRecordCreated(data);
     res.status(201).json(data);
   } catch (err) {
     console.error('Error logging call record in MongoDB:', err);
@@ -97,6 +100,7 @@ export async function deleteCall(req, res) {
     if (getMongoConnectionStatus()) {
       await CallRecord.findOneAndDelete({ id });
     }
+    broadcastCallRecordDeleted(id);
     res.json({ success: true, id });
   } catch (err) {
     console.error('Error deleting call record in MongoDB:', err);

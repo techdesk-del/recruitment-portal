@@ -2,10 +2,18 @@
   "name": "recruitment-dashboard-suite",
   "private": true,
   "version": "1.0.0",
+  "type": "module",
   "workspaces": [
     "frontend",
     "backend"
   ],
+  "dependencies": {
+    "cors": "^2.8.6",
+    "dotenv": "^17.4.2",
+    "express": "^5.2.1",
+    "mongoose": "^9.9.4",
+    "socket.io": "^4.8.3"
+  },
   "scripts": {
     "dev": "start /B npm --prefix backend run dev && npm --prefix frontend run dev",
     "dev:all": "start /B npm --prefix backend run dev && npm --prefix frontend run dev",

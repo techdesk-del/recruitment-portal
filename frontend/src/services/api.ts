@@ -1,6 +1,24 @@
 import { Candidate, CandidateStatus, Scorecard, JobPosting, InterviewSchedule, CallRecord } from '../types';
 
-const BASE_URL = (import.meta as any).env?.VITE_API_URL || 'http://localhost:5000';
+// Dynamic base URL:
+// - Uses VITE_API_URL if configured
+// - When deployed on Vercel or cloud domain, uses relative '' to route to cloud API
+// - On localhost, routes to local backend port 5000
+const getBaseUrl = (): string => {
+  const envUrl = (import.meta as any).env?.VITE_API_URL;
+  if (envUrl && typeof envUrl === 'string' && envUrl.trim()) {
+    return envUrl.replace(/\/+$/, '');
+  }
+  if (typeof window !== 'undefined') {
+    const host = window.location.hostname;
+    if (host !== 'localhost' && host !== '127.0.0.1') {
+      return '';
+    }
+  }
+  return 'http://localhost:5000';
+};
+
+const BASE_URL = getBaseUrl();
 
 // Simple helper to send JSON requests and parse responses
 async function request<T>(endpoint: string, options: RequestInit = {}): Promise<T> {

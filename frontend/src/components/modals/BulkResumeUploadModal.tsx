@@ -15,7 +15,8 @@ import {
   Edit3,
   Save,
   Check,
-  Award
+  Award,
+  Cpu
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { useRecruitment } from '../../context/RecruitmentContext';
@@ -49,7 +50,7 @@ export const BulkResumeUploadModal: React.FC = () => {
   const [selectedSource, setSelectedSource] = useState<CandidateSource>('naukri');
   const [initialStatus, setInitialStatus] = useState<'applied' | 'screening'>('applied');
   const [recruiterProfile, setRecruiterProfile] = useState<string>('Dr Sharmila Yadav');
-  
+
   const [isDragging, setIsDragging] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
   const [processingProgress, setProcessingProgress] = useState(0);
@@ -59,6 +60,7 @@ export const BulkResumeUploadModal: React.FC = () => {
     candidate: Candidate;
     fileName: string;
     fileSizeText: string;
+    parserUsed?: 'gemini-ai' | 'universal-engine';
   }[]>([]);
 
   // Manual Form State
@@ -102,13 +104,13 @@ export const BulkResumeUploadModal: React.FC = () => {
     setProcessingProgress(15);
     setProcessingStepText(`Reading ${fileArray.length} document stream${fileArray.length > 1 ? 's' : ''}...`);
 
-    const newStaged: { candidate: Candidate; fileName: string; fileSizeText: string }[] = [];
+    const newStaged: { candidate: Candidate; fileName: string; fileSizeText: string; parserUsed?: 'gemini-ai' | 'universal-engine' }[] = [];
 
     for (let i = 0; i < fileArray.length; i++) {
       const file = fileArray[i];
       const percent = Math.round(15 + ((i + 1) / fileArray.length) * 75);
       setProcessingProgress(percent);
-      setProcessingStepText(`Extracting contact details & ATS keywords for ${file.name}...`);
+      setProcessingStepText(`Extracting candidate details & parsing layout for ${file.name}...`);
 
       // Small realistic parsing feedback
       await new Promise((r) => setTimeout(r, 140));
@@ -123,7 +125,8 @@ export const BulkResumeUploadModal: React.FC = () => {
       newStaged.push({
         candidate: parsed.candidate,
         fileName: file.name,
-        fileSizeText: (file.size / 1024).toFixed(1) + ' KB'
+        fileSizeText: (file.size / 1024).toFixed(1) + ' KB',
+        parserUsed: parsed.parserUsed
       });
     }
 
@@ -331,6 +334,28 @@ export const BulkResumeUploadModal: React.FC = () => {
           {/* TAB 1: RESUME UPLOAD & PARSING */}
           {activeTab === 'upload' && (
             <div className="space-y-6 animate-fade-in">
+              {/* Gemini AI Resume Engine Badge */}
+              <div className="flex items-center justify-between p-3.5 rounded-2xl bg-gradient-to-r from-blue-50/90 via-indigo-50/70 to-purple-50/90 border border-indigo-100 shadow-2xs">
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 rounded-xl bg-purple-600 text-white flex items-center justify-center shrink-0 shadow-xs">
+                    <Sparkles size={16} />
+                  </div>
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs font-bold text-slate-900">
+                        Gemini 2.5 AI Resume Intelligence Engine
+                      </span>
+                      <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-purple-100 text-purple-700 border border-purple-200">
+                        Active & Connected
+                      </span>
+                    </div>
+                    <p className="text-[11px] text-slate-500 mt-0.5">
+                      Analyzes any resume format with Google Gemini AI intelligence, extracting exact candidate details, timeline & qualifications.
+                    </p>
+                  </div>
+                </div>
+              </div>
+
               {/* Configuration Grid */}
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 bg-white p-4 rounded-2xl border border-slate-200 shadow-2xs">
                 {/* Target Requisition */}
@@ -557,6 +582,15 @@ export const BulkResumeUploadModal: React.FC = () => {
                                 <span className="text-[10px] text-slate-400">
                                   • {cand.phone}
                                 </span>
+                                {item.parserUsed === 'gemini-ai' ? (
+                                  <span className="px-1.5 py-0.5 rounded text-[9px] font-bold bg-purple-100 text-purple-700 border border-purple-200 flex items-center gap-1">
+                                    <Sparkles size={9} /> Gemini AI
+                                  </span>
+                                ) : (
+                                  <span className="px-1.5 py-0.5 rounded text-[9px] font-bold bg-blue-50 text-blue-700 border border-blue-200 flex items-center gap-1">
+                                    <Cpu size={9} /> Universal Engine
+                                  </span>
+                                )}
                               </div>
 
                               <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] text-slate-500 mt-1">

@@ -36,6 +36,7 @@ function sanitizeCandidate(data) {
   if (!sanitized.phone) {
     sanitized.phone = '+91 98290 00000';
   }
+  //
   if (!sanitized.source) {
     sanitized.source = 'urbangaon';
   }

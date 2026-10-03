@@ -1,0 +1,87 @@
+import { Interview } from '../models/Interview.js';
+import { Candidate } from '../models/Candidate.js';
+import { getMongoConnectionStatus } from '../config/database.js';
+
+export async function getInterviews(req, res) {
+  try {
+    if (getMongoConnectionStatus()) {
+      const interviews = await Interview.find().sort({ date: -1, startTime: -1 });
+      return res.json(interviews);
+    }
+  } catch (err) {
+    console.error('Error fetching interviews from MongoDB:', err);
+  }
+  res.json([]);
+}
+
+export async function createInterview(req, res) {
+  try {
+    const data = req.body;
+    if (!data.id) {
+      data.id = `int-${Date.now().toString().slice(-6)}`;
+    }
+    if (getMongoConnectionStatus()) {
+      const saved = await Interview.findOneAndUpdate(
+        { id: data.id },
+        data,
+        { upsert: true, new: true, setDefaultsOnInsert: true }
+      );
+
+      // Log activity on the candidate in MongoDB
+      const activityItem = {
+        id: `act-${Date.now()}`,
+        action: `Interview Scheduled: ${data.round}`,
+        details: `${data.date} at ${data.startTime} with ${data.interviewerName} (${data.platform})`,
+        performedBy: data.interviewerName || 'Lead Recruiter',
+        timestamp: new Date().toISOString(),
+        type: 'interview'
+      };
+
+      await Candidate.findOneAndUpdate(
+        { id: data.candidateId },
+        { 
+          $set: { status: 'interview_r1', lastUpdatedDate: new Date().toISOString() },
+          $push: { activityHistory: { $each: [activityItem], $position: 0 } }
+        }
+      ).catch(() => {});
+
+      return res.status(201).json(saved);
+    }
+    res.status(201).json(data);
+  } catch (err) {
+    console.error('Error creating interview in MongoDB:', err);
+    res.status(500).json({ error: 'Failed to create interview' });
+  }
+}
+
+export async function updateInterview(req, res) {
+  const { id } = req.params;
+  const updates = req.body;
+  try {
+    if (getMongoConnectionStatus()) {
+      const updated = await Interview.findOneAndUpdate(
+        { id },
+        { $set: { ...updates, updatedAt: new Date().toISOString() } },
+        { new: true }
+      );
+      return res.json({ success: true, interview: updated });
+    }
+    res.json({ success: true, id, updates });
+  } catch (err) {
+    console.error('Error updating interview in MongoDB:', err);
+    res.status(500).json({ error: 'Failed to update interview' });
+  }
+}
+
+export async function deleteInterview(req, res) {
+  const { id } = req.params;
+  try {
+    if (getMongoConnectionStatus()) {
+      await Interview.findOneAndDelete({ id });
+    }
+    res.json({ success: true, id });
+  } catch (err) {
+    console.error('Error deleting interview in MongoDB:', err);
+    res.status(500).json({ error: 'Failed to delete interview' });
+  }
+}

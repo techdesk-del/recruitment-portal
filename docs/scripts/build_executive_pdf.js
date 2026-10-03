@@ -76,7 +76,7 @@ const htmlContent = `<!DOCTYPE html>
     .page {
       width: 210mm;
       height: 297mm;
-      max-height: 297mm;https://127.0.0.1:49885/static/artifacts/8ee91c57-7c64-4234-87b0-d21e4b6249d1/recruiter_codebase_flow_1790933626320.jpg?csrf=47fc62a0-50f5-4d4c-beca-e9bf251ccbcf
+      max-height: 297mm;
       padding: 16mm 18mm 15mm 18mm;
       margin: 0 auto;
       background: #ffffff;

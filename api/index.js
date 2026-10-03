@@ -7,21 +7,15 @@ const app = express();
 
 // Enable Cross-Origin Resource Sharing for any remote client worldwide
 app.use(cors({ origin: '*' }));
-app.use(express.json({ limit: '15mb' }));
-app.use(express.urlencoded({ extended: true, limit: '15mb' }));
+app.use(express.json({ limit: '20mb' }));
+app.use(express.urlencoded({ extended: true, limit: '20mb' }));
 
-// Ensure MongoDB Atlas connection on serverless cold starts
-let isConnecting = false;
+// Ensure MongoDB Atlas connection on every request before routing
 app.use(async (req, res, next) => {
-  if (!getMongoConnectionStatus() && !isConnecting) {
-    isConnecting = true;
-    try {
-      await connectDB();
-    } catch (e) {
-      console.warn('[Vercel Serverless] DB connection note:', e.message);
-    } finally {
-      isConnecting = false;
-    }
+  try {
+    await connectDB();
+  } catch (e) {
+    console.warn('[Serverless Gateway] DB connection warning:', e.message);
   }
   next();
 });

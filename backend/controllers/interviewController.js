@@ -1,11 +1,12 @@
 import { Interview } from '../models/Interview.js';
 import { Candidate } from '../models/Candidate.js';
-import { getMongoConnectionStatus } from '../config/database.js';
+import { ensureDBConnected, getMongoConnectionStatus } from '../config/database.js';
 import { broadcastInterviewCreated, broadcastInterviewUpdated, broadcastInterviewDeleted } from '../sockets/socketHandler.js';
 
 export async function getInterviews(req, res) {
   try {
-    if (getMongoConnectionStatus()) {
+    const isConnected = await ensureDBConnected();
+    if (isConnected) {
       const interviews = await Interview.find().sort({ date: -1, startTime: -1 });
       return res.json(interviews);
     }
@@ -21,7 +22,8 @@ export async function createInterview(req, res) {
     if (!data.id) {
       data.id = `int-${Date.now().toString().slice(-6)}`;
     }
-    if (getMongoConnectionStatus()) {
+    const isConnected = await ensureDBConnected();
+    if (isConnected) {
       const saved = await Interview.findOneAndUpdate(
         { id: data.id },
         data,

@@ -338,8 +338,11 @@ export const RecruitmentProvider: React.FC<{ children: React.ReactNode }> = ({ c
           );
 
           setCandidates((current) => {
-            // Check if there are updates
-            if (current.length !== remoteList.length) {
+            const currentIds = new Set(current.map((c) => c.id));
+            const hasNew = remoteList.some((r) => !currentIds.has(r.id));
+            const hasMissing = current.some((c) => !remoteList.some((r) => r.id === c.id));
+            
+            if (hasNew || hasMissing || current.length !== remoteList.length) {
               try { localStorage.setItem(STORAGE_KEYS.candidates, JSON.stringify(remoteList)); } catch (e) {}
               return remoteList;
             }
@@ -376,8 +379,8 @@ export const RecruitmentProvider: React.FC<{ children: React.ReactNode }> = ({ c
       }
     };
 
-    // Poll every 4.5 seconds for instant multi-device sync
-    const syncInterval = setInterval(pollAtlasSync, 4500);
+    // Poll every 3 seconds for instant multi-device sync
+    const syncInterval = setInterval(pollAtlasSync, 3000);
 
     // Instant re-sync when tab becomes active / focused
     const handleRevalidate = () => {

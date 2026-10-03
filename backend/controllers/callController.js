@@ -1,11 +1,12 @@
 import { CallRecord } from '../models/CallRecord.js';
 import { Candidate } from '../models/Candidate.js';
-import { getMongoConnectionStatus } from '../config/database.js';
+import { ensureDBConnected, getMongoConnectionStatus } from '../config/database.js';
 import { broadcastCallRecordCreated, broadcastCallRecordDeleted } from '../sockets/socketHandler.js';
 
 export async function getCalls(req, res) {
   try {
-    if (getMongoConnectionStatus()) {
+    const isConnected = await ensureDBConnected();
+    if (isConnected) {
       const calls = await CallRecord.find().sort({ callTime: -1 });
       return res.json(calls);
     }
@@ -25,7 +26,8 @@ export async function createCall(req, res) {
       data.callTime = new Date().toISOString();
     }
 
-    if (getMongoConnectionStatus()) {
+    const isConnected = await ensureDBConnected();
+    if (isConnected) {
       const saved = await CallRecord.findOneAndUpdate(
         { id: data.id },
         data,

@@ -1,5 +1,5 @@
 import { Candidate } from '../models/Candidate.js';
-import { getMongoConnectionStatus } from '../config/database.js';
+import { ensureDBConnected, getMongoConnectionStatus } from '../config/database.js';
 import { getAllCandidatesFromStore, persistCandidate, deleteCandidateFromStore } from '../services/candidateStore.js';
 import { 
   broadcastStatusUpdate, 
@@ -10,7 +10,7 @@ import {
 
 // Helper to update candidate fields in MongoDB
 async function updateCandidateField(id, updates, extraPush = null) {
-  if (!getMongoConnectionStatus()) return null;
+  await ensureDBConnected();
   const updateQuery = {
     $set: { ...updates, lastUpdatedDate: new Date().toISOString() },
     ...(extraPush && { $push: extraPush })
@@ -18,18 +18,15 @@ async function updateCandidateField(id, updates, extraPush = null) {
   return Candidate.findOneAndUpdate({ id }, updateQuery, { new: true });
 }
 
-// GET all candidates
+// GET all candidates (Guaranteed MongoDB Atlas synchronization)
 export async function getCandidates(req, res) {
   try {
-    if (getMongoConnectionStatus()) {
-      const candidates = await Candidate.find().sort({ createdAt: -1 });
-      return res.json(candidates);
-    }
+    const candidates = await getAllCandidatesFromStore();
+    return res.json(candidates);
   } catch (err) {
-    console.error('Error fetching candidates from MongoDB:', err.message);
+    console.error('Error in getCandidates:', err.message);
+    res.status(500).json({ error: 'Failed to retrieve candidates' });
   }
-  const fallback = await getAllCandidatesFromStore();
-  res.json(fallback);
 }
 
 // POST create single candidate

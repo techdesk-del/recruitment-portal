@@ -158,25 +158,23 @@ const CandidateCallingDetailsSchema = new mongoose.Schema({
 const CandidateSchema = new mongoose.Schema({
   id: { type: String, required: true, unique: true, index: true },
   name: { type: String, required: true, trim: true },
-  email: { type: String, required: true, trim: true, index: true },
-  phone: { type: String, required: true, trim: true },
+  email: { type: String, default: '', trim: true, index: true },
+  phone: { type: String, default: '', trim: true },
   location: { type: String, default: 'India' },
   source: {
     type: String,
-    enum: ['naukri', 'linkedin', 'indeed', 'apna', 'urbangaon', 'internshala', 'referral', 'newspaper', 'other'],
-    required: true,
+    default: 'urbangaon',
     index: true
   },
   sourceId: { type: String },
   referralDetails: EmployeeReferralSchema,
-  jobAppliedFor: { type: String, required: true },
-  jobId: { type: String, required: true, index: true },
-  department: { type: String, default: 'Engineering' },
+  jobAppliedFor: { type: String, default: 'General Application' },
+  jobId: { type: String, default: 'job-general', index: true },
+  department: { type: String, default: 'Operations' },
   appliedDate: { type: String, default: () => new Date().toISOString() },
   lastUpdatedDate: { type: String, default: () => new Date().toISOString() },
   status: {
     type: String,
-    enum: ['applied', 'screening', 'shortlisted', 'interview_r1', 'interview_r2', 'offered', 'joined', 'rejected'],
     default: 'applied',
     index: true
   },

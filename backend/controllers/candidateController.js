@@ -53,16 +53,18 @@ export async function createCandidate(req, res) {
 export async function bulkCreateCandidates(req, res) {
   try {
     const list = Array.isArray(req.body.candidates) ? req.body.candidates : [req.body];
-    const results = [];
+    const valid = list.filter(c => c?.name);
 
-    for (const c of list) {
-      if (c?.name) {
-        if (!c.id) c.id = `cand-${Date.now()}-${Math.floor(Math.random() * 900 + 100)}`;
-        const saved = await persistCandidate(c);
-        results.push(saved);
-        broadcastNewCandidate(saved);
+    const results = await Promise.all(valid.map(async (c) => {
+      const candidatePayload = { ...c };
+      if (!candidatePayload.id) {
+        candidatePayload.id = `cand-${Date.now()}-${Math.floor(Math.random() * 900 + 100)}`;
       }
-    }
+      const saved = await persistCandidate(candidatePayload);
+      broadcastNewCandidate(saved);
+      return saved;
+    }));
+
     res.status(201).json({ success: true, count: results.length, candidates: results });
   } catch (err) {
     console.error('Error in bulkCreateCandidates:', err.message);

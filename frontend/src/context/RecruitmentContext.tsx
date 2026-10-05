@@ -239,8 +239,9 @@ export const RecruitmentProvider: React.FC<{ children: React.ReactNode }> = ({ c
 
     // 1. New Candidate Ingested (Single / Bulk / Webhook)
     socket.on('NEW_CANDIDATE_INGESTED', (newCand: Candidate) => {
+      if (!newCand || !newCand.id) return;
       setCandidates((prev) => {
-        if (prev.some((c) => c.id === newCand.id || c.email === newCand.email)) return prev;
+        if (prev.some((c) => c.id === newCand.id || (newCand.email && c.email === newCand.email))) return prev;
         const updated = [newCand, ...prev];
         try { localStorage.setItem(STORAGE_KEYS.candidates, JSON.stringify(updated)); } catch (e) {}
         return updated;
@@ -250,11 +251,12 @@ export const RecruitmentProvider: React.FC<{ children: React.ReactNode }> = ({ c
         prev.map((j) => (j.id === newCand.jobId || j.title === newCand.jobAppliedFor ? { ...j, applicantsCount: j.applicantsCount + 1 } : j))
       );
 
-      showToast('success', `⚡ Live Ingestion: ${newCand.name}`, `Application received from ${newCand.source.toUpperCase()}!`);
+      showToast('success', `⚡ Live Ingestion: ${newCand.name}`, `Application received from ${(newCand.source || 'portal').toUpperCase()}!`);
     });
 
     // 2. Candidate Status Updated across any device
     socket.on('CANDIDATE_STATUS_UPDATED', ({ id, status, activityItem }: { id: string; status: CandidateStatus; activityItem?: any }) => {
+      if (!id || !status) return;
       setCandidates((prev) => {
         const next = prev.map((c) => {
           if (c.id === id) {
@@ -270,6 +272,7 @@ export const RecruitmentProvider: React.FC<{ children: React.ReactNode }> = ({ c
 
     // 3. Generic Candidate Update (Scorecard, Notes, Rating, Recruiter, etc.)
     socket.on('CANDIDATE_UPDATED', (candUpdate: Partial<Candidate> & { id: string }) => {
+      if (!candUpdate || !candUpdate.id) return;
       setCandidates((prev) => {
         const next = prev.map((c) => (c.id === candUpdate.id ? { ...c, ...candUpdate, lastUpdatedDate: new Date().toISOString() } : c));
         try { localStorage.setItem(STORAGE_KEYS.candidates, JSON.stringify(next)); } catch (e) {}
@@ -279,6 +282,7 @@ export const RecruitmentProvider: React.FC<{ children: React.ReactNode }> = ({ c
 
     // 4. Candidate Deleted
     socket.on('CANDIDATE_DELETED', ({ id }: { id: string }) => {
+      if (!id) return;
       setCandidates((prev) => {
         const next = prev.filter((c) => c.id !== id);
         try { localStorage.setItem(STORAGE_KEYS.candidates, JSON.stringify(next)); } catch (e) {}
@@ -288,23 +292,28 @@ export const RecruitmentProvider: React.FC<{ children: React.ReactNode }> = ({ c
 
     // 5. Interview Scheduled / Updated / Deleted
     socket.on('INTERVIEW_CREATED', (newInt: InterviewSchedule) => {
+      if (!newInt?.id) return;
       setInterviews((prev) => (prev.some((i) => i.id === newInt.id) ? prev : [newInt, ...prev]));
     });
 
     socket.on('INTERVIEW_UPDATED', (updatedInt: Partial<InterviewSchedule> & { id: string }) => {
+      if (!updatedInt?.id) return;
       setInterviews((prev) => prev.map((i) => (i.id === updatedInt.id ? { ...i, ...updatedInt } : i)));
     });
 
     socket.on('INTERVIEW_DELETED', ({ id }: { id: string }) => {
+      if (!id) return;
       setInterviews((prev) => prev.filter((i) => i.id !== id));
     });
 
     // 6. Calling Log Created / Deleted
     socket.on('CALL_RECORD_CREATED', (newCall: CallRecord) => {
+      if (!newCall?.id) return;
       setCallRecords((prev) => (prev.some((c) => c.id === newCall.id) ? prev : [newCall, ...prev]));
     });
 
     socket.on('CALL_RECORD_DELETED', ({ id }: { id: string }) => {
+      if (!id) return;
       setCallRecords((prev) => prev.filter((c) => c.id !== id));
     });
 
@@ -325,11 +334,14 @@ export const RecruitmentProvider: React.FC<{ children: React.ReactNode }> = ({ c
   // --- Real-Time Global Cloud Poller (Heartbeat for All PCs Worldwide) ---
   useEffect(() => {
     let isMounted = true;
+    let isPolling = false;
 
     const pollAtlasSync = async () => {
       if (typeof document !== 'undefined' && document.visibilityState !== 'visible') {
         return; // Don't burn bandwidth if tab is hidden
       }
+      if (isPolling) return; // Prevent overlapping requests
+      isPolling = true;
 
       try {
         const [cloudCandidates, cloudInterviews, cloudCalls] = await Promise.allSettled([
@@ -340,35 +352,64 @@ export const RecruitmentProvider: React.FC<{ children: React.ReactNode }> = ({ c
 
         if (!isMounted) return;
 
-        // Sync Candidates
+        // Sync Candidates with Non-Destructive Reconciliation
         if (cloudCandidates.status === 'fulfilled' && Array.isArray(cloudCandidates.value) && cloudCandidates.value.length > 0) {
           const remoteList = cloudCandidates.value.filter(
             (c: any) => c.id !== 'cand-010651' && c.email !== 'test@gmail.com' && c.name?.toLowerCase() !== 'test'
           );
 
           setCandidates((current) => {
-            const currentIds = new Set(current.map((c) => c.id));
-            const hasNew = remoteList.some((r) => !currentIds.has(r.id));
-            const hasMissing = current.some((c) => !remoteList.some((r) => r.id === c.id));
-            
-            if (hasNew || hasMissing || current.length !== remoteList.length) {
-              try { localStorage.setItem(STORAGE_KEYS.candidates, JSON.stringify(remoteList)); } catch (e) {}
-              return remoteList;
-            }
-
+            const remoteMap = new Map(remoteList.map((r: Candidate) => [r.id, r]));
             const currentMap = new Map(current.map((c) => [c.id, c]));
-            let hasChanged = false;
-            for (const rem of remoteList) {
-              const loc = currentMap.get(rem.id);
-              if (!loc || loc.status !== rem.status || loc.lastUpdatedDate !== rem.lastUpdatedDate || loc.notes !== rem.notes) {
-                hasChanged = true;
-                break;
+
+            // Preserve locally added candidates (created in the last 3 minutes) that may not yet be replicated on remote
+            const now = Date.now();
+            const pendingLocal = current.filter((c) => {
+              if (remoteMap.has(c.id)) return false;
+              const timestamp = new Date(c.appliedDate || c.lastUpdatedDate || 0).getTime();
+              return (now - timestamp) < 180000;
+            });
+
+            // Unified list: pending local additions prepended to remote Atlas list
+            const unified = [...pendingLocal, ...remoteList];
+
+            // Check if count or IDs changed
+            let hasStructuralChange = unified.length !== current.length;
+            if (!hasStructuralChange) {
+              for (let i = 0; i < unified.length; i++) {
+                if (unified[i].id !== current[i].id) {
+                  hasStructuralChange = true;
+                  break;
+                }
               }
             }
 
-            if (hasChanged) {
-              try { localStorage.setItem(STORAGE_KEYS.candidates, JSON.stringify(remoteList)); } catch (e) {}
-              return remoteList;
+            // Check for actual field changes (status, trimmed notes, recruiter, rating, ATS score)
+            let hasFieldChange = false;
+            if (!hasStructuralChange) {
+              for (const item of unified) {
+                const existing = currentMap.get(item.id);
+                if (!existing) {
+                  hasFieldChange = true;
+                  break;
+                }
+                if (
+                  existing.status !== item.status ||
+                  (existing.notes || '').trim() !== (item.notes || '').trim() ||
+                  existing.recruiterAssigned !== item.recruiterAssigned ||
+                  existing.rating !== item.rating ||
+                  existing.atsMatchScore !== item.atsMatchScore
+                ) {
+                  hasFieldChange = true;
+                  break;
+                }
+              }
+            }
+
+            // Only update React state if data genuinely changed (eliminates candidate flapping and UI flickering)
+            if (hasStructuralChange || hasFieldChange) {
+              try { localStorage.setItem(STORAGE_KEYS.candidates, JSON.stringify(unified)); } catch (e) {}
+              return unified;
             }
             return current;
           });
@@ -385,11 +426,13 @@ export const RecruitmentProvider: React.FC<{ children: React.ReactNode }> = ({ c
         }
       } catch (err) {
         // Silent background fallback
+      } finally {
+        isPolling = false;
       }
     };
 
-    // Poll every 3 seconds for instant multi-device sync
-    const syncInterval = setInterval(pollAtlasSync, 3000);
+    // Poll every 12 seconds (optimal for serverless multi-device sync without CPU/network churn)
+    const syncInterval = setInterval(pollAtlasSync, 12000);
 
     // Instant re-sync when tab becomes active / focused
     const handleRevalidate = () => {
@@ -796,22 +839,33 @@ export const RecruitmentProvider: React.FC<{ children: React.ReactNode }> = ({ c
 
   const bulkAddCandidates = (newCandidates: Candidate[]) => {
     if (!newCandidates?.length) return;
-    const unique = newCandidates.filter((nc) => !candidates.some((c) => c.id === nc.id || c.email === nc.email));
-    if (!unique.length) return showToast('info', 'No New Candidates', 'All candidates already exist.');
 
-    setCandidates((prev) => [...unique, ...prev]);
-    recruitmentApi.bulkCreateCandidates(unique).catch(() => {});
+    setCandidates((prev) => {
+      const unique = newCandidates.filter((nc) => !prev.some((c) => c.id === nc.id || (nc.email && c.email === nc.email)));
+      if (!unique.length) {
+        showToast('info', 'No New Candidates', 'All candidates already exist.');
+        return prev;
+      }
 
-    // Update job counts
-    setJobs((prev) =>
-      prev.map((j) => {
-        const added = unique.filter((c) => c.jobId === j.id).length;
-        return added ? { ...j, applicantsCount: j.applicantsCount + added } : j;
-      })
-    );
+      recruitmentApi.bulkCreateCandidates(unique).catch((err) => {
+        console.warn('Backend sync warning for bulk candidates:', err);
+      });
 
-    confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
-    showToast('success', `🚀 ${unique.length} Resumes Added!`, 'Profiles extracted and added to dashboard.');
+      // Update job counts
+      setJobs((prevJobs) =>
+        prevJobs.map((j) => {
+          const added = unique.filter((c) => c.jobId === j.id).length;
+          return added ? { ...j, applicantsCount: j.applicantsCount + added } : j;
+        })
+      );
+
+      confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
+      showToast('success', `🚀 ${unique.length} Resumes Added!`, 'Profiles extracted and added to dashboard.');
+
+      const updated = [...unique, ...prev];
+      try { localStorage.setItem(STORAGE_KEYS.candidates, JSON.stringify(updated)); } catch (e) {}
+      return updated;
+    });
   };
 
   // --- Interview Scheduler Actions ---

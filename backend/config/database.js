@@ -2,53 +2,75 @@ import mongoose from 'mongoose';
 import dns from 'dns';
 import { ENV } from './env.js';
 
-// Set public reliable DNS servers for Node.js SRV record lookups
-try {
-  dns.setServers(['8.8.8.8', '1.1.1.1']);
-} catch (e) {
-  // Ignore if DNS server override is restricted
+const isServerless = Boolean(process.env.VERCEL || process.env.AWS_LAMBDA_FUNCTION_NAME);
+
+// Only configure custom DNS in non-serverless local environments when necessary
+if (!isServerless) {
+  try {
+    dns.setServers(['8.8.8.8', '1.1.1.1']);
+  } catch (e) {
+    // Ignore if DNS server override is restricted
+  }
+}
+
+// Global cached connection for Serverless / Lambda warm container reuse
+let cached = global.mongoose;
+if (!cached) {
+  cached = global.mongoose = { conn: null, promise: null };
 }
 
 let isMongoConnected = false;
-let connectionPromise = null;
 
 export async function connectDB() {
+  if (cached.conn && mongoose.connection.readyState === 1) {
+    isMongoConnected = true;
+    return cached.conn;
+  }
+
   if (mongoose.connection.readyState === 1) {
+    cached.conn = mongoose.connection;
     isMongoConnected = true;
     return mongoose.connection;
   }
 
-  if (connectionPromise) {
-    return connectionPromise;
+  if (cached.promise) {
+    return cached.promise;
   }
 
   const primaryUri = ENV.MONGODB_URI;
   const localFallbackUri = 'mongodb://127.0.0.1:27017/recruitment_dashboard';
 
-  connectionPromise = (async () => {
+  const connectionOpts = {
+    bufferCommands: false,
+    maxPoolSize: isServerless ? 5 : 10,
+    serverSelectionTimeoutMS: 5000,
+    connectTimeoutMS: 5000,
+    socketTimeoutMS: 30000
+  };
+
+  cached.promise = (async () => {
     try {
       console.log(`📡 Connecting to MongoDB Atlas...`);
-      await mongoose.connect(primaryUri, {
-        serverSelectionTimeoutMS: 6000,
-        connectTimeoutMS: 8000
-      });
+      const conn = await mongoose.connect(primaryUri, connectionOpts);
       isMongoConnected = true;
+      cached.conn = conn;
       const hostPart = primaryUri.includes('@') ? primaryUri.split('@').pop() : primaryUri;
       console.log(`✅ MongoDB Atlas Connected Successfully (${hostPart})`);
-      return mongoose.connection;
+      return conn;
     } catch (err) {
       console.warn(`⚠️ Primary MongoDB Atlas Connection Error (${err.message}).`);
 
-      // If primary failed and it wasn't already local, try the running local MongoDB instance
-      if (!primaryUri.includes('127.0.0.1') && !primaryUri.includes('localhost')) {
+      // Only attempt local fallback if running locally and not in serverless cloud
+      if (!isServerless && !primaryUri.includes('127.0.0.1') && !primaryUri.includes('localhost')) {
         console.log(`🔄 Attempting automatic fallback to local MongoDB (127.0.0.1:27017)...`);
         try {
-          await mongoose.connect(localFallbackUri, {
-            serverSelectionTimeoutMS: 3000
+          const localConn = await mongoose.connect(localFallbackUri, {
+            serverSelectionTimeoutMS: 2000
           });
           isMongoConnected = true;
-          console.log(`✅ Connected to Local MongoDB fallback successfully (127.0.0.1:27017/recruitment_dashboard)!`);
-          return mongoose.connection;
+          cached.conn = localConn;
+          console.log(`✅ Connected to Local MongoDB fallback successfully!`);
+          return localConn;
         } catch (localErr) {
           console.warn(`⚠️ Local MongoDB fallback also unavailable (${localErr.message}).`);
         }
@@ -58,11 +80,11 @@ export async function connectDB() {
       console.log(`ℹ️ Running with Dual-Persistence (In-Memory Database Store active)`);
       return null;
     } finally {
-      connectionPromise = null;
+      cached.promise = null;
     }
   })();
 
-  return connectionPromise;
+  return cached.promise;
 }
 
 export function getMongoConnectionStatus() {
@@ -75,3 +97,4 @@ export async function ensureDBConnected() {
   }
   return mongoose.connection.readyState === 1;
 }
+

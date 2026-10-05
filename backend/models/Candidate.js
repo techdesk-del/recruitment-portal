@@ -204,4 +204,8 @@ const CandidateSchema = new mongoose.Schema({
   strict: false // Allow dynamic extra fields gracefully without silent loss
 });
 
+// Index on createdAt to guarantee sub-millisecond sorted candidate retrieval
+CandidateSchema.index({ createdAt: -1 });
+
 export const Candidate = mongoose.models.Candidate || mongoose.model('Candidate', CandidateSchema);
+

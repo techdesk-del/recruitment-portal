@@ -66,19 +66,20 @@ export async function persistCandidate(candidateData) {
         { id: cleanData.id },
         cleanData,
         { upsert: true, new: true, setDefaultsOnInsert: true }
-      );
+      ).lean();
 
+      const result = saved ? (saved.toObject ? saved.toObject() : saved) : cleanData;
       console.log(`[Store] Successfully persisted to MongoDB Atlas: ${cleanData.name} (${cleanData.id})`);
 
       // Update in-memory copy
       const idx = memoryCandidates.findIndex((c) => c.id === cleanData.id);
       if (idx >= 0) {
-        memoryCandidates[idx] = saved.toObject();
+        memoryCandidates[idx] = result;
       } else {
-        memoryCandidates.unshift(saved.toObject());
+        memoryCandidates.unshift(result);
       }
 
-      return saved.toObject();
+      return result;
     }
   } catch (e) {
     console.error('MongoDB write error in persistCandidate:', e.message);
@@ -98,10 +99,10 @@ export async function getAllCandidatesFromStore() {
   try {
     const isConnected = await ensureDBConnected();
     if (isConnected) {
-      const candidates = await Candidate.find().sort({ createdAt: -1 });
+      const candidates = await Candidate.find().sort({ createdAt: -1 }).lean();
       if (Array.isArray(candidates) && candidates.length > 0) {
         // Sync in-memory store with fresh Atlas state
-        memoryCandidates = candidates.map(c => c.toObject());
+        memoryCandidates = candidates;
         return candidates;
       }
     }

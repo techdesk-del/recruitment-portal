@@ -314,10 +314,19 @@ export const CandidateProfileModal: React.FC = () => {
 
   return (
     <div className={clsx('fixed', 'inset-0', 'z-50', 'flex', 'items-center', 'justify-center', 'p-2', 'sm:p-4', 'bg-slate-900/60', 'backdrop-blur-xs', 'animate-fade-in')}>
-      <div className={clsx('bg-white', 'border', 'border-slate-200', 'rounded-3xl', 'w-[96vw]', 'max-w-[1420px]', 'h-[94vh]', 'max-h-[96vh]', 'flex', 'flex-col', 'shadow-2xl', 'overflow-hidden', 'animate-slide-up', 'text-slate-900')}>
+      <div className={clsx('bg-white', 'border', 'border-slate-200', 'rounded-3xl', 'w-[96vw]', 'max-w-[1420px]', 'h-[94vh]', 'max-h-[96vh]', 'flex', 'flex-col', 'shadow-2xl', 'overflow-hidden', 'animate-slide-up', 'text-slate-900', 'relative')}>
         
+        {/* Dedicated Top-Right Close Button */}
+        <button
+          onClick={() => setSelectedCandidate(null)}
+          title="Close modal (Esc)"
+          className="absolute top-5 right-5 z-30 p-2.5 rounded-2xl bg-white/95 hover:bg-slate-100 text-slate-500 hover:text-slate-900 border border-slate-200 shadow-sm transition active:scale-95 cursor-pointer flex items-center justify-center"
+        >
+          <X size={18} />
+        </button>
+
         {/* Modal Top Header */}
-        <div className={clsx('p-6', 'bg-slate-50', 'border-b', 'border-slate-200', 'flex', 'flex-col', 'sm:flex-row', 'sm:items-center', 'justify-between', 'gap-4')}>
+        <div className={clsx('p-6', 'bg-slate-50', 'border-b', 'border-slate-200', 'flex', 'flex-col', 'sm:flex-row', 'sm:items-center', 'justify-between', 'gap-4', 'pr-16')}>
           <div className={clsx('flex', 'items-start', 'gap-4')}>
             <div className={clsx('w-14', 'h-14', 'rounded-2xl', 'bg-blue-600', 'text-white', 'font-extrabold', 'text-2xl', 'flex', 'items-center', 'justify-center', 'shadow-md', 'shrink-0')}>
               {cand.name.charAt(0)}
@@ -451,12 +460,6 @@ export const CandidateProfileModal: React.FC = () => {
             >
               <Download size={14} />
               Download Resume (PDF)
-            </button>
-            <button
-              onClick={() => setSelectedCandidate(null)}
-              className={clsx('p-2', 'rounded-xl', 'bg-slate-100', 'hover:bg-slate-200', 'text-slate-500', 'hover:text-slate-900', 'transition')}
-            >
-              <X size={18} />
             </button>
           </div>
         </div>

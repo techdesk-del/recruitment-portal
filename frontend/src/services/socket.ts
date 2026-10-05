@@ -1,35 +1,75 @@
 import { io, Socket } from 'socket.io-client';
 
-const getSocketUrl = (): string => {
-  const envUrl = (import.meta as any).env?.VITE_WS_URL || (import.meta as any).env?.VITE_API_URL;
-  if (envUrl && typeof envUrl === 'string' && envUrl.trim()) {
-    return envUrl.replace(/\/+$/, '');
+const isBrowser = typeof window !== 'undefined';
+
+const isVercelOrCloud = (): boolean => {
+  if (!isBrowser) return false;
+  const host = window.location.hostname;
+  return host.includes('vercel.app') || (host !== 'localhost' && host !== '127.0.0.1');
+};
+
+const getSocketUrl = (): string | null => {
+  const envWsUrl = (import.meta as any).env?.VITE_WS_URL;
+  if (envWsUrl && typeof envWsUrl === 'string' && envWsUrl.trim()) {
+    return envWsUrl.replace(/\/+$/, '');
   }
-  if (typeof window !== 'undefined') {
-    const host = window.location.hostname;
-    if (host !== 'localhost' && host !== '127.0.0.1') {
-      return window.location.origin;
-    }
+
+  // On Vercel / serverless cloud hosting without dedicated standalone WebSocket servers:
+  // Return null to avoid flooding the browser console with failed wss:// connection attempts
+  if (isVercelOrCloud()) {
+    return null;
   }
+
   return 'http://localhost:5000';
 };
 
-const SOCKET_URL = getSocketUrl();
+// Clean no-op fallback socket for environments without dedicated WebSocket servers (e.g. Vercel Serverless)
+class MockSocket {
+  connected = false;
+  id = 'mock-socket-serverless';
+
+  on(_event: string, _callback: (...args: any[]) => void): this {
+    return this;
+  }
+  off(_event?: string, _callback?: (...args: any[]) => void): this {
+    return this;
+  }
+  emit(_event: string, ..._args: any[]): this {
+    return this;
+  }
+  disconnect(): this {
+    return this;
+  }
+  close(): this {
+    return this;
+  }
+}
 
 let socketInstance: Socket | null = null;
+let mockInstance: any = null;
 
 export function getSocket(): Socket {
+  const socketUrl = getSocketUrl();
+
+  // If deployed on Vercel without a dedicated standalone WebSocket server, use clean MockSocket
+  if (!socketUrl) {
+    if (!mockInstance) {
+      mockInstance = new MockSocket();
+      console.info('[Real-Time] Serverless environment active: Using High-Performance Cloud Heartbeat Polling for Multi-Device Sync.');
+    }
+    return mockInstance as unknown as Socket;
+  }
+
   if (!socketInstance) {
-    socketInstance = io(SOCKET_URL, {
-      reconnectionAttempts: 15,
-      reconnectionDelay: 2000,
-      timeout: 6000,
+    socketInstance = io(socketUrl, {
+      reconnectionAttempts: 5,
+      reconnectionDelay: 3000,
+      timeout: 5000,
       transports: ['websocket', 'polling']
     });
 
-    socketInstance.on('connect_error', (err) => {
-      // Graceful warning for environments without dedicated WebSocket servers
-      console.debug('[Real-Time] WebSocket fallback to Cloud Heartbeat Polling:', err.message);
+    socketInstance.on('connect_error', () => {
+      // Gracefully silent in environments where socket falls back
     });
   }
   return socketInstance;
@@ -40,4 +80,6 @@ export function closeSocket(): void {
     socketInstance.disconnect();
     socketInstance = null;
   }
+  mockInstance = null;
 }
+

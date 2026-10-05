@@ -6,7 +6,6 @@ import {
   Briefcase, 
   Kanban, 
   CalendarDays, 
-  Settings, 
   LogOut 
 } from 'lucide-react';
 import { useRecruitment } from '../../context/RecruitmentContext';
@@ -324,17 +323,9 @@ export const Sidebar: React.FC = () => {
 
       </div>
 
-      {/* Bottom Settings & User Profile Footer */}
-      <div className="p-3.5 border-t border-slate-100 space-y-2">
-        <button
-          onClick={() => handleGeneralViewClick('overview')}
-          className="w-full flex items-center gap-2.5 px-3 py-1.5 text-[13px] font-normal text-slate-500 hover:text-slate-900 hover:bg-slate-50 rounded-xl transition tracking-tight"
-        >
-          <Settings size={16} className="text-slate-400" />
-          <span>Hiring Settings</span>
-        </button>
-
-        <div className="pt-2 border-t border-slate-100 flex items-center justify-between text-xs px-1.5">
+      {/* Bottom User Profile Footer */}
+      <div className="p-3 border-t border-slate-100">
+        <div className="flex items-center justify-between text-xs px-1">
           <div className="flex items-center gap-2 min-w-0 flex-1 mr-2">
             <div className={`w-7 h-7 rounded-full flex items-center justify-center font-bold text-[10px] shrink-0 ${
               user?.role === 'admin' ? 'bg-emerald-100 text-emerald-700' :

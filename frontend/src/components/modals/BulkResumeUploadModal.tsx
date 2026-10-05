@@ -16,11 +16,13 @@ import {
   Save,
   Check,
   Award,
-  Cpu
+  Cpu,
+  Zap
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { useRecruitment } from '../../context/RecruitmentContext';
 import { Candidate, CandidateSource } from '../../types';
+import { queueApi } from '../../services/api';
 import { 
   parseResumeFile, 
   DEMO_RESUME_BATCHES, 
@@ -53,6 +55,7 @@ export const BulkResumeUploadModal: React.FC = () => {
 
   const [isDragging, setIsDragging] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [isEnqueuing, setIsEnqueuing] = useState(false);
   const [processingProgress, setProcessingProgress] = useState(0);
   const [processingStepText, setProcessingStepText] = useState('');
   
@@ -179,6 +182,52 @@ export const BulkResumeUploadModal: React.FC = () => {
     setFilters((prev) => ({ ...prev, source: 'all', status: 'all' }));
   };
 
+  // Decoupled Background Worker Queue Ingestion (BullMQ / Async Queue)
+  const handleEnqueueBackgroundQueue = async () => {
+    if (stagedCandidates.length === 0) return;
+
+    setIsEnqueuing(true);
+    try {
+      const items = stagedCandidates.map((s) => ({
+        fileName: s.fileName,
+        candidateDraft: s.candidate,
+        textContent: s.candidate.resumeData?.summary || ''
+      }));
+
+      const res = await queueApi.enqueueBulkResumes({
+        batchId: `batch-${Date.now()}`,
+        items,
+        options: {
+          targetJobId: selectedJobId === 'auto' ? undefined : selectedJobId,
+          targetSource: selectedSource,
+          recruiterAssigned: recruiterProfile,
+          initialStatus
+        }
+      });
+
+      showToast(
+        'success',
+        'Enqueued to Background Worker',
+        `⚡ ${res.enqueuedCount} resumes offloaded to background queue (${res.mode}, concurrency: ${res.concurrency}). Non-blocking ingestion started!`
+      );
+
+      confetti({
+        particleCount: 90,
+        spread: 70,
+        origin: { y: 0.6 }
+      });
+
+      setIsBulkUploadModalOpen(false);
+      setStagedCandidates([]);
+      setActiveView('candidates');
+      setFilters((prev) => ({ ...prev, source: 'all', status: 'all' }));
+    } catch (err: any) {
+      showToast('error', 'Queue Error', err.message || 'Failed to dispatch to background worker.');
+    } finally {
+      setIsEnqueuing(false);
+    }
+  };
+
   // One-click demo batch loader
   const handleLoadDemoBatch = (batchId: string) => {
     const batch = DEMO_RESUME_BATCHES.find((b) => b.id === batchId);
@@ -284,6 +333,10 @@ export const BulkResumeUploadModal: React.FC = () => {
                 <span className="hidden sm:inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-blue-100 text-blue-800 border border-blue-200">
                   <Sparkles size={11} className="text-blue-600" />
                   AI Resume Parser
+                </span>
+                <span className="hidden md:inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-purple-100 text-purple-800 border border-purple-200">
+                  <Zap size={11} className="text-purple-600" />
+                  BullMQ Worker Queue
                 </span>
               </div>
               <p className="text-xs text-slate-500 font-normal mt-0.5">
@@ -666,6 +719,7 @@ export const BulkResumeUploadModal: React.FC = () => {
 
                 <div className="flex items-center gap-2.5 w-full sm:w-auto">
                   <button
+                    type="button"
                     onClick={() => setIsBulkUploadModalOpen(false)}
                     className="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold transition cursor-pointer flex-1 sm:flex-none"
                   >
@@ -673,12 +727,24 @@ export const BulkResumeUploadModal: React.FC = () => {
                   </button>
 
                   <button
+                    type="button"
+                    onClick={handleEnqueueBackgroundQueue}
+                    disabled={stagedCandidates.length === 0 || isProcessing || isEnqueuing}
+                    className="flex items-center justify-center gap-1.5 px-4 py-2 rounded-xl bg-purple-600 hover:bg-purple-700 disabled:bg-slate-300 text-white text-xs font-bold shadow-xs transition active:scale-95 cursor-pointer flex-1 sm:flex-none"
+                    title="Offload parsing, skill extraction, ATS scoring & ingestion to decoupled background worker (BullMQ/Redis)"
+                  >
+                    <Zap size={14} className={isEnqueuing ? 'animate-spin' : ''} />
+                    <span>{isEnqueuing ? 'Enqueuing...' : `Queue via BullMQ (${stagedCandidates.length})`}</span>
+                  </button>
+
+                  <button
+                    type="button"
                     onClick={handleCommitIngestion}
-                    disabled={stagedCandidates.length === 0 || isProcessing}
-                    className="flex items-center justify-center gap-2 px-5 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 disabled:bg-slate-300 text-white text-xs font-bold shadow-xs transition active:scale-95 cursor-pointer flex-1 sm:flex-none"
+                    disabled={stagedCandidates.length === 0 || isProcessing || isEnqueuing}
+                    className="flex items-center justify-center gap-2 px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 disabled:bg-slate-300 text-white text-xs font-bold shadow-xs transition active:scale-95 cursor-pointer flex-1 sm:flex-none"
                   >
                     <CheckCircle2 size={15} />
-                    <span>Confirm & Ingest {stagedCandidates.length > 0 ? `(${stagedCandidates.length})` : ''} Candidates</span>
+                    <span>Direct Ingest {stagedCandidates.length > 0 ? `(${stagedCandidates.length})` : ''}</span>
                   </button>
                 </div>
               </div>

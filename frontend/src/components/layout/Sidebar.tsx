@@ -10,12 +10,14 @@ import {
   LogOut 
 } from 'lucide-react';
 import { useRecruitment } from '../../context/RecruitmentContext';
+import { useAuth } from '../../context/AuthContext';
 import { UrbanGaonLogo } from '../common/UrbanGaonLogo';
 import { PortalLogo } from '../common/PortalLogo';
-import { CandidateSource } from '../../types';
+import { CandidateSource, ROLE_LABELS } from '../../types';
 import { REFERRING_EMPLOYEES } from '../../data/mockData';
 
 export const Sidebar: React.FC = () => {
+  const { user, logout } = useAuth();
   const { activeView, setActiveView, candidates, jobs, interviews, filters, setFilters, callingMetrics } = useRecruitment();
 
   const getPortalCount = (source: CandidateSource) => {
@@ -333,11 +335,27 @@ export const Sidebar: React.FC = () => {
         </button>
 
         <div className="pt-2 border-t border-slate-100 flex items-center justify-between text-xs px-1.5">
-          <span className="font-semibold text-slate-800 text-[11px] tracking-tight">Akash Das</span>
+          <div className="flex items-center gap-2 min-w-0 flex-1 mr-2">
+            <div className={`w-7 h-7 rounded-full flex items-center justify-center font-bold text-[10px] shrink-0 ${
+              user?.role === 'admin' ? 'bg-emerald-100 text-emerald-700' :
+              user?.role === 'recruiter' ? 'bg-blue-100 text-blue-700' : 'bg-purple-100 text-purple-700'
+            }`}>
+              {user?.avatar || user?.name?.slice(0, 2).toUpperCase() || 'UG'}
+            </div>
+            <div className="min-w-0 flex-1">
+              <div className="font-semibold text-slate-800 text-[11px] tracking-tight truncate">
+                {user?.name === 'Akash Das' ? 'Urban Gaon' : (user?.name || 'Urban Gaon')}
+              </div>
+              <div className="text-[10px] text-slate-400 truncate">
+                {user ? ROLE_LABELS[user.role]?.badge : 'Active'}
+              </div>
+            </div>
+          </div>
 
           <button
-            onClick={() => alert('Demo HR Session')}
-            className="flex items-center gap-1 text-[11px] font-medium text-rose-500 hover:text-rose-600 transition tracking-tight"
+            onClick={() => logout()}
+            className="flex items-center gap-1 text-[11px] font-medium text-rose-500 hover:text-rose-600 transition tracking-tight shrink-0 cursor-pointer"
+            title="Sign out of recruitment portal"
           >
             <LogOut size={12} />
             <span>Sign out</span>

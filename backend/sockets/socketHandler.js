@@ -79,3 +79,15 @@ export function broadcastCallRecordDeleted(id) {
     ioInstance.emit('CALL_RECORD_DELETED', { id });
   }
 }
+
+export function broadcastQueueProgress(payload) {
+  if (ioInstance) {
+    ioInstance.emit('QUEUE_PROGRESS', payload);
+  }
+}
+
+export function broadcastQueueBatchCompleted(payload) {
+  if (ioInstance) {
+    ioInstance.emit('QUEUE_BATCH_COMPLETED', payload);
+  }
+}

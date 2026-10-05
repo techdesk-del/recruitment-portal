@@ -85,7 +85,7 @@ export interface ActivityLog {
   details: string;
   performedBy: string;
   timestamp: string;
-  type: 'status' | 'note' | 'scorecard' | 'interview' | 'ingestion' | 'call';
+  type: 'status' | 'note' | 'scorecard' | 'interview' | 'ingestion' | 'call' | 'communication';
 }
 
 export interface EmployeeReferralInfo {
@@ -298,4 +298,6 @@ export interface CandidateCallingDetails {
   tentativeInterviewDate?: string;
   callHistory: CallRecord[];
 }
+
+export * from './auth';
 

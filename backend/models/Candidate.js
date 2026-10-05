@@ -8,7 +8,7 @@ const ActivityLogSchema = new mongoose.Schema({
   timestamp: { type: String, default: () => new Date().toISOString() },
   type: {
     type: String,
-    enum: ['status', 'note', 'scorecard', 'interview', 'ingestion', 'call'],
+    enum: ['status', 'note', 'scorecard', 'interview', 'ingestion', 'call', 'communication'],
     default: 'status'
   }
 }, { _id: false });

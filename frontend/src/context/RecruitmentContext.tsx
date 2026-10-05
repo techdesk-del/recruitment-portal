@@ -308,6 +308,15 @@ export const RecruitmentProvider: React.FC<{ children: React.ReactNode }> = ({ c
       setCallRecords((prev) => prev.filter((c) => c.id !== id));
     });
 
+    // 7. Background Worker Queue Progress & Batch Completed
+    socket.on('QUEUE_PROGRESS', (payload: { batchId: string; progress: number; completed: number; total: number; latestCandidate?: { name: string; email: string } }) => {
+      console.log(`[Queue Progress] Batch ${payload.batchId}: ${payload.progress}% (${payload.completed}/${payload.total})`);
+    });
+
+    socket.on('QUEUE_BATCH_COMPLETED', (payload: { batchId: string; total: number }) => {
+      showToast('success', '⚡ Background Batch Complete', `All ${payload.total} resumes parsed and ingested into Atlas via decoupled background worker!`);
+    });
+
     return () => {
       closeSocket();
     };

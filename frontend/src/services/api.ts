@@ -1,4 +1,18 @@
-import { Candidate, CandidateStatus, Scorecard, JobPosting, InterviewSchedule, CallRecord } from '../types';
+import { 
+  Candidate, 
+  CandidateStatus, 
+  Scorecard, 
+  JobPosting, 
+  InterviewSchedule, 
+  CallRecord,
+  AuthUser,
+  AuthResponse,
+  LoginCredentials,
+  RegisterData,
+  UserRole
+} from '../types';
+
+export const AUTH_TOKEN_KEY = 'urbangaon_auth_token';
 
 // Dynamic base URL:
 // - Uses VITE_API_URL if configured
@@ -20,15 +34,64 @@ const getBaseUrl = (): string => {
 
 const BASE_URL = getBaseUrl();
 
-// Simple helper to send JSON requests and parse responses
+// Simple helper to send JSON requests and parse responses with Bearer token injection
 async function request<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
-  const headers = { 'Content-Type': 'application/json', ...options.headers };
+  const token = typeof window !== 'undefined' ? localStorage.getItem(AUTH_TOKEN_KEY) : null;
+  const headers: Record<string, string> = { 
+    'Content-Type': 'application/json', 
+    ...(options.headers as Record<string, string>) 
+  };
+
+  if (token) {
+    headers['Authorization'] = `Bearer ${token}`;
+  }
+
   const res = await fetch(`${BASE_URL}${endpoint}`, { ...options, headers });
+  
+  if (res.status === 401 && typeof window !== 'undefined') {
+    window.dispatchEvent(new CustomEvent('auth:unauthorized'));
+  }
+
   if (!res.ok) {
-    throw new Error(`API error (${res.status}): ${res.statusText}`);
+    let errorDetail = res.statusText;
+    try {
+      const errJson = await res.json();
+      if (errJson && errJson.error) {
+        errorDetail = errJson.error;
+      }
+    } catch {
+      // ignore
+    }
+    throw new Error(errorDetail || `API error (${res.status})`);
   }
   return res.json();
 }
+
+export const authApi = {
+  login: (credentials: LoginCredentials) =>
+    request<AuthResponse>('/api/auth/login', {
+      method: 'POST',
+      body: JSON.stringify(credentials),
+    }),
+
+  register: (data: RegisterData) =>
+    request<AuthResponse>('/api/auth/register', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    }),
+
+  getMe: () =>
+    request<{ success: boolean; user: AuthUser }>('/api/auth/me'),
+
+  getUsers: () =>
+    request<AuthUser[]>('/api/auth/users'),
+
+  updateUserRole: (id: string, role: UserRole) =>
+    request<{ success: boolean; user: AuthUser }>(`/api/auth/users/${id}/role`, {
+      method: 'PATCH',
+      body: JSON.stringify({ role }),
+    }),
+};
 
 export const recruitmentApi = {
   // --- Candidates ---
@@ -146,3 +209,149 @@ export const recruitmentApi = {
   checkHealth: () => 
     request<{ status: string; timestamp: string }>('/api/health')
 };
+
+export const queueApi = {
+  enqueueBulkResumes: (payload: {
+    batchId?: string;
+    items: Array<{ fileName: string; textContent?: string; candidateDraft?: Partial<Candidate> }>;
+    options?: {
+      targetJobId?: string;
+      targetJobTitle?: string;
+      targetSource?: string;
+      recruiterAssigned?: string;
+      initialStatus?: string;
+    };
+  }) =>
+    request<{
+      success: boolean;
+      message: string;
+      batchId: string;
+      enqueuedCount: number;
+      mode: string;
+      concurrency: number;
+    }>('/api/queue/resumes/bulk', {
+      method: 'POST',
+      body: JSON.stringify(payload)
+    }),
+
+  getBatchStatus: (batchId: string) =>
+    request<{
+      batchId: string;
+      total: number;
+      completed: number;
+      failed: number;
+      percent: number;
+      status: string;
+      results: Candidate[];
+    }>(`/api/queue/batch/${batchId}`),
+
+  getQueueMetrics: () =>
+    request<{
+      mode: string;
+      isRedisConnected: boolean;
+      concurrency: number;
+      waiting?: number;
+      active?: number;
+      completed?: number;
+      failed?: number;
+      trackedBatches?: number;
+    }>('/api/queue/metrics'),
+
+  clearQueue: () =>
+    request<{ success: boolean }>('/api/queue/clear', { method: 'POST' })
+};
+
+export const communicationApi = {
+  sendInterviewEmail: (payload: {
+    candidateId?: string;
+    interviewId?: string;
+    candidate?: any;
+    interview?: any;
+    customNotes?: string;
+  }) =>
+    request<{
+      success: boolean;
+      message: string;
+      messageId?: string;
+      previewUrl?: string;
+      recipient?: string;
+      subject?: string;
+    }>('/api/communications/email/interview', {
+      method: 'POST',
+      body: JSON.stringify(payload)
+    }),
+
+  sendStatusEmail: (payload: {
+    candidateId?: string;
+    candidate?: any;
+    status: string;
+    details?: string;
+  }) =>
+    request<{
+      success: boolean;
+      message: string;
+      previewUrl?: string;
+      recipient?: string;
+      subject?: string;
+    }>('/api/communications/email/status', {
+      method: 'POST',
+      body: JSON.stringify(payload)
+    }),
+
+  sendRejectionEmail: (payload: {
+    candidateId?: string;
+    candidate?: any;
+    feedback?: string;
+  }) =>
+    request<{
+      success: boolean;
+      message: string;
+      previewUrl?: string;
+      recipient?: string;
+      subject?: string;
+    }>('/api/communications/email/rejection', {
+      method: 'POST',
+      body: JSON.stringify(payload)
+    }),
+
+  sendWhatsAppInterview: (payload: {
+    candidateId?: string;
+    interviewId?: string;
+    candidate?: any;
+    interview?: any;
+  }) =>
+    request<{
+      success: boolean;
+      message: string;
+      recipient: string;
+      phone: string;
+      deepLink: string;
+      waMeLink: string;
+      webLink: string;
+      rawText: string;
+    }>('/api/communications/whatsapp/interview', {
+      method: 'POST',
+      body: JSON.stringify(payload)
+    }),
+
+  sendWhatsAppStatus: (payload: {
+    candidateId?: string;
+    candidate?: any;
+    status: string;
+    details?: string;
+  }) =>
+    request<{
+      success: boolean;
+      message: string;
+      recipient: string;
+      phone: string;
+      deepLink: string;
+      waMeLink: string;
+      webLink: string;
+      rawText: string;
+    }>('/api/communications/whatsapp/status', {
+      method: 'POST',
+      body: JSON.stringify(payload)
+    })
+};
+

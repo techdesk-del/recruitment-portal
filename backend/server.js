@@ -5,7 +5,9 @@ import cors from 'cors';
 import { ENV } from './config/env.js';
 import { connectDB } from './config/database.js';
 import { autoSeedDatabase } from './services/dbSeeder.js';
+import { autoSeedUsers } from './services/userSeeder.js';
 import { initSocket } from './sockets/socketHandler.js';
+import { initResumeQueue } from './queues/resumeQueue.js';
 import apiRouter from './routes/index.js';
 import { startLinkedInAutoSyncScheduler } from './services/linkedinAutoFetcher.js';
 
@@ -22,8 +24,12 @@ const io = initSocket(httpServer);
 // Mount API Routes
 app.use('/api', apiRouter);
 
-// Initialize Database Connection and Auto-seed
-connectDB().then(() => autoSeedDatabase());
+// Initialize Database Connection, Auto-seed, and Background Queue
+connectDB().then(async () => {
+  await autoSeedDatabase();
+  await autoSeedUsers();
+  await initResumeQueue();
+});
 
 // Start Server & Auto-Sync Scheduler
 httpServer.listen(ENV.PORT, () => {

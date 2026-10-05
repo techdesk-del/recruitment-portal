@@ -16,6 +16,7 @@ import {
   exportCandidateTrackerExcel,
   exportCandidateTrackerCSV
 } from '../controllers/exportController.js';
+import { requireAuth, requireRole } from '../middleware/auth.js';
 
 const router = Router();
 
@@ -25,16 +26,16 @@ router.get('/export/tracker-sheet', exportCandidateTrackerExcel);
 router.get('/export/csv', exportCandidateTrackerCSV);
 
 router.get('/', getCandidates);
-router.post('/', createCandidate);
-router.post('/bulk', bulkCreateCandidates);
-router.put('/:id', updateCandidate);
-router.patch('/:id', updateCandidate);
-router.patch('/:id/status', updateCandidateStatus);
-router.patch('/:id/notes', updateCandidateNotes);
-router.patch('/:id/rating', updateCandidateRating);
-router.patch('/:id/recruiter', updateCandidateRecruiter);
-router.patch('/:id/scorecard', updateCandidateScorecard);
-router.patch('/:id/calling', updateCandidateCallingDetails);
-router.delete('/:id', deleteCandidate);
+router.post('/', requireAuth, requireRole('admin', 'recruiter'), createCandidate);
+router.post('/bulk', requireAuth, requireRole('admin', 'recruiter'), bulkCreateCandidates);
+router.put('/:id', requireAuth, updateCandidate);
+router.patch('/:id', requireAuth, updateCandidate);
+router.patch('/:id/status', requireAuth, updateCandidateStatus);
+router.patch('/:id/notes', requireAuth, updateCandidateNotes);
+router.patch('/:id/rating', requireAuth, updateCandidateRating);
+router.patch('/:id/recruiter', requireAuth, updateCandidateRecruiter);
+router.patch('/:id/scorecard', requireAuth, updateCandidateScorecard);
+router.patch('/:id/calling', requireAuth, updateCandidateCallingDetails);
+router.delete('/:id', requireAuth, requireRole('admin'), deleteCandidate);
 
 export default router;

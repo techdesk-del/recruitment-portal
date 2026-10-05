@@ -1,7 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { 
   Calendar, 
   ChevronDown, 
+  ChevronLeft,
+  ChevronRight,
   ArrowRight, 
   Download 
 } from 'lucide-react';
@@ -22,6 +24,88 @@ export const MainDashboard: React.FC = () => {
 
   const [dashPage, setDashPage] = useState(1);
   const [dashPageSize, setDashPageSize] = useState(5);
+
+  // --- Horizontal Edge Hover Auto-Scroll for Recent Candidates Table ---
+  const tableScrollRef = useRef<HTMLDivElement>(null);
+  const scrollAnimRef = useRef<number | null>(null);
+  const [canScrollLeft, setCanScrollLeft] = useState(false);
+  const [canScrollRight, setCanScrollRight] = useState(false);
+
+  const updateScrollState = useCallback(() => {
+    if (!tableScrollRef.current) return;
+    const { scrollLeft, scrollWidth, clientWidth } = tableScrollRef.current;
+    setCanScrollLeft(scrollLeft > 4);
+    setCanScrollRight(scrollLeft + clientWidth < scrollWidth - 4);
+  }, []);
+
+  const stopAutoScroll = useCallback(() => {
+    if (scrollAnimRef.current !== null) {
+      cancelAnimationFrame(scrollAnimRef.current);
+      scrollAnimRef.current = null;
+    }
+  }, []);
+
+  const startAutoScroll = useCallback((direction: 'left' | 'right', speed: number = 8) => {
+    stopAutoScroll();
+    const scrollStep = () => {
+      const el = tableScrollRef.current;
+      if (!el) return;
+      const { scrollLeft, scrollWidth, clientWidth } = el;
+
+      if (direction === 'right') {
+        if (scrollLeft + clientWidth < scrollWidth - 1) {
+          el.scrollLeft += speed;
+          scrollAnimRef.current = requestAnimationFrame(scrollStep);
+        } else {
+          stopAutoScroll();
+        }
+      } else {
+        if (scrollLeft > 1) {
+          el.scrollLeft -= speed;
+          scrollAnimRef.current = requestAnimationFrame(scrollStep);
+        } else {
+          stopAutoScroll();
+        }
+      }
+      updateScrollState();
+    };
+    scrollAnimRef.current = requestAnimationFrame(scrollStep);
+  }, [stopAutoScroll, updateScrollState]);
+
+  useEffect(() => {
+    const el = tableScrollRef.current;
+    if (!el) return;
+    updateScrollState();
+    el.addEventListener('scroll', updateScrollState, { passive: true });
+    window.addEventListener('resize', updateScrollState);
+    return () => {
+      el.removeEventListener('scroll', updateScrollState);
+      window.removeEventListener('resize', updateScrollState);
+      stopAutoScroll();
+    };
+  }, [updateScrollState, stopAutoScroll]);
+
+  // Adaptive edge hover detection on the table container
+  const handleTableMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    const container = tableScrollRef.current;
+    if (!container) return;
+    const rect = container.getBoundingClientRect();
+    const mouseX = e.clientX - rect.left;
+    const width = rect.width;
+    const edgeThreshold = 110; // 110px threshold from left & right border
+
+    if (mouseX > width - edgeThreshold && container.scrollLeft + container.clientWidth < container.scrollWidth - 2) {
+      const intensity = (mouseX - (width - edgeThreshold)) / edgeThreshold;
+      const speed = Math.max(4, Math.round(intensity * 14));
+      startAutoScroll('right', speed);
+    } else if (mouseX < edgeThreshold && container.scrollLeft > 2) {
+      const intensity = (edgeThreshold - mouseX) / edgeThreshold;
+      const speed = Math.max(4, Math.round(intensity * 14));
+      startAutoScroll('left', speed);
+    } else {
+      stopAutoScroll();
+    }
+  };
 
   const paginatedRecentCandidates = candidates.slice(
     (dashPage - 1) * dashPageSize,
@@ -50,7 +134,7 @@ export const MainDashboard: React.FC = () => {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold text-slate-900 tracking-tight">Dashboard</h1>
-          <p className="text-xs text-slate-500 font-normal mt-0.5">Welcome back, Akash • UrbanGaon Recruitment Operations</p>
+          <p className="text-xs text-slate-500 font-normal mt-0.5">Welcome back, Urban Gaon • Recruitment Operations</p>
         </div>
 
         <div className="flex items-center gap-2">
@@ -241,18 +325,64 @@ export const MainDashboard: React.FC = () => {
           </button>
         </div>
 
-        <div className="bg-white rounded-2xl border border-slate-100 overflow-hidden shadow-2xs">
-          <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse">
+        <div className="bg-white rounded-2xl border border-slate-100 overflow-hidden shadow-2xs relative group">
+          
+          {/* Left Hover Scroll Guide Badge */}
+          {canScrollLeft && (
+            <div
+              onMouseEnter={() => startAutoScroll('left', 11)}
+              onMouseLeave={stopAutoScroll}
+              onClick={() => tableScrollRef.current?.scrollBy({ left: -260, behavior: 'smooth' })}
+              title="Hover or click to scroll left"
+              className="absolute left-0 top-0 bottom-14 w-12 z-20 flex items-center justify-start pl-2 bg-gradient-to-r from-white via-white/80 to-transparent cursor-pointer transition-opacity"
+            >
+              <div className="w-8 h-8 rounded-full bg-white shadow-md border border-slate-200 text-slate-700 flex items-center justify-center hover:bg-blue-600 hover:text-white transition">
+                <ChevronLeft size={18} />
+              </div>
+            </div>
+          )}
+
+          {/* Right Hover Scroll Guide Badge */}
+          {canScrollRight && (
+            <div
+              onMouseEnter={() => startAutoScroll('right', 11)}
+              onMouseLeave={stopAutoScroll}
+              onClick={() => tableScrollRef.current?.scrollBy({ left: 260, behavior: 'smooth' })}
+              title="Hover or click to scroll right"
+              className="absolute right-0 top-0 bottom-14 w-12 z-20 flex items-center justify-end pr-2 bg-gradient-to-l from-white via-white/80 to-transparent cursor-pointer transition-opacity"
+            >
+              <div className="w-8 h-8 rounded-full bg-white shadow-md border border-slate-200 text-slate-700 flex items-center justify-center hover:bg-blue-600 hover:text-white transition">
+                <ChevronRight size={18} />
+              </div>
+            </div>
+          )}
+
+          <div 
+            ref={tableScrollRef}
+            onMouseMove={handleTableMouseMove}
+            onMouseLeave={stopAutoScroll}
+            className="overflow-x-auto scroll-smooth"
+          >
+            <table className="w-full text-left border-collapse min-w-[1100px]">
               <thead>
-                <tr className="bg-slate-50/80 border-b border-slate-100 text-[11px] font-semibold text-slate-500 uppercase tracking-wider">
-                  <th className="py-3 px-5">Candidate</th>
-                  <th className="py-3 px-4">Applied Role</th>
-                  <th className="py-3 px-4">Portal</th>
-                  <th className="py-3 px-4">Assigned HR</th>
-                  <th className="py-3 px-4">Experience</th>
-                  <th className="py-3 px-4 whitespace-nowrap">Hiring Stage</th>
-                  <th className="py-3 px-4 text-left whitespace-nowrap">Actions</th>
+                <tr className="bg-slate-50/80 border-b border-slate-100 text-[11px] font-semibold text-slate-500 uppercase tracking-wider select-none">
+                  <th 
+                    onMouseEnter={() => startAutoScroll('left', 10)}
+                    className="py-3 px-5 min-w-[260px]"
+                  >
+                    Candidate
+                  </th>
+                  <th className="py-3 px-4 min-w-[180px]">Applied Role</th>
+                  <th className="py-3 px-4 min-w-[160px]">Portal</th>
+                  <th className="py-3 px-4 min-w-[160px]">Assigned HR</th>
+                  <th className="py-3 px-4 min-w-[130px]">Experience</th>
+                  <th className="py-3 px-4 whitespace-nowrap min-w-[140px]">Hiring Stage</th>
+                  <th 
+                    onMouseEnter={() => startAutoScroll('right', 10)}
+                    className="py-3 px-4 text-left whitespace-nowrap min-w-[160px]"
+                  >
+                    Actions
+                  </th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 text-xs">

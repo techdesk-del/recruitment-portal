@@ -32,10 +32,13 @@ import {
   ArrowRight,
   ShieldCheck,
   PlayCircle,
-  RefreshCw
+  RefreshCw,
+  MessageSquare,
+  Send
 } from 'lucide-react';
 import { useRecruitment } from '../../context/RecruitmentContext';
 import { InterviewSchedule, InterviewRoundType, InterviewPlatform, InterviewStatus, Candidate } from '../../types';
+import { communicationApi } from '../../services/api';
 import { Pagination } from '../common';
 
 export const InterviewScheduler: React.FC = () => {
@@ -401,6 +404,50 @@ export const InterviewScheduler: React.FC = () => {
     document.body.removeChild(link);
 
     showToast('success', 'Calendar Invite Downloaded', '.ICS file ready to import into Google Calendar or Outlook.');
+  };
+
+  // Automated Email Resend Handler
+  const handleResendInterviewEmail = async (interview: InterviewSchedule) => {
+    const cand = candidates.find((c) => c.id === interview.candidateId || c.name === interview.candidateName);
+    const emailToUse = interview.candidateEmail || cand?.email;
+    if (!emailToUse) {
+      showToast('warning', 'Missing Email', 'No email address registered for this candidate.');
+      return;
+    }
+    try {
+      showToast('info', 'Sending Email...', `Dispatching invitation with Google Meet & .ics calendar invite to ${emailToUse}`);
+      const res = await communicationApi.sendInterviewEmail({
+        interviewId: interview.id,
+        candidateId: interview.candidateId,
+        candidate: cand || { name: interview.candidateName, email: emailToUse, phone: interview.candidatePhone, jobAppliedFor: interview.jobTitle },
+        interview
+      });
+      showToast('success', 'Invitation Delivered', res.message);
+    } catch (err: any) {
+      showToast('error', 'Email Error', err.message || 'Failed to dispatch email.');
+    }
+  };
+
+  // WhatsApp Alert Trigger
+  const handleTriggerWhatsAppAlert = async (interview: InterviewSchedule) => {
+    const cand = candidates.find((c) => c.id === interview.candidateId || c.name === interview.candidateName);
+    const phoneToUse = interview.candidatePhone || cand?.phone;
+    if (!phoneToUse) {
+      showToast('warning', 'Missing Phone Number', 'No phone number registered for this candidate.');
+      return;
+    }
+    try {
+      const res = await communicationApi.sendWhatsAppInterview({
+        interviewId: interview.id,
+        candidateId: interview.candidateId,
+        candidate: cand || { name: interview.candidateName, email: interview.candidateEmail, phone: phoneToUse, jobAppliedFor: interview.jobTitle },
+        interview
+      });
+      window.open(res.waMeLink, '_blank', 'noopener,noreferrer');
+      showToast('success', 'WhatsApp Launched', `Opening WhatsApp conversation for ${interview.candidateName}...`);
+    } catch (err: any) {
+      showToast('error', 'WhatsApp Error', err.message || 'Failed to prepare WhatsApp message.');
+    }
   };
 
   // Status Styling Badge Helper
@@ -1444,21 +1491,32 @@ export const InterviewScheduler: React.FC = () => {
                 />
               </div>
 
+              {/* Automated Communications Trigger Info Box */}
+              <div className="p-3.5 rounded-xl bg-blue-50/70 border border-blue-200 space-y-1 text-xs text-blue-900">
+                <div className="flex items-center gap-1.5 font-bold">
+                  <Sparkles size={14} className="text-blue-600" />
+                  <span>Automated Candidate Communications (Email + Calendar + WhatsApp)</span>
+                </div>
+                <p className="text-[11px] text-blue-800 leading-relaxed">
+                  Upon scheduling, the candidate will automatically receive a branded <strong>UrbanGaon HTML Interview Invitation</strong> containing the Google Meet link, interview guide, and a synchronized <strong>.ics Calendar Invite</strong>. A <strong>WhatsApp status alert</strong> is also generated.
+                </p>
+              </div>
+
               {/* Action Buttons */}
               <div className="pt-3 border-t border-slate-200 flex items-center justify-end gap-3">
                 <button
                   type="button"
                   onClick={() => setIsScheduleModalOpen(false)}
-                  className="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold transition"
+                  className="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold transition cursor-pointer"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold shadow-md transition flex items-center gap-1.5"
+                  className="px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold shadow-md transition flex items-center gap-1.5 cursor-pointer active:scale-95"
                 >
                   <CalendarCheck size={15} />
-                  <span>Confirm & Schedule Interview</span>
+                  <span>Confirm & Dispatch Invitation</span>
                 </button>
               </div>
 
@@ -1685,6 +1743,24 @@ export const InterviewScheduler: React.FC = () => {
                   >
                     <Download size={14} />
                     <span>Download .ICS Invite</span>
+                  </button>
+
+                  <button
+                    onClick={() => handleResendInterviewEmail(activeInterviewForDetails)}
+                    className="w-full flex items-center justify-center gap-2 px-4 py-2 rounded-xl bg-blue-50 hover:bg-blue-100 text-blue-700 font-bold transition border border-blue-200"
+                    title="Send or resend branded interview email with Google Meet and .ics calendar invite"
+                  >
+                    <Mail size={14} />
+                    <span>Send / Resend Email Invite</span>
+                  </button>
+
+                  <button
+                    onClick={() => handleTriggerWhatsAppAlert(activeInterviewForDetails)}
+                    className="w-full flex items-center justify-center gap-2 px-4 py-2 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-800 font-bold transition border border-emerald-200"
+                    title="Launch WhatsApp Web or Mobile app with formatted interview invitation"
+                  >
+                    <MessageSquare size={14} />
+                    <span>WhatsApp Alert</span>
                   </button>
                 </div>
               </div>

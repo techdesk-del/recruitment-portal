@@ -5,12 +5,22 @@ import {
   Bell, 
   RefreshCw, 
   Download, 
-  Briefcase 
+  Briefcase,
+  ChevronDown,
+  Shield,
+  UserCheck,
+  Building,
+  LogOut,
+  Sparkles
 } from 'lucide-react';
 import { useRecruitment } from '../../context/RecruitmentContext';
+import { useAuth } from '../../context/AuthContext';
+import { ROLE_LABELS, UserRole } from '../../types';
 import { recruitmentApi } from '../../services/api';
 
 export const TopHeader: React.FC = () => {
+  const { user, can, switchRole, logout } = useAuth();
+  const [isRoleMenuOpen, setIsRoleMenuOpen] = useState(false);
   const { 
     jobs, 
     filters, 
@@ -70,20 +80,81 @@ export const TopHeader: React.FC = () => {
       {/* Right Action Controls */}
       <div className="flex items-center gap-3 shrink-0">
         
-        {/* + Add Candidate Button */}
-        <button
-          onClick={() => setIsBulkUploadModalOpen(true)}
-          className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#2563eb] hover:bg-blue-700 text-white font-medium text-xs shadow-xs transition active:scale-95 cursor-pointer"
-          title="Add candidate via resume upload or manual intake"
-        >
-          <Plus size={14} />
-          <span>Add Candidate</span>
-        </button>
+        {/* + Add Candidate Button (Admin & Recruiter only) */}
+        {can('create_candidate') ? (
+          <button
+            onClick={() => setIsBulkUploadModalOpen(true)}
+            className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#2563eb] hover:bg-blue-700 text-white font-medium text-xs shadow-xs transition active:scale-95 cursor-pointer"
+            title="Add candidate via resume upload or manual intake"
+          >
+            <Plus size={14} />
+            <span>Add Candidate</span>
+          </button>
+        ) : (
+          <div 
+            title="Read-only mode: Candidate intake requires Recruiter or Admin role"
+            className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-100 border border-slate-200 text-xs font-normal text-slate-400 cursor-not-allowed"
+          >
+            <span>Intake Restricted</span>
+          </div>
+        )}
 
-        {/* Role: Admin / HR Pill */}
-        <div className="hidden lg:flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white border border-slate-200 text-xs font-normal text-slate-700 shadow-2xs">
-          <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
-          <span>Role: <strong>Admin / HR</strong></span>
+        {/* Dynamic Role Pill with Dropdown Switcher */}
+        <div className="relative">
+          <button
+            onClick={() => setIsRoleMenuOpen(!isRoleMenuOpen)}
+            className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-white hover:bg-slate-50 border border-slate-200 text-xs font-normal text-slate-700 shadow-2xs transition cursor-pointer"
+            title="Click to view permissions or switch identity"
+          >
+            <span className={`w-2 h-2 rounded-full ${
+              user?.role === 'admin' ? 'bg-emerald-500' :
+              user?.role === 'recruiter' ? 'bg-blue-500' : 'bg-purple-500'
+            }`}></span>
+            <span>
+              Role: <strong className="capitalize">{user ? ROLE_LABELS[user.role]?.badge : 'Loading...'}</strong>
+            </span>
+            <ChevronDown size={12} className={`text-slate-400 transition-transform ${isRoleMenuOpen ? 'rotate-180' : ''}`} />
+          </button>
+
+          {/* Interactive Role & Session Menu Dropdown */}
+          {isRoleMenuOpen && (
+            <>
+              <div 
+                className="fixed inset-0 z-30" 
+                onClick={() => setIsRoleMenuOpen(false)}
+              />
+              <div className="absolute right-0 top-full mt-2 w-64 bg-white rounded-2xl shadow-xl border border-slate-200 p-3 z-40 space-y-3 font-sans animate-in fade-in zoom-in-95 duration-100">
+                {/* User Info Header */}
+                <div className="flex items-center gap-2.5 pb-2 border-b border-slate-100">
+                  <div className="w-8 h-8 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center font-bold text-xs">
+                    {user?.avatar || user?.name?.slice(0, 2).toUpperCase() || 'UG'}
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <div className="font-semibold text-slate-800 text-xs truncate">
+                      {user?.name === 'Akash Das' ? 'Urban Gaon' : (user?.name || 'Urban Gaon')}
+                    </div>
+                    <div className="text-[11px] text-slate-500 truncate">{user?.email}</div>
+                  </div>
+                </div>
+
+                {/* Sign Out */}
+                <div className="pt-1 flex items-center justify-between">
+                  <span className="text-[11px] text-slate-400 capitalize">{user?.role || 'Admin'}</span>
+                  <button
+                    onClick={() => {
+                      setIsRoleMenuOpen(false);
+                      logout();
+                      showToast('info', 'Logged Out', 'Signed out successfully.');
+                    }}
+                    className="flex items-center gap-1 text-xs font-semibold text-rose-600 hover:text-rose-700 cursor-pointer"
+                  >
+                    <LogOut size={13} />
+                    <span>Sign Out</span>
+                  </button>
+                </div>
+              </div>
+            </>
+          )}
         </div>
 
         {/* Sync Button */}

@@ -25,10 +25,12 @@ import {
   Check
 } from 'lucide-react';
 import { useRecruitment } from '../../context/RecruitmentContext';
+import { useAuth } from '../../context/AuthContext';
 import { CandidateStatus, CandidateSource, WorkExperience, Education } from '../../types';
 import { PortalLogo } from '../common/PortalLogo';
 import { InterviewEvaluationForm } from './InterviewEvaluationForm';
 import { CandidateCallTab } from '../candidate/CandidateCallTab';
+import { CandidateCommunicationsTab } from '../candidate/CandidateCommunicationsTab';
 
 export const CandidateProfileModal: React.FC = () => {
   const { 
@@ -50,8 +52,9 @@ export const CandidateProfileModal: React.FC = () => {
     setActiveView,
     shiftCandidateToCalling
   } = useRecruitment();
+  const { can } = useAuth();
 
-  const [activeTab, setActiveTab] = useState<'profile' | 'resume' | 'scorecard' | 'calling' | 'timeline'>('profile');
+  const [activeTab, setActiveTab] = useState<'profile' | 'resume' | 'scorecard' | 'calling' | 'timeline' | 'communications'>('profile');
   const [noteText, setNoteText] = useState(selectedCandidate?.notes || '');
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
@@ -348,32 +351,36 @@ export const CandidateProfileModal: React.FC = () => {
           </div>
 
           <div className={clsx('flex', 'flex-wrap', 'items-center', 'gap-2', 'self-end', 'sm:self-center')}>
-            {/* Quick Edit Details Button */}
-            <button
-              onClick={() => {
-                if (activeTab === 'resume') {
-                  setIsEditingResume(true);
-                } else {
-                  setActiveTab('profile');
-                  setIsEditingProfile(true);
-                }
-              }}
-              title="Edit candidate profile or resume details"
-              className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-amber-500 hover:bg-amber-600 text-white font-bold text-xs shadow-md transition active:scale-95 cursor-pointer"
-            >
-              <Edit3 size={14} />
-              <span>Edit Details</span>
-            </button>
+            {/* Quick Edit Details Button (Admin & Recruiter only) */}
+            {can('edit_candidate') && (
+              <button
+                onClick={() => {
+                  if (activeTab === 'resume') {
+                    setIsEditingResume(true);
+                  } else {
+                    setActiveTab('profile');
+                    setIsEditingProfile(true);
+                  }
+                }}
+                title="Edit candidate profile or resume details"
+                className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-amber-500 hover:bg-amber-600 text-white font-bold text-xs shadow-md transition active:scale-95 cursor-pointer"
+              >
+                <Edit3 size={14} />
+                <span>Edit Details</span>
+              </button>
+            )}
 
-            {/* Quick Delete Candidate Button */}
-            <button
-              onClick={() => setShowDeleteConfirm(true)}
-              title="Delete candidate permanently"
-              className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-700 font-bold text-xs border border-rose-200 transition active:scale-95 cursor-pointer shadow-2xs"
-            >
-              <Trash2 size={14} className="text-rose-600" />
-              <span>Delete Candidate</span>
-            </button>
+            {/* Quick Delete Candidate Button (Admin Only) */}
+            {can('delete_candidate') && (
+              <button
+                onClick={() => setShowDeleteConfirm(true)}
+                title="Delete candidate permanently (Admin Only)"
+                className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-700 font-bold text-xs border border-rose-200 transition active:scale-95 cursor-pointer shadow-2xs"
+              >
+                <Trash2 size={14} className="text-rose-600" />
+                <span>Delete Candidate</span>
+              </button>
+            )}
 
             <button
               onClick={() => {
@@ -399,6 +406,19 @@ export const CandidateProfileModal: React.FC = () => {
               }`}
             >
               <span>Screening Log</span>
+            </button>
+
+            <button
+              onClick={() => setActiveTab('communications')}
+              className={`flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold transition active:scale-95 cursor-pointer border ${
+                activeTab === 'communications'
+                  ? 'bg-blue-50 text-blue-800 border-blue-300 ring-2 ring-blue-300'
+                  : 'bg-slate-100 hover:bg-slate-200 text-slate-700 border-slate-200'
+              }`}
+              title="Send candidate email with Google Meet & calendar invite, or WhatsApp status alert"
+            >
+              <Mail size={14} className="text-blue-600" />
+              <span>Outreach (Email & WhatsApp)</span>
             </button>
 
             {candScheduledInterview ? (
@@ -551,6 +571,17 @@ export const CandidateProfileModal: React.FC = () => {
           >
             <Clock size={13} />
             Activity History ({cand.activityHistory?.length || 0})
+          </button>
+          <button
+            onClick={() => setActiveTab('communications')}
+            className={`px-4 py-3 text-xs font-bold border-b-2 transition flex items-center gap-1.5 ${
+              activeTab === 'communications'
+                ? 'border-blue-600 text-blue-600'
+                : 'border-transparent text-slate-500 hover:text-slate-800'
+            }`}
+          >
+            <Mail size={13} />
+            Outreach (Email & WhatsApp)
           </button>
         </div>
 
@@ -1480,6 +1511,14 @@ export const CandidateProfileModal: React.FC = () => {
                 ))}
               </div>
             </div>
+          )}
+
+          {/* TAB 5: CANDIDATE OUTREACH & COMMUNICATIONS */}
+          {activeTab === 'communications' && (
+            <CandidateCommunicationsTab
+              candidate={cand}
+              scheduledInterviews={interviews.filter((i) => i.candidateId === cand.id || i.candidateName === cand.name)}
+            />
           )}
 
         </div>

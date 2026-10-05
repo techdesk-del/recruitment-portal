@@ -2,6 +2,8 @@ import { Interview } from '../models/Interview.js';
 import { Candidate } from '../models/Candidate.js';
 import { ensureDBConnected, getMongoConnectionStatus } from '../config/database.js';
 import { broadcastInterviewCreated, broadcastInterviewUpdated, broadcastInterviewDeleted } from '../sockets/socketHandler.js';
+import { sendInterviewInviteEmail } from '../services/emailService.js';
+import { buildInterviewWhatsAppMessage, sendWhatsAppAlert } from '../services/whatsappService.js';
 
 export async function getInterviews(req, res) {
   try {
@@ -40,13 +42,56 @@ export async function createInterview(req, res) {
         type: 'interview'
       };
 
-      await Candidate.findOneAndUpdate(
+      const candDoc = await Candidate.findOneAndUpdate(
         { id: data.candidateId },
         { 
           $set: { status: 'interview_r1', lastUpdatedDate: new Date().toISOString() },
           $push: { activityHistory: { $each: [activityItem], $position: 0 } }
+        },
+        { new: true }
+      ).catch(() => null);
+
+      // Non-blocking Automated Communications (Email & Calendar Invite & WhatsApp)
+      (async () => {
+        try {
+          const candidateData = candDoc || {
+            id: data.candidateId,
+            name: data.candidateName,
+            email: data.candidateEmail,
+            phone: data.candidatePhone,
+            jobAppliedFor: data.jobTitle
+          };
+
+          if (candidateData.email) {
+            await sendInterviewInviteEmail({
+              candidate: candidateData,
+              interview: saved || data,
+              customNotes: data.notes || ''
+            });
+            console.log(`📧 [Auto-Comm] Automated interview invitation delivered to ${candidateData.email}`);
+          }
+
+          if (candidateData.phone) {
+            const msg = buildInterviewWhatsAppMessage({
+              candidateName: candidateData.name,
+              jobTitle: data.jobTitle || candidateData.jobAppliedFor,
+              round: data.round,
+              date: data.date,
+              startTime: data.startTime,
+              endTime: data.endTime,
+              meetingLink: data.meetingLink,
+              interviewerName: data.interviewerName
+            });
+            await sendWhatsAppAlert({
+              phone: candidateData.phone,
+              message: msg,
+              candidateId: candidateData.id
+            });
+          }
+        } catch (commErr) {
+          console.warn('⚠️ [Auto-Comm] Non-fatal notification delivery warning:', commErr.message);
         }
-      ).catch(() => {});
+      })();
 
       broadcastInterviewCreated(saved);
       return res.status(201).json(saved);

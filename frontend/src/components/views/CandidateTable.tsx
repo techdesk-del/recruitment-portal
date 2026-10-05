@@ -16,10 +16,12 @@ import {
   ChevronRight 
 } from 'lucide-react';
 import { useRecruitment } from '../../context/RecruitmentContext';
+import { useAuth } from '../../context/AuthContext';
 import { CandidateStatus, CandidateSource } from '../../types';
 import { PortalLogo, Pagination } from '../common';
 
 export const CandidateTable: React.FC = () => {
+  const { can } = useAuth();
   const { 
     candidates, 
     jobs, 
@@ -611,17 +613,19 @@ export const CandidateTable: React.FC = () => {
                             <Download size={13} />
                           </button>
 
-                          <button
-                            onClick={() => {
-                              if (window.confirm(`Are you sure you want to permanently delete candidate "${cand.name}" (${cand.jobAppliedFor})? This will remove all their records.`)) {
-                                deleteCandidate(cand.id);
-                              }
-                            }}
-                            title={`Delete Candidate ${cand.name}`}
-                            className="p-1 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-600 border border-rose-200 transition cursor-pointer"
-                          >
-                            <Trash2 size={13} />
-                          </button>
+                          {can('delete_candidate') && (
+                            <button
+                              onClick={() => {
+                                if (window.confirm(`Are you sure you want to permanently delete candidate "${cand.name}" (${cand.jobAppliedFor})? This will remove all their records.`)) {
+                                  deleteCandidate(cand.id);
+                                }
+                              }}
+                              title={`Delete Candidate ${cand.name} (Admin Only)`}
+                              className="p-1 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-600 border border-rose-200 transition cursor-pointer"
+                            >
+                              <Trash2 size={13} />
+                            </button>
+                          )}
                         </div>
                       </td>
                     </tr>

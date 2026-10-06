@@ -691,13 +691,13 @@ export const InterviewScheduler: React.FC = () => {
       <div className="bg-white p-4 rounded-2xl border border-slate-200/80 shadow-xs flex flex-col lg:flex-row lg:items-center justify-between gap-4">
         
         {/* Left: View Switcher & Month Navigation */}
-        <div className="flex flex-wrap items-center gap-3">
+        <div className="flex flex-wrap items-center gap-2 sm:gap-3">
           
           {/* View Mode Buttons */}
-          <div className="flex items-center bg-slate-100 p-1 rounded-xl border border-slate-200 text-xs font-medium">
+          <div className="flex items-center bg-slate-100 p-1 rounded-xl border border-slate-200 text-xs font-medium overflow-x-auto no-scrollbar whitespace-nowrap max-w-full">
             <button
               onClick={() => setViewMode('month')}
-              className={`px-3 py-1.5 rounded-lg transition ${
+              className={`px-2.5 sm:px-3 py-1.5 rounded-lg transition ${
                 viewMode === 'month' ? 'bg-white text-blue-700 font-bold shadow-xs' : 'text-slate-600 hover:text-slate-900'
               }`}
             >
@@ -705,7 +705,7 @@ export const InterviewScheduler: React.FC = () => {
             </button>
             <button
               onClick={() => setViewMode('week')}
-              className={`px-3 py-1.5 rounded-lg transition ${
+              className={`px-2.5 sm:px-3 py-1.5 rounded-lg transition ${
                 viewMode === 'week' ? 'bg-white text-blue-700 font-bold shadow-xs' : 'text-slate-600 hover:text-slate-900'
               }`}
             >
@@ -713,7 +713,7 @@ export const InterviewScheduler: React.FC = () => {
             </button>
             <button
               onClick={() => setViewMode('day')}
-              className={`px-3 py-1.5 rounded-lg transition ${
+              className={`px-2.5 sm:px-3 py-1.5 rounded-lg transition ${
                 viewMode === 'day' ? 'bg-white text-blue-700 font-bold shadow-xs' : 'text-slate-600 hover:text-slate-900'
               }`}
             >
@@ -721,7 +721,7 @@ export const InterviewScheduler: React.FC = () => {
             </button>
             <button
               onClick={() => setViewMode('list')}
-              className={`px-3 py-1.5 rounded-lg transition ${
+              className={`px-2.5 sm:px-3 py-1.5 rounded-lg transition ${
                 viewMode === 'list' ? 'bg-white text-blue-700 font-bold shadow-xs' : 'text-slate-600 hover:text-slate-900'
               }`}
             >
@@ -758,10 +758,10 @@ export const InterviewScheduler: React.FC = () => {
         </div>
 
         {/* Right: Search, Filters & Action Button */}
-        <div className="flex flex-wrap items-center gap-2.5">
+        <div className="flex flex-wrap items-center gap-2 sm:gap-2.5 w-full lg:w-auto">
           
           {/* Quick Search */}
-          <div className="relative min-w-[180px] sm:min-w-[210px]">
+          <div className="relative flex-1 sm:flex-initial min-w-[150px] sm:min-w-[210px]">
             <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
             <input
               type="text"
@@ -776,7 +776,7 @@ export const InterviewScheduler: React.FC = () => {
           <select
             value={roundFilter}
             onChange={(e) => setRoundFilter(e.target.value)}
-            className="text-xs px-2.5 py-1.5 rounded-xl bg-slate-50 border border-slate-200 font-medium text-slate-700 focus:outline-none focus:border-blue-500 cursor-pointer"
+            className="flex-1 sm:flex-initial text-xs px-2.5 py-1.5 rounded-xl bg-slate-50 border border-slate-200 font-medium text-slate-700 focus:outline-none focus:border-blue-500 cursor-pointer"
           >
             <option value="all">All Rounds</option>
             <option value="Round 1: Screening / Technical">Round 1: Technical</option>
@@ -789,7 +789,7 @@ export const InterviewScheduler: React.FC = () => {
           <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
-            className="text-xs px-2.5 py-1.5 rounded-xl bg-slate-50 border border-slate-200 font-medium text-slate-700 focus:outline-none focus:border-blue-500 cursor-pointer"
+            className="flex-1 sm:flex-initial text-xs px-2.5 py-1.5 rounded-xl bg-slate-50 border border-slate-200 font-medium text-slate-700 focus:outline-none focus:border-blue-500 cursor-pointer"
           >
             <option value="all">All Status</option>
             <option value="in_progress">In Progress</option>
@@ -808,7 +808,7 @@ export const InterviewScheduler: React.FC = () => {
               }
               setIsScheduleModalOpen(true);
             }}
-            className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs shadow-md transition active:scale-95 shrink-0"
+            className="flex items-center justify-center gap-1.5 px-3.5 sm:px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs shadow-md transition active:scale-95 shrink-0 flex-1 sm:flex-initial"
           >
             <Plus size={15} />
             <span>Schedule Interview</span>
@@ -818,20 +818,21 @@ export const InterviewScheduler: React.FC = () => {
 
       {/* VIEW 1: MONTH CALENDAR GRID */}
       {viewMode === 'month' && (
-        <div className="bg-white rounded-2xl border border-slate-200/80 shadow-xs overflow-hidden">
-          {/* Weekday Headers */}
-          <div className="grid grid-cols-7 border-b border-slate-200 bg-slate-50/80 text-center text-xs font-bold text-slate-600 py-3">
-            <span>SUN</span>
-            <span>MON</span>
-            <span>TUE</span>
-            <span>WED</span>
-            <span>THU</span>
-            <span>FRI</span>
-            <span>SAT</span>
-          </div>
+        <div className="bg-white rounded-2xl border border-slate-200/80 shadow-xs overflow-x-auto touch-pan-x">
+          <div className="min-w-[640px] sm:min-w-0">
+            {/* Weekday Headers */}
+            <div className="grid grid-cols-7 border-b border-slate-200 bg-slate-50/80 text-center text-xs font-bold text-slate-600 py-3">
+              <span>SUN</span>
+              <span>MON</span>
+              <span>TUE</span>
+              <span>WED</span>
+              <span>THU</span>
+              <span>FRI</span>
+              <span>SAT</span>
+            </div>
 
-          {/* Days Matrix */}
-          <div className="grid grid-cols-7 auto-rows-fr divide-x divide-y divide-slate-100">
+            {/* Days Matrix */}
+            <div className="grid grid-cols-7 auto-rows-fr divide-x divide-y divide-slate-100">
             {calendarGridDays.map((cell, idx) => {
               const cellInterviews = filteredInterviews.filter((i) => i.date === cell.dateStr);
               const isSelected = selectedDate === cell.dateStr;
@@ -931,13 +932,15 @@ export const InterviewScheduler: React.FC = () => {
                 </div>
               );
             })}
+            </div>
           </div>
         </div>
       )}
 
       {/* VIEW 2: WEEK VIEW */}
       {viewMode === 'week' && (
-        <div className="bg-white rounded-2xl border border-slate-200/80 shadow-xs overflow-hidden">
+        <div className="bg-white rounded-2xl border border-slate-200/80 shadow-xs overflow-x-auto touch-pan-x">
+          <div className="min-w-[640px] sm:min-w-0">
           {/* Week Columns Header */}
           <div className="grid grid-cols-7 border-b border-slate-200 bg-slate-50/80">
             {weekDays.map((w) => (
@@ -1023,11 +1026,12 @@ export const InterviewScheduler: React.FC = () => {
             })}
           </div>
         </div>
-      )}
+      </div>
+    )}
 
       {/* VIEW 3: DAY / AGENDA VIEW */}
       {viewMode === 'day' && (
-        <div className="bg-white rounded-2xl border border-slate-200/80 shadow-xs p-6 space-y-6">
+        <div className="bg-white rounded-2xl border border-slate-200/80 shadow-xs p-3.5 sm:p-6 space-y-4 sm:space-y-6">
           {/* Day View Header Banner */}
           <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-slate-200 gap-4">
             <div>

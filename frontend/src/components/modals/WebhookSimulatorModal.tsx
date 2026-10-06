@@ -102,30 +102,30 @@ export const WebhookSimulatorModal: React.FC = () => {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md animate-fade-in">
-      <div className="bg-slate-900 border border-slate-800 rounded-3xl w-full max-w-2xl max-h-[85vh] flex flex-col shadow-2xl overflow-hidden animate-slide-up">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 bg-slate-950/80 backdrop-blur-md animate-fade-in">
+      <div className="bg-slate-900 border border-slate-800 rounded-3xl w-[98vw] sm:w-full max-w-2xl max-h-[92vh] sm:max-h-[85vh] flex flex-col shadow-2xl overflow-hidden animate-slide-up">
         
         {/* Header */}
-        <div className="p-6 bg-slate-950 border-b border-slate-800 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="p-2.5 rounded-2xl bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
-              <Zap size={20} />
+        <div className="p-3.5 sm:p-6 bg-slate-950 border-b border-slate-800 flex items-center justify-between gap-3">
+          <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
+            <div className="p-2 sm:p-2.5 rounded-2xl bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 shrink-0">
+              <Zap size={18} />
             </div>
-            <div>
-              <h2 className="text-lg font-bold text-white">Live Ingestion & Resume Generation Simulator</h2>
-              <p className="text-xs text-slate-400">Test real-time candidate synchronization & PDF resume generation</p>
+            <div className="min-w-0">
+              <h2 className="text-sm sm:text-lg font-bold text-white truncate">Live Ingestion & Resume Simulator</h2>
+              <p className="text-[11px] sm:text-xs text-slate-400 truncate">Test real-time candidate synchronization & PDF resume generation</p>
             </div>
           </div>
           <button
             onClick={() => setIsWebhookModalOpen(false)}
-            className="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white transition"
+            className="p-1.5 sm:p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white transition shrink-0 cursor-pointer"
           >
             <X size={18} />
           </button>
         </div>
 
         {/* Body */}
-        <div className="flex-1 overflow-y-auto p-6 space-y-5">
+        <div className="flex-1 overflow-y-auto p-3.5 sm:p-6 space-y-4 sm:space-y-5">
           
           <div className="space-y-3">
             <label className="text-xs font-bold text-slate-300 uppercase tracking-wider">

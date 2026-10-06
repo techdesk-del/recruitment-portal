@@ -33,15 +33,18 @@ export function parseDateToExcel(val) {
 export function cleanRole(role) {
   if (!role) return '';
   const r = role.trim();
-  if (r.includes('Deputy Project Manager') || r === 'DPM') return 'DPM';
-  if (r.includes('Executive Assistant') || r === 'EA') return 'EA';
-  if (r.includes('Driver')) return 'Driver';
-  if (r.includes('Civil Supervisor')) return 'Civil Supervisor';
-  if (r.includes('Talent Acquisition') || r === 'Talent') return 'Talent';
-  if (r.includes('Sales & Marketing') || r.includes('Sales& Marketing')) return 'Sales& Marketing';
-  if (r.includes('Senior Project Manager') || r === 'Project Manager') return 'Project Manager';
+  if (r.includes('Deputy Project Manager') || r === 'DPM') return 'Deputy Project Manager';
+  if (r.includes('EA to Director') || r.includes('Executive Assistant') || r === 'EA') return 'EA to Director';
+  if (r.includes('Supervisor (Civil)') || r.includes('Civil Supervisor')) return 'Supervisor (Civil)';
+  if (r.includes('Assistant Manager – Sales') || r.includes('Sales')) return 'AM - Sales';
+  if (r.includes('Assistant Manager – Marketing') || r.includes('Marketing')) return 'AM - Marketing & Branding';
+  if (r.includes('Head of AI Adoption') || r.includes('AI Adoption')) return 'Head of AI & IT';
+  if (r.includes('In-house Research Analyst') || r.includes('Research Analyst')) return 'Research Analyst';
+  if (r.includes('Head of Architecture') || r.includes('Architecture')) return 'Head of Architecture';
+  if (r.includes('Accounts Manager') || r.includes('Accounts')) return 'Accounts Manager';
+  if (r.includes('Purchase Officer') || r.includes('China Exposure')) return 'Purchase Officer (China)';
   if (r.includes('Purchase Manager')) return 'Purchase Manager';
-  if (r.includes('Architect')) return 'Architect';
+  if (r.includes('Project Manager')) return 'Project Manager';
   return r;
 }
 

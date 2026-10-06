@@ -318,16 +318,16 @@ export const BulkResumeUploadModal: React.FC = () => {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-900/60 backdrop-blur-xs animate-fade-in font-sans">
-      <div className="bg-white border border-slate-200 rounded-3xl w-full max-w-4xl max-h-[92vh] flex flex-col shadow-2xl overflow-hidden animate-slide-up text-slate-900">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 bg-slate-900/60 backdrop-blur-xs animate-fade-in font-sans">
+      <div className="bg-white border border-slate-200 rounded-3xl w-full max-w-4xl max-h-[94vh] sm:max-h-[92vh] flex flex-col shadow-2xl overflow-hidden animate-slide-up text-slate-900">
         
         {/* Top Header */}
-        <div className="p-5 sm:p-6 bg-slate-50 border-b border-slate-200 flex items-center justify-between gap-4">
-          <div className="flex items-center gap-3.5">
-            <UrbanGaonLogo size="md" className="h-9 w-auto" />
-            <div>
-              <div className="flex items-center gap-2">
-                <h2 className="text-base font-bold text-slate-900">
+        <div className="p-3.5 sm:p-6 bg-slate-50 border-b border-slate-200 flex items-center justify-between gap-3 sm:gap-4">
+          <div className="flex items-center gap-2.5 sm:gap-3.5 min-w-0">
+            <UrbanGaonLogo size="md" className="h-8 sm:h-9 w-auto shrink-0" />
+            <div className="min-w-0">
+              <div className="flex items-center gap-2 flex-wrap">
+                <h2 className="text-sm sm:text-base font-bold text-slate-900 truncate">
                   Add Candidate & Resume Ingestion Engine
                 </h2>
                 <span className="hidden sm:inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-blue-100 text-blue-800 border border-blue-200">
@@ -339,7 +339,7 @@ export const BulkResumeUploadModal: React.FC = () => {
                   BullMQ Worker Queue
                 </span>
               </div>
-              <p className="text-xs text-slate-500 font-normal mt-0.5">
+              <p className="text-[11px] sm:text-xs text-slate-500 font-normal mt-0.5 truncate">
                 Upload a candidate resume (.PDF, .DOCX) for AI auto-parsing, or enter candidate credentials manually
               </p>
             </div>
@@ -347,7 +347,7 @@ export const BulkResumeUploadModal: React.FC = () => {
 
           <button
             onClick={() => setIsBulkUploadModalOpen(false)}
-            className="p-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-500 hover:text-slate-900 transition shrink-0 cursor-pointer"
+            className="p-1.5 sm:p-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-500 hover:text-slate-900 transition shrink-0 cursor-pointer"
             title="Close modal"
           >
             <X size={18} />
@@ -355,10 +355,10 @@ export const BulkResumeUploadModal: React.FC = () => {
         </div>
 
         {/* Tab Switcher: Upload Resume vs Manual Entry */}
-        <div className="px-6 bg-white border-b border-slate-200 flex items-center gap-2">
+        <div className="px-3 sm:px-6 bg-white border-b border-slate-200 flex items-center gap-1 sm:gap-2 overflow-x-auto no-scrollbar whitespace-nowrap">
           <button
             onClick={() => setActiveTab('upload')}
-            className={`px-4 py-3 text-xs font-bold border-b-2 transition flex items-center gap-2 cursor-pointer ${
+            className={`px-3 sm:px-4 py-2.5 sm:py-3 text-xs font-bold border-b-2 transition flex items-center gap-1.5 sm:gap-2 cursor-pointer ${
               activeTab === 'upload'
                 ? 'border-blue-600 text-blue-600'
                 : 'border-transparent text-slate-500 hover:text-slate-800'
@@ -370,7 +370,7 @@ export const BulkResumeUploadModal: React.FC = () => {
 
           <button
             onClick={() => setActiveTab('manual')}
-            className={`px-4 py-3 text-xs font-bold border-b-2 transition flex items-center gap-2 cursor-pointer ${
+            className={`px-3 sm:px-4 py-2.5 sm:py-3 text-xs font-bold border-b-2 transition flex items-center gap-1.5 sm:gap-2 cursor-pointer ${
               activeTab === 'manual'
                 ? 'border-blue-600 text-blue-600'
                 : 'border-transparent text-slate-500 hover:text-slate-800'
@@ -382,7 +382,7 @@ export const BulkResumeUploadModal: React.FC = () => {
         </div>
 
         {/* Scrollable Content Body */}
-        <div className="flex-1 overflow-y-auto p-5 sm:p-6 space-y-6 bg-slate-50/40">
+        <div className="flex-1 overflow-y-auto p-3.5 sm:p-6 space-y-4 sm:space-y-6 bg-slate-50/40">
           
           {/* TAB 1: RESUME UPLOAD & PARSING */}
           {activeTab === 'upload' && (

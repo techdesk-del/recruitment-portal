@@ -52,6 +52,8 @@ interface RecruitmentContextType {
   setIsWebhookModalOpen: (open: boolean) => void;
   isBulkUploadModalOpen: boolean;
   setIsBulkUploadModalOpen: (open: boolean) => void;
+  isMobileMenuOpen: boolean;
+  setIsMobileMenuOpen: (open: boolean) => void;
   toasts: ToastMessage[];
   showToast: (type: ToastMessage['type'], title: string, message: string) => void;
   removeToast: (id: string) => void;
@@ -96,10 +98,23 @@ interface RecruitmentContextType {
 const RecruitmentContext = createContext<RecruitmentContextType | undefined>(undefined);
 
 const STORAGE_KEYS = {
-  candidates: 'urbangaon_recruitment_candidates_v7',
-  jobs: 'urbangaon_recruitment_jobs_v7',
-  interviews: 'urbangaon_recruitment_interviews_v7',
-  calls: 'urbangaon_recruitment_calls_v7'
+  candidates: 'urbangaon_recruitment_candidates_v8',
+  jobs: 'urbangaon_recruitment_jobs_v8',
+  interviews: 'urbangaon_recruitment_interviews_v8',
+  calls: 'urbangaon_recruitment_calls_v8'
+};
+
+const LEGACY_JOB_MAP: Record<string, { id: string; title: string; dept: string }> = {
+  'job-dpm': { id: 'job-deputy-project-manager', title: 'Deputy Project Manager', dept: 'Civil' },
+  'job-ea': { id: 'job-ea-director', title: 'EA to Director', dept: "Administration / Director's Office" },
+  'job-driver': { id: 'job-supervisor-civil', title: 'Supervisor (Civil)', dept: 'Civil' },
+  'job-civil-sup': { id: 'job-supervisor-civil', title: 'Supervisor (Civil)', dept: 'Civil' },
+  'job-talent': { id: 'job-ea-director', title: 'EA to Director', dept: "Administration / Director's Office" },
+  'job-sales-mkt': { id: 'job-am-sales', title: 'Assistant Manager – Sales', dept: 'Sales' },
+  'job-pm': { id: 'job-project-manager', title: 'Project Manager', dept: 'Civil' },
+  'job-purchase': { id: 'job-purchase-manager-construction', title: 'Purchase Manager – Construction Procurement', dept: 'Procurement / Supply Chain & Contracts' },
+  'job-architect': { id: 'job-head-architecture', title: 'Head of Architecture', dept: 'Architecture & Design' },
+  'job-general': { id: 'job-head-ai-it', title: 'Head of AI Adoption, IT & Research', dept: 'AI, IT & Research' }
 };
 
 function loadStorage<T>(key: string, fallback: T): T {
@@ -107,9 +122,17 @@ function loadStorage<T>(key: string, fallback: T): T {
     const saved = localStorage.getItem(key);
     if (!saved) return fallback;
     const parsed = JSON.parse(saved);
-    if (key === STORAGE_KEYS.candidates && Array.isArray(parsed)) {
-      // Purge any stale deleted test candidate from client localStorage
-      return parsed.filter((c: any) => c.id !== 'cand-010651' && c.email !== 'test@gmail.com' && c.name?.toLowerCase() !== 'test') as T;
+    if ((key === STORAGE_KEYS.candidates || key === 'urbangaon_recruitment_candidates_v7') && Array.isArray(parsed)) {
+      // Purge any stale deleted test candidate and migrate legacy job IDs
+      return parsed
+        .filter((c: any) => c.id !== 'cand-010651' && c.email !== 'test@gmail.com' && c.name?.toLowerCase() !== 'test')
+        .map((c: any) => {
+          if (LEGACY_JOB_MAP[c.jobId]) {
+            const m = LEGACY_JOB_MAP[c.jobId];
+            return { ...c, jobId: m.id, jobAppliedFor: m.title, department: m.dept };
+          }
+          return c;
+        }) as T;
     }
     return parsed;
   } catch {
@@ -133,6 +156,7 @@ export const RecruitmentProvider: React.FC<{ children: React.ReactNode }> = ({ c
   const [isJobModalOpen, setIsJobModalOpen] = useState(false);
   const [isWebhookModalOpen, setIsWebhookModalOpen] = useState(false);
   const [isBulkUploadModalOpen, setIsBulkUploadModalOpen] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [toasts, setToasts] = useState<ToastMessage[]>([]);
 
   const [filters, setFilters] = useState<FilterState>({
@@ -1191,6 +1215,8 @@ export const RecruitmentProvider: React.FC<{ children: React.ReactNode }> = ({ c
         setIsWebhookModalOpen,
         isBulkUploadModalOpen,
         setIsBulkUploadModalOpen,
+        isMobileMenuOpen,
+        setIsMobileMenuOpen,
         toasts,
         showToast,
         removeToast,

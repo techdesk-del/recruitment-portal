@@ -161,18 +161,18 @@ export const CandidateKanban: React.FC = () => {
     <div className="h-full flex flex-col space-y-4 animate-fade-in min-h-0">
       
       {/* Top Filter Bar in Light Mode */}
-      <div className="shrink-0 p-3.5 rounded-2xl bg-white border border-slate-200 flex flex-wrap items-center justify-between gap-4 shadow-xs">
-        <div className="flex flex-wrap items-center gap-3">
+      <div className="shrink-0 p-3 sm:p-3.5 rounded-2xl bg-white border border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-xs">
+        <div className="flex flex-wrap items-center gap-2 sm:gap-3">
           <div className="flex items-center gap-2 text-xs text-slate-700 font-bold">
             <Filter size={14} className="text-blue-600" />
-            Filters:
+            <span>Filters:</span>
           </div>
 
           {/* Source Dropdown */}
           <select
             value={filters.source}
             onChange={(e) => setFilters((prev) => ({ ...prev, source: e.target.value as any }))}
-            className="px-3 py-1.5 rounded-lg bg-slate-50 border border-slate-200 text-xs text-slate-700 focus:outline-none focus:border-blue-500"
+            className="flex-1 sm:flex-initial min-w-[140px] px-3 py-1.5 rounded-lg bg-slate-50 border border-slate-200 text-xs text-slate-700 focus:outline-none focus:border-blue-500"
           >
             <option value="all">All Sources (Naukri, LinkedIn, Indeed...)</option>
             <option value="naukri">Naukri.com</option>
@@ -187,7 +187,7 @@ export const CandidateKanban: React.FC = () => {
           <select
             value={filters.jobId}
             onChange={(e) => setFilters((prev) => ({ ...prev, jobId: e.target.value }))}
-            className="px-3 py-1.5 rounded-lg bg-slate-50 border border-slate-200 text-xs text-slate-700 focus:outline-none focus:border-blue-500 max-w-xs truncate"
+            className="flex-1 sm:flex-initial min-w-[140px] px-3 py-1.5 rounded-lg bg-slate-50 border border-slate-200 text-xs text-slate-700 focus:outline-none focus:border-blue-500 max-w-xs truncate"
           >
             <option value="all">All Active Job Roles</option>
             {jobs.map((j) => (
@@ -208,18 +208,38 @@ export const CandidateKanban: React.FC = () => {
           )}
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center justify-between sm:justify-end gap-2.5">
           <span className="text-xs text-slate-500">
             Showing <strong className="text-slate-900">{filteredCandidates.length}</strong> candidates
           </span>
           <button
             onClick={() => bulkDownloadResumes(filteredCandidates.map(c => c.id))}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold border border-slate-200 transition"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold border border-slate-200 transition shrink-0"
           >
             <FileDown size={13} />
-            <span>Download Visible Resumes</span>
+            <span className="hidden xs:inline">Download</span> Visible
           </button>
         </div>
+      </div>
+
+      {/* Mobile Stage Selector Switcher Pills (Visible on small screens) */}
+      <div className="sm:hidden shrink-0 flex items-center gap-1.5 overflow-x-auto no-scrollbar pb-1">
+        {columns.map((col) => {
+          const count = filteredCandidates.filter((c) => c.status === col.status).length;
+          return (
+            <button
+              key={col.status}
+              onClick={() => {
+                const el = document.getElementById(`kanban-col-${col.status}`);
+                el?.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'start' });
+              }}
+              className="px-2.5 py-1 rounded-xl text-[11px] font-bold shrink-0 bg-white border border-slate-200 text-slate-700 active:scale-95 transition shadow-2xs"
+            >
+              <span>{col.label}</span>
+              <span className="ml-1.5 px-1.5 py-0.2 rounded-full bg-slate-100 text-[10px] text-slate-600 font-bold">{count}</span>
+            </button>
+          );
+        })}
       </div>
 
       {/* Kanban Stage Columns Container (Horizontal Scrollable with Edge Hover) */}
@@ -258,7 +278,7 @@ export const CandidateKanban: React.FC = () => {
           ref={kanbanScrollRef}
           onMouseMove={handleKanbanMouseMove}
           onMouseLeave={stopAutoScroll}
-          className="flex-1 min-h-0 flex items-stretch gap-4 overflow-x-auto pb-2 scroll-smooth"
+          className="flex-1 min-h-0 flex items-stretch gap-3 sm:gap-4 overflow-x-auto pb-2 scroll-smooth touch-pan-x"
         >
         {columns.map((col) => {
           const colCandidates = filteredCandidates.filter((c) => c.status === col.status);
@@ -266,7 +286,8 @@ export const CandidateKanban: React.FC = () => {
           return (
             <div
               key={col.status}
-              className={`w-80 shrink-0 flex flex-col rounded-2xl border ${col.border} ${col.bg} p-3.5 h-full shadow-2xs`}
+              id={`kanban-col-${col.status}`}
+              className={`w-[85vw] max-w-[320px] sm:w-80 shrink-0 flex flex-col rounded-2xl border ${col.border} ${col.bg} p-3 sm:p-3.5 h-full shadow-2xs`}
             >
               {/* Column Header */}
               <div className="shrink-0 flex items-center justify-between pb-3 border-b border-slate-200/80 mb-3">

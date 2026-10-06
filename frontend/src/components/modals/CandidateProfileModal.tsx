@@ -326,9 +326,9 @@ export const CandidateProfileModal: React.FC = () => {
         </button>
 
         {/* Modal Top Header */}
-        <div className={clsx('p-6', 'bg-slate-50', 'border-b', 'border-slate-200', 'flex', 'flex-col', 'sm:flex-row', 'sm:items-center', 'justify-between', 'gap-4', 'pr-16')}>
-          <div className={clsx('flex', 'items-start', 'gap-4')}>
-            <div className={clsx('w-14', 'h-14', 'rounded-2xl', 'bg-blue-600', 'text-white', 'font-extrabold', 'text-2xl', 'flex', 'items-center', 'justify-center', 'shadow-md', 'shrink-0')}>
+        <div className={clsx('p-4', 'sm:p-6', 'bg-slate-50', 'border-b', 'border-slate-200', 'flex', 'flex-col', 'sm:flex-row', 'sm:items-center', 'justify-between', 'gap-4', 'pr-12', 'sm:pr-16')}>
+          <div className={clsx('flex', 'items-start', 'gap-3', 'sm:gap-4')}>
+            <div className={clsx('w-11', 'h-11', 'sm:w-14', 'sm:h-14', 'rounded-2xl', 'bg-blue-600', 'text-white', 'font-extrabold', 'text-xl', 'sm:text-2xl', 'flex', 'items-center', 'justify-center', 'shadow-md', 'shrink-0')}>
               {cand.name.charAt(0)}
             </div>
             <div>
@@ -517,7 +517,7 @@ export const CandidateProfileModal: React.FC = () => {
         </div>
 
         {/* Modal Navigation Tabs */}
-        <div className={clsx('px-6', 'border-b', 'border-slate-200', 'bg-white', 'flex', 'items-center', 'gap-2')}>
+        <div className={clsx('px-3', 'sm:px-6', 'border-b', 'border-slate-200', 'bg-white', 'flex', 'items-center', 'gap-1', 'sm:gap-2', 'overflow-x-auto', 'no-scrollbar', 'whitespace-nowrap')}>
           <button
             onClick={() => setActiveTab('profile')}
             className={`px-4 py-3 text-xs font-bold border-b-2 transition ${
@@ -589,7 +589,7 @@ export const CandidateProfileModal: React.FC = () => {
         </div>
 
         {/* Modal Body / Tab Contents */}
-        <div className={clsx('flex-1', 'overflow-y-auto', 'p-6', 'space-y-6', 'bg-slate-50/50')}>
+        <div className={clsx('flex-1', 'overflow-y-auto', 'p-3.5', 'sm:p-6', 'space-y-4', 'sm:space-y-6', 'bg-slate-50/50')}>
           
           {/* TAB 1: PROFILE DOSSIER */}
           {activeTab === 'profile' && (

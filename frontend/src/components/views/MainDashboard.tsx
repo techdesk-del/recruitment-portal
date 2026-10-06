@@ -152,16 +152,16 @@ export const MainDashboard: React.FC = () => {
           PERFORMANCE • RECRUITMENT PIPELINE
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
           
           {/* Card 1: Total Applicants */}
           <div 
             onClick={() => setActiveView('candidates')}
-            className="p-6 rounded-2xl bg-white border border-slate-100 shadow-2xs hover:shadow-xs hover:border-emerald-400 transition cursor-pointer flex flex-col justify-between min-h-[140px]"
+            className="p-4 sm:p-6 rounded-2xl bg-white border border-slate-100 shadow-2xs hover:shadow-xs hover:border-emerald-400 transition cursor-pointer flex flex-col justify-between min-h-[130px] sm:min-h-[140px]"
           >
             <span className="text-xs font-normal text-slate-500">Total Applicants</span>
             <div className="mt-2">
-              <span className="text-3xl font-bold text-[#00a86b] tracking-tight">
+              <span className="text-2xl sm:text-3xl font-bold text-[#00a86b] tracking-tight">
                 {metrics.totalApplications}
               </span>
               <p className="text-xs text-slate-400 font-normal mt-1">{metrics.statusBreakdown.applied} new applications</p>
@@ -171,11 +171,11 @@ export const MainDashboard: React.FC = () => {
           {/* Card 2: Active Pipeline */}
           <div 
             onClick={() => setActiveView('pipeline')}
-            className="p-6 rounded-2xl bg-white border border-slate-100 shadow-2xs hover:shadow-xs hover:border-blue-400 transition cursor-pointer flex flex-col justify-between min-h-[140px]"
+            className="p-4 sm:p-6 rounded-2xl bg-white border border-slate-100 shadow-2xs hover:shadow-xs hover:border-blue-400 transition cursor-pointer flex flex-col justify-between min-h-[130px] sm:min-h-[140px]"
           >
             <span className="text-xs font-normal text-slate-500">In Active Pipeline</span>
             <div className="mt-2">
-              <span className="text-3xl font-bold text-[#2563eb] tracking-tight">
+              <span className="text-2xl sm:text-3xl font-bold text-[#2563eb] tracking-tight">
                 {metrics.activeCandidates}
               </span>
               <p className="text-xs text-slate-400 font-normal mt-1">across {jobs.length} open positions</p>
@@ -183,10 +183,10 @@ export const MainDashboard: React.FC = () => {
           </div>
 
           {/* Card 3: Conversion */}
-          <div className="p-6 rounded-2xl bg-white border border-slate-100 shadow-2xs flex flex-col justify-between min-h-[140px]">
+          <div className="p-4 sm:p-6 rounded-2xl bg-white border border-slate-100 shadow-2xs flex flex-col justify-between min-h-[130px] sm:min-h-[140px]">
             <span className="text-xs font-normal text-slate-500">Interview Conversion</span>
             <div className="mt-2">
-              <span className="text-3xl font-bold text-[#f59e0b] tracking-tight">
+              <span className="text-2xl sm:text-3xl font-bold text-[#f59e0b] tracking-tight">
                 {metrics.overallConversionRate}%
               </span>
               <p className="text-xs text-slate-400 font-normal mt-1">{metrics.statusBreakdown.joined} hired • {metrics.statusBreakdown.offered} offered</p>
@@ -194,11 +194,11 @@ export const MainDashboard: React.FC = () => {
           </div>
 
           {/* Card 4: Avg Time to Hire */}
-          <div className="p-6 rounded-2xl bg-white border border-slate-100 shadow-2xs flex flex-col justify-between min-h-[140px]">
+          <div className="p-4 sm:p-6 rounded-2xl bg-white border border-slate-100 shadow-2xs flex flex-col justify-between min-h-[130px] sm:min-h-[140px]">
             <span className="text-xs font-normal text-slate-500">Avg Time to Hire</span>
             <div className="mt-2">
-              <span className="text-3xl font-bold text-[#0284c7] tracking-tight">
-                {metrics.avgTimeToHireDays} <span className="text-xl font-medium text-slate-400">days</span>
+              <span className="text-2xl sm:text-3xl font-bold text-[#0284c7] tracking-tight">
+                {metrics.avgTimeToHireDays} <span className="text-lg sm:text-xl font-medium text-slate-400">days</span>
               </span>
               <p className="text-xs text-slate-400 font-normal mt-1">fast turnaround per candidate</p>
             </div>
@@ -213,7 +213,7 @@ export const MainDashboard: React.FC = () => {
           PORTAL SOURCES • APPLICATIONS RECEIVED
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
           
           {/* Card 1: LinkedIn */}
           <div 
@@ -361,7 +361,7 @@ export const MainDashboard: React.FC = () => {
             ref={tableScrollRef}
             onMouseMove={handleTableMouseMove}
             onMouseLeave={stopAutoScroll}
-            className="overflow-x-auto scroll-smooth"
+            className="overflow-x-auto scroll-smooth touch-pan-x"
           >
             <table className="w-full text-left border-collapse min-w-[1100px]">
               <thead>

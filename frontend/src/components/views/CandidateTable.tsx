@@ -255,43 +255,43 @@ export const CandidateTable: React.FC = () => {
       )}
 
       {/* 4 Simple Top HR Metric Cards in Light Mode */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 sm:gap-3">
         <div 
           onClick={() => setFilters((prev) => ({ ...prev, status: 'all' }))}
-          className="p-4 rounded-xl bg-white border border-slate-200 hover:border-blue-500 cursor-pointer transition shadow-2xs"
+          className="p-3 sm:p-4 rounded-xl bg-white border border-slate-200 hover:border-blue-500 cursor-pointer transition shadow-2xs"
         >
-          <span className="text-[11px] font-medium text-slate-500 uppercase tracking-wider block">Total Applicants</span>
-          <span className="text-2xl font-bold text-slate-900 mt-1 block">{totalCount}</span>
-          <span className="text-[11px] text-blue-600 font-medium mt-0.5 block">
+          <span className="text-[10px] sm:text-[11px] font-medium text-slate-500 uppercase tracking-wider block truncate">Total Applicants</span>
+          <span className="text-xl sm:text-2xl font-bold text-slate-900 mt-0.5 sm:mt-1 block">{totalCount}</span>
+          <span className="text-[10px] sm:text-[11px] text-blue-600 font-medium mt-0.5 block truncate">
             {filters.source === 'all' ? 'All Sourced Portals' : `${sourceBadges[filters.source]?.label || filters.source}`}
           </span>
         </div>
 
         <div 
           onClick={() => setFilters((prev) => ({ ...prev, status: 'screening' }))}
-          className="p-4 rounded-xl bg-white border border-slate-200 hover:border-blue-500 cursor-pointer transition shadow-2xs"
+          className="p-3 sm:p-4 rounded-xl bg-white border border-slate-200 hover:border-blue-500 cursor-pointer transition shadow-2xs"
         >
-          <span className="text-[11px] font-medium text-slate-500 uppercase tracking-wider block">Under Review</span>
-          <span className="text-2xl font-bold text-blue-600 mt-1 block">{inReviewCount}</span>
-          <span className="text-[11px] text-slate-400 font-medium mt-0.5 block">Screening / Shortlisted</span>
+          <span className="text-[10px] sm:text-[11px] font-medium text-slate-500 uppercase tracking-wider block truncate">Under Review</span>
+          <span className="text-xl sm:text-2xl font-bold text-blue-600 mt-0.5 sm:mt-1 block">{inReviewCount}</span>
+          <span className="text-[10px] sm:text-[11px] text-slate-400 font-medium mt-0.5 block truncate">Screening / Shortlisted</span>
         </div>
 
         <div 
           onClick={() => setFilters((prev) => ({ ...prev, status: 'interview_r1' }))}
-          className="p-4 rounded-xl bg-white border border-slate-200 hover:border-purple-500 cursor-pointer transition shadow-2xs"
+          className="p-3 sm:p-4 rounded-xl bg-white border border-slate-200 hover:border-purple-500 cursor-pointer transition shadow-2xs"
         >
-          <span className="text-[11px] font-medium text-slate-500 uppercase tracking-wider block">In Interviews</span>
-          <span className="text-2xl font-bold text-purple-600 mt-1 block">{interviewCount}</span>
-          <span className="text-[11px] text-slate-400 font-medium mt-0.5 block">Round 1 & Round 2</span>
+          <span className="text-[10px] sm:text-[11px] font-medium text-slate-500 uppercase tracking-wider block truncate">In Interviews</span>
+          <span className="text-xl sm:text-2xl font-bold text-purple-600 mt-0.5 sm:mt-1 block">{interviewCount}</span>
+          <span className="text-[10px] sm:text-[11px] text-slate-400 font-medium mt-0.5 block truncate">Round 1 & Round 2</span>
         </div>
 
         <div 
           onClick={() => setFilters((prev) => ({ ...prev, status: 'joined' }))}
-          className="p-4 rounded-xl bg-white border border-slate-200 hover:border-emerald-500 cursor-pointer transition shadow-2xs"
+          className="p-3 sm:p-4 rounded-xl bg-white border border-slate-200 hover:border-emerald-500 cursor-pointer transition shadow-2xs"
         >
-          <span className="text-[11px] font-medium text-slate-500 uppercase tracking-wider block">Selected / Hired</span>
-          <span className="text-2xl font-bold text-emerald-600 mt-1 block">{hiredCount}</span>
-          <span className="text-[11px] text-emerald-700 font-medium mt-0.5 block">Offer Accepted</span>
+          <span className="text-[10px] sm:text-[11px] font-medium text-slate-500 uppercase tracking-wider block truncate">Selected / Hired</span>
+          <span className="text-xl sm:text-2xl font-bold text-emerald-600 mt-0.5 sm:mt-1 block">{hiredCount}</span>
+          <span className="text-[10px] sm:text-[11px] text-emerald-700 font-medium mt-0.5 block truncate">Offer Accepted</span>
         </div>
       </div>
 
@@ -339,7 +339,7 @@ export const CandidateTable: React.FC = () => {
           <select
             value={filters.jobId}
             onChange={(e) => setFilters((prev) => ({ ...prev, jobId: e.target.value }))}
-            className="px-3 py-1.5 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-700 focus:outline-none focus:border-blue-500 font-medium"
+            className="flex-1 sm:flex-initial min-w-[130px] px-3 py-1.5 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-700 focus:outline-none focus:border-blue-500 font-medium"
           >
             <option value="all">All Positions ({jobs.length})</option>
             {jobs.map((j) => (
@@ -361,7 +361,7 @@ export const CandidateTable: React.FC = () => {
                 setActiveView('candidates');
               }
             }}
-            className="px-3 py-1.5 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-700 focus:outline-none focus:border-blue-500 font-medium"
+            className="flex-1 sm:flex-initial min-w-[130px] px-3 py-1.5 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-700 focus:outline-none focus:border-blue-500 font-medium"
           >
             <option value="all">All Sources</option>
             <option value="naukri">Naukri.com</option>
@@ -378,7 +378,7 @@ export const CandidateTable: React.FC = () => {
           <select
             value={filters.status}
             onChange={(e) => setFilters((prev) => ({ ...prev, status: e.target.value as any }))}
-            className="px-3 py-1.5 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-700 focus:outline-none focus:border-blue-500 font-medium"
+            className="flex-1 sm:flex-initial min-w-[120px] px-3 py-1.5 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-700 focus:outline-none focus:border-blue-500 font-medium"
           >
             <option value="all">All Stages</option>
             {statusOptions.map((s) => (
@@ -392,7 +392,7 @@ export const CandidateTable: React.FC = () => {
           <select
             value={filters.recruiter || 'all'}
             onChange={(e) => setFilters((prev) => ({ ...prev, recruiter: e.target.value }))}
-            className="px-3 py-1.5 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-700 focus:outline-none focus:border-blue-500 font-medium"
+            className="flex-1 sm:flex-initial min-w-[130px] px-3 py-1.5 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-700 focus:outline-none focus:border-blue-500 font-medium"
           >
             <option value="all">All Assigned HRs</option>
             <option value="Dr Rekha Pareek">Dr Rekha Pareek</option>
@@ -448,7 +448,7 @@ export const CandidateTable: React.FC = () => {
           ref={tableScrollRef}
           onMouseMove={handleTableMouseMove}
           onMouseLeave={stopAutoScroll}
-          className="overflow-x-auto scroll-smooth"
+          className="overflow-x-auto scroll-smooth touch-pan-x"
         >
           <table className="w-full text-left border-collapse min-w-[1100px]">
             <thead>

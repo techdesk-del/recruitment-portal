@@ -152,6 +152,13 @@ export interface JobPosting {
   platforms: CandidateSource[];
   applicantsCount: number;
   hiredCount: number;
+  rolePurpose?: string;
+  mandatoryQualification?: string;
+  preferredQualification?: string;
+  responsibilities?: string[];
+  competencies?: string[];
+  reportsTo?: string;
+  industry?: string;
 }
 
 export interface DashboardMetrics {

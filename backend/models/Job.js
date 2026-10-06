@@ -24,7 +24,14 @@ const JobSchema = new mongoose.Schema({
     enum: ['naukri', 'linkedin', 'indeed', 'apna', 'urbangaon', 'internshala', 'referral', 'newspaper', 'other'] 
   }],
   applicantsCount: { type: Number, default: 0 },
-  hiredCount: { type: Number, default: 0 }
+  hiredCount: { type: Number, default: 0 },
+  rolePurpose: { type: String, default: '' },
+  mandatoryQualification: { type: String, default: '' },
+  preferredQualification: { type: String, default: '' },
+  responsibilities: [{ type: String }],
+  competencies: [{ type: String }],
+  reportsTo: { type: String, default: '' },
+  industry: { type: String, default: 'Real Estate Development' }
 }, {
   timestamps: true
 });

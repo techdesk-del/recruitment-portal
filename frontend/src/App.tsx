@@ -58,8 +58,8 @@ export const App: React.FC = () => {
         {/* Dynamic Page Views */}
         <main className={`flex-1 w-full mx-auto ${
           activeView === 'pipeline' 
-            ? 'px-6 py-4 overflow-hidden flex flex-col max-w-full' 
-            : 'px-6 py-6 overflow-y-auto max-w-7xl'
+            ? 'px-2.5 sm:px-4 md:px-6 py-2 sm:py-4 overflow-hidden flex flex-col max-w-full' 
+            : 'px-3 sm:px-4 md:px-6 py-3 sm:py-6 overflow-y-auto max-w-7xl'
         }`}>
           {(activeView === 'dashboard' || activeView === 'overview') && <MainDashboard />}
           {activeView === 'candidates' && <CandidateTable />}

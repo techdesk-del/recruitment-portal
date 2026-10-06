@@ -33,11 +33,11 @@ ${cand.resumeData.skills.join(', ')}`;
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs animate-fade-in">
-      <div className="bg-white border border-slate-200 rounded-3xl w-full max-w-3xl max-h-[90vh] flex flex-col shadow-2xl overflow-hidden animate-slide-up text-slate-900">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 bg-slate-900/60 backdrop-blur-xs animate-fade-in">
+      <div className="bg-white border border-slate-200 rounded-3xl w-[98vw] sm:w-full max-w-3xl max-h-[94vh] sm:max-h-[90vh] flex flex-col shadow-2xl overflow-hidden animate-slide-up text-slate-900">
         
         {/* Top Control Bar */}
-        <div className="p-4 bg-slate-50 border-b border-slate-200 flex items-center justify-between gap-4">
+        <div className="p-3.5 sm:p-4 bg-slate-50 border-b border-slate-200 flex items-center justify-between gap-2.5 sm:gap-4">
           <div className="flex items-center gap-3">
             <UrbanGaonIcon size={28} />
             <div>

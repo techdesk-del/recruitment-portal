@@ -6,7 +6,7 @@ import { UrbanGaonLogo } from '../common/UrbanGaonLogo';
 import { PortalLogo } from '../common/PortalLogo';
 
 export const JobPostingsModal: React.FC = () => {
-  const { jobs, isJobModalOpen, setIsJobModalOpen, setFilters, setActiveView } = useRecruitment();
+  const { jobs, candidates, isJobModalOpen, setIsJobModalOpen, setFilters, setActiveView } = useRecruitment();
 
   if (!isJobModalOpen) return null;
 
@@ -38,28 +38,28 @@ export const JobPostingsModal: React.FC = () => {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs animate-fade-in">
-      <div className="bg-white border border-slate-200 rounded-3xl w-full max-w-4xl max-h-[85vh] flex flex-col shadow-2xl overflow-hidden animate-slide-up text-slate-900">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 bg-slate-900/60 backdrop-blur-xs animate-fade-in">
+      <div className="bg-white border border-slate-200 rounded-3xl w-[98vw] sm:w-full max-w-4xl max-h-[92vh] sm:max-h-[85vh] flex flex-col shadow-2xl overflow-hidden animate-slide-up text-slate-900">
         
         {/* Header with Exact Attached Logo */}
-        <div className="p-6 bg-slate-50 border-b border-slate-200 flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <UrbanGaonLogo size="md" className="h-10 w-auto" />
-            <div>
-              <h2 className="text-base font-semibold text-slate-900">Job Requisitions</h2>
-              <p className="text-xs text-slate-400 font-normal">Active job postings across all recruitment portals</p>
+        <div className="p-3.5 sm:p-6 bg-slate-50 border-b border-slate-200 flex items-center justify-between gap-3">
+          <div className="flex items-center gap-3 sm:gap-4 min-w-0">
+            <UrbanGaonLogo size="md" className="h-8 sm:h-10 w-auto shrink-0" />
+            <div className="min-w-0">
+              <h2 className="text-sm sm:text-base font-semibold text-slate-900 truncate">Job Requisitions</h2>
+              <p className="text-[11px] sm:text-xs text-slate-400 font-normal truncate">Active job postings across all recruitment portals</p>
             </div>
           </div>
           <button
             onClick={() => setIsJobModalOpen(false)}
-            className="p-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-500 hover:text-slate-900 transition"
+            className="p-1.5 sm:p-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-500 hover:text-slate-900 transition shrink-0 cursor-pointer"
           >
             <X size={18} />
           </button>
         </div>
 
         {/* List of Jobs */}
-        <div className="flex-1 overflow-y-auto p-6 space-y-4 bg-slate-50/50">
+        <div className="flex-1 overflow-y-auto p-3.5 sm:p-6 space-y-3.5 sm:space-y-4 bg-slate-50/50">
           {jobs.map((job) => (
             <div
               key={job.id}
@@ -80,8 +80,6 @@ export const JobPostingsModal: React.FC = () => {
                   <span className="flex items-center gap-1"><MapPin size={12} /> {job.location}</span>
                   <span>•</span>
                   <span>Exp: <strong className="text-slate-700">{job.experienceRequired}</strong></span>
-                  <span>•</span>
-                  <span>CTC: <strong className="text-blue-700">{job.salaryRange}</strong></span>
                 </div>
 
                 {/* Platforms Synced */}
@@ -105,7 +103,9 @@ export const JobPostingsModal: React.FC = () => {
               {/* Right Side Stats & Actions */}
               <div className="flex items-center gap-4 self-end md:self-center border-t md:border-t-0 pt-3 md:pt-0 border-slate-100">
                 <div className="text-right">
-                  <div className="text-lg font-extrabold text-slate-900">{job.applicantsCount}</div>
+                  <div className="text-lg font-extrabold text-slate-900">
+                    {candidates.filter(c => c.jobId === job.id).length || job.applicantsCount}
+                  </div>
                   <div className="text-[11px] text-slate-500">Applicants</div>
                 </div>
 

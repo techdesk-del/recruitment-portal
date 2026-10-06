@@ -601,81 +601,81 @@ export const CallingDesk: React.FC = () => {
       )}
 
       {/* 5 KPI Metric Cards */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3.5">
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2.5 sm:gap-3.5">
         <div 
           onClick={() => setActiveTab('all')}
-          className={`p-4 rounded-2xl bg-white border transition cursor-pointer shadow-2xs ${
+          className={`p-3 sm:p-4 rounded-2xl bg-white border transition cursor-pointer shadow-2xs ${
             activeTab === 'all' ? 'border-blue-500 ring-2 ring-blue-100' : 'border-slate-200 hover:border-slate-300'
           }`}
         >
-          <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block">Total Calling Queue</span>
+          <span className="text-[10px] sm:text-[11px] font-bold text-slate-400 uppercase tracking-wider block truncate">Total Calling Queue</span>
           <div className="flex items-baseline justify-between mt-1">
-            <span className="text-2xl font-black text-slate-900">{candidates.length}</span>
-            <span className="text-xs text-blue-600 font-bold">Candidates</span>
+            <span className="text-xl sm:text-2xl font-black text-slate-900">{candidates.length}</span>
+            <span className="text-xs text-blue-600 font-bold hidden sm:inline">Candidates</span>
           </div>
-          <span className="text-[11px] text-slate-400 mt-1 block">Across all sourced portals</span>
+          <span className="text-[10px] sm:text-[11px] text-slate-400 mt-1 block truncate">Across all portals</span>
         </div>
 
         <div 
           onClick={() => setActiveTab('pending')}
-          className={`p-4 rounded-2xl bg-white border transition cursor-pointer shadow-2xs ${
+          className={`p-3 sm:p-4 rounded-2xl bg-white border transition cursor-pointer shadow-2xs ${
             activeTab === 'pending' ? 'border-amber-500 ring-2 ring-amber-100' : 'border-slate-200 hover:border-slate-300'
           }`}
         >
-          <span className="text-[11px] font-bold text-amber-600 uppercase tracking-wider block">Fresh / Needs Call</span>
+          <span className="text-[10px] sm:text-[11px] font-bold text-amber-600 uppercase tracking-wider block truncate">Fresh / Needs Call</span>
           <div className="flex items-baseline justify-between mt-1">
-            <span className="text-2xl font-black text-amber-600">{callingMetrics.pendingCallsCount}</span>
-            <span className="text-xs text-amber-700 font-bold bg-amber-50 px-1.5 py-0.5 rounded">High Priority</span>
+            <span className="text-xl sm:text-2xl font-black text-amber-600">{callingMetrics.pendingCallsCount}</span>
+            <span className="text-[10px] sm:text-xs text-amber-700 font-bold bg-amber-50 px-1.5 py-0.5 rounded">Priority</span>
           </div>
-          <span className="text-[11px] text-slate-400 mt-1 block">Awaiting 1st recruiter touch</span>
+          <span className="text-[10px] sm:text-[11px] text-slate-400 mt-1 block truncate">Awaiting 1st touch</span>
         </div>
 
         <div 
           onClick={() => setActiveTab('followup')}
-          className={`p-4 rounded-2xl bg-white border transition cursor-pointer shadow-2xs ${
+          className={`p-3 sm:p-4 rounded-2xl bg-white border transition cursor-pointer shadow-2xs ${
             activeTab === 'followup' ? 'border-blue-500 ring-2 ring-blue-100' : 'border-slate-200 hover:border-slate-300'
           }`}
         >
-          <span className="text-[11px] font-bold text-blue-600 uppercase tracking-wider block">Follow-ups Today</span>
+          <span className="text-[10px] sm:text-[11px] font-bold text-blue-600 uppercase tracking-wider block truncate">Follow-ups Today</span>
           <div className="flex items-baseline justify-between mt-1">
-            <span className="text-2xl font-black text-blue-600">{callingMetrics.followUpsTodayCount}</span>
-            <span className="text-xs text-blue-700 font-bold bg-blue-50 px-1.5 py-0.5 rounded">Scheduled</span>
+            <span className="text-xl sm:text-2xl font-black text-blue-600">{callingMetrics.followUpsTodayCount}</span>
+            <span className="text-[10px] sm:text-xs text-blue-700 font-bold bg-blue-50 px-1.5 py-0.5 rounded">Today</span>
           </div>
-          <span className="text-[11px] text-slate-400 mt-1 block">Scheduled for callback today</span>
+          <span className="text-[10px] sm:text-[11px] text-slate-400 mt-1 block truncate">Callbacks scheduled</span>
         </div>
 
         <div 
           onClick={() => setActiveTab('qualified')}
-          className={`p-4 rounded-2xl bg-white border transition cursor-pointer shadow-2xs ${
+          className={`p-3 sm:p-4 rounded-2xl bg-white border transition cursor-pointer shadow-2xs ${
             activeTab === 'qualified' ? 'border-emerald-500 ring-2 ring-emerald-100' : 'border-slate-200 hover:border-slate-300'
           }`}
         >
-          <span className="text-[11px] font-bold text-emerald-600 uppercase tracking-wider block">Screening Qualified</span>
+          <span className="text-[10px] sm:text-[11px] font-bold text-emerald-600 uppercase tracking-wider block truncate">Screening Qualified</span>
           <div className="flex items-baseline justify-between mt-1">
-            <span className="text-2xl font-black text-emerald-600">{callingMetrics.qualifiedRate}%</span>
-            <span className="text-xs text-emerald-700 font-bold bg-emerald-50 px-1.5 py-0.5 rounded">
+            <span className="text-xl sm:text-2xl font-black text-emerald-600">{callingMetrics.qualifiedRate}%</span>
+            <span className="text-[10px] sm:text-xs text-emerald-700 font-bold bg-emerald-50 px-1.5 py-0.5 rounded">
               {callRecords.filter(r => r.disposition === 'connected_screening_passed').length} Passed
             </span>
           </div>
-          <span className="text-[11px] text-slate-400 mt-1 block">Promoted to R1 Interview</span>
+          <span className="text-[10px] sm:text-[11px] text-slate-400 mt-1 block truncate">Promoted to R1</span>
         </div>
 
         <div 
           onClick={() => setActiveTab('logs')}
-          className="p-4 rounded-2xl bg-white border border-slate-200 shadow-2xs"
+          className="p-3 sm:p-4 rounded-2xl bg-white border border-slate-200 shadow-2xs col-span-2 sm:col-span-1"
         >
-          <span className="text-[11px] font-bold text-indigo-600 uppercase tracking-wider block">Total Talk Time</span>
+          <span className="text-[10px] sm:text-[11px] font-bold text-indigo-600 uppercase tracking-wider block truncate">Total Talk Time</span>
           <div className="flex items-baseline justify-between mt-1">
-            <span className="text-2xl font-black text-indigo-600">{callingMetrics.totalDurationMinutes}m</span>
-            <span className="text-xs text-indigo-700 font-bold bg-indigo-50 px-1.5 py-0.5 rounded">{callingMetrics.totalCallsMade} Calls</span>
+            <span className="text-xl sm:text-2xl font-black text-indigo-600">{callingMetrics.totalDurationMinutes}m</span>
+            <span className="text-[10px] sm:text-xs text-indigo-700 font-bold bg-indigo-50 px-1.5 py-0.5 rounded">{callingMetrics.totalCallsMade} Calls</span>
           </div>
-          <span className="text-[11px] text-slate-400 mt-1 block">{callingMetrics.connectedRate}% Connect Rate</span>
+          <span className="text-[10px] sm:text-[11px] text-slate-400 mt-1 block truncate">{callingMetrics.connectedRate}% Connect Rate</span>
         </div>
       </div>
 
       {/* Main Tabs Navigation Bar */}
-      <div className="p-2 rounded-2xl bg-white border border-slate-200 flex flex-wrap items-center justify-between gap-3 shadow-2xs">
-        <div className="flex flex-wrap items-center gap-1.5">
+      <div className="p-2 rounded-2xl bg-white border border-slate-200 flex flex-col md:flex-row md:items-center justify-between gap-2.5 sm:gap-3 shadow-2xs">
+        <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar whitespace-nowrap w-full md:w-auto pb-1 md:pb-0">
           <button
             onClick={() => setActiveTab('all')}
             className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition ${
@@ -1147,44 +1147,44 @@ export const CallingDesk: React.FC = () => {
       {/* MODAL 1: LIVE INTERACTIVE WEB DIALER & SCREENING SCRIPT MODAL             */}
       {/* ========================================================================= */}
       {activeDialerCandidate && createPortal(
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-2 sm:p-4 bg-slate-900/60 backdrop-blur-xs animate-fade-in font-titillium">
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-1.5 sm:p-4 bg-slate-900/60 backdrop-blur-xs animate-fade-in font-titillium">
           <div 
-            className="bg-white border border-slate-200/90 rounded-[28px] sm:rounded-[36px] w-[96vw] max-w-6xl max-h-[94vh] h-[90vh] flex flex-col shadow-2xl overflow-hidden animate-slide-up text-slate-900 my-auto font-titillium"
+            className="bg-white border border-slate-200/90 rounded-[24px] sm:rounded-[36px] w-[98vw] sm:w-[96vw] max-w-6xl max-h-[96vh] sm:max-h-[94vh] h-[95vh] sm:h-[90vh] flex flex-col shadow-2xl overflow-hidden animate-slide-up text-slate-900 my-auto font-titillium"
             style={{ fontFamily: "'Titillium Web', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" }}
           >
             
             {/* Top Header Bar (Screening & Telecalling Context) */}
-            <div className="shrink-0 px-6 sm:px-8 py-3 bg-white border-b border-slate-100 flex items-center justify-between gap-4">
-              <div className="flex items-center gap-3">
+            <div className="shrink-0 px-3.5 sm:px-8 py-2.5 sm:py-3 bg-white border-b border-slate-100 flex items-center justify-between gap-3 sm:gap-4">
+              <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
                 <img 
                   src={brandIconPng} 
                   alt="UrbanGaon" 
-                  className="w-9 h-9 rounded-full object-cover shrink-0 shadow-xs border border-slate-100" 
+                  className="w-8 h-8 sm:w-9 sm:h-9 rounded-full object-cover shrink-0 shadow-xs border border-slate-100" 
                 />
-                <div>
-                  <h3 className="text-sm sm:text-base font-bold text-slate-900 tracking-tight leading-tight font-titillium">
+                <div className="min-w-0">
+                  <h3 className="text-xs sm:text-base font-bold text-slate-900 tracking-tight leading-tight font-titillium truncate">
                     Candidate Calling & Screening Form
                   </h3>
-                  <p className="text-[11px] sm:text-xs text-slate-500 font-normal font-titillium">
+                  <p className="text-[10px] sm:text-xs text-slate-500 font-normal font-titillium truncate">
                     {activeDialerCandidate ? (
                       <span>
-                        Candidate: <strong className="text-slate-800 font-bold">{activeDialerCandidate.name}</strong> • Role: <strong className="text-blue-700 font-bold">{activeDialerCandidate.jobAppliedFor}</strong> • Live ATS Sync
+                        <strong className="text-slate-800 font-bold">{activeDialerCandidate.name}</strong> • <strong className="text-blue-700 font-bold">{activeDialerCandidate.jobAppliedFor}</strong>
                       </span>
                     ) : (
-                      'Official recruitment evaluation dossier with real-time ATS auto-sync'
+                      'Official recruitment evaluation dossier'
                     )}
                   </p>
                 </div>
               </div>
 
-              <div className="flex items-center gap-2 sm:gap-3 shrink-0">
+              <div className="flex items-center gap-1.5 sm:gap-3 shrink-0">
                 <button
                   type="button"
                   onClick={() => {
                     setSelectedCandidate(activeDialerCandidate);
                     setActiveView('candidates');
                   }}
-                  className="px-3.5 py-1.5 rounded-xl border border-slate-200 hover:bg-slate-50 text-slate-700 text-xs font-semibold flex items-center gap-2 transition shadow-2xs cursor-pointer"
+                  className="hidden sm:flex px-3.5 py-1.5 rounded-xl border border-slate-200 hover:bg-slate-50 text-slate-700 text-xs font-semibold items-center gap-2 transition shadow-2xs cursor-pointer"
                   title="Preview Candidate Dossier"
                 >
                   <Mail size={13} className="text-slate-500" />
@@ -1194,11 +1194,11 @@ export const CallingDesk: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => window.print()}
-                  className="px-3.5 py-1.5 rounded-xl border border-slate-200 hover:bg-slate-50 text-blue-600 text-xs font-semibold flex items-center gap-2 transition shadow-2xs cursor-pointer"
+                  className="hidden xs:flex px-2.5 sm:px-3.5 py-1.5 rounded-xl border border-slate-200 hover:bg-slate-50 text-blue-600 text-xs font-semibold items-center gap-1.5 sm:gap-2 transition shadow-2xs cursor-pointer"
                   title="Print Form"
                 >
                   <Printer size={13} className="text-blue-600" />
-                  <span>Print Form</span>
+                  <span className="hidden sm:inline">Print Form</span>
                 </button>
 
                 <button
@@ -1213,25 +1213,25 @@ export const CallingDesk: React.FC = () => {
             </div>
 
             {/* Centered Brand Hero Section with UrbanGaon Matching Screenshot */}
-            <div className="shrink-0 px-6 sm:px-10 py-3.5 border-b border-slate-100 bg-white flex flex-col items-center text-center">
+            <div className="shrink-0 px-3.5 sm:px-10 py-2.5 sm:py-3.5 border-b border-slate-100 bg-white flex flex-col items-center text-center">
               <img 
                 src={brandLogoJpg} 
                 alt="UrbanGaon a perfect balance" 
-                className="h-10 sm:h-12 w-auto object-contain select-none mx-auto mb-1"
+                className="h-8 sm:h-12 w-auto object-contain select-none mx-auto mb-1"
                 onError={(e) => {
                   (e.target as HTMLElement).style.display = 'none';
                 }}
               />
-              <h2 className="text-2xl sm:text-[26px] font-bold text-slate-800 tracking-tight mt-1 font-titillium">
+              <h2 className="text-xl sm:text-[26px] font-bold text-slate-800 tracking-tight mt-0.5 sm:mt-1 font-titillium">
                 Candidate Calling & Screening Form
               </h2>
-              <p className="text-[11px] sm:text-xs text-slate-500 italic mt-0.5 font-titillium">
+              <p className="text-[10px] sm:text-xs text-slate-500 italic mt-0.5 font-titillium">
                 (Please complete this application thoroughly so we can process it as quickly as possible)
               </p>
             </div>
 
             {/* Form Fields Body (Spacious with sleek scrolling) */}
-            <div className="flex-1 min-h-0 overflow-y-auto px-6 sm:px-10 py-4 space-y-4 bg-white font-titillium">
+            <div className="flex-1 min-h-0 overflow-y-auto px-3.5 sm:px-10 py-3 sm:py-4 space-y-3.5 sm:space-y-4 bg-white font-titillium">
               
               {/* Row 1: Candidate Name (Salutation, First Name, Middle Name, Last Name in 1 horizontal row matching screenshot) */}
               <div>

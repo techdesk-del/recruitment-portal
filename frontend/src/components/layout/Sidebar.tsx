@@ -6,7 +6,8 @@ import {
   Briefcase, 
   Kanban, 
   CalendarDays, 
-  LogOut 
+  LogOut,
+  X 
 } from 'lucide-react';
 import { useRecruitment } from '../../context/RecruitmentContext';
 import { useAuth } from '../../context/AuthContext';
@@ -17,7 +18,18 @@ import { REFERRING_EMPLOYEES } from '../../data/mockData';
 
 export const Sidebar: React.FC = () => {
   const { user, logout } = useAuth();
-  const { activeView, setActiveView, candidates, jobs, interviews, filters, setFilters, callingMetrics } = useRecruitment();
+  const { 
+    activeView, 
+    setActiveView, 
+    candidates, 
+    jobs, 
+    interviews, 
+    filters, 
+    setFilters, 
+    callingMetrics,
+    isMobileMenuOpen,
+    setIsMobileMenuOpen
+  } = useRecruitment();
 
   const getPortalCount = (source: CandidateSource) => {
     return candidates.filter((c) => c.source === source).length;
@@ -43,6 +55,7 @@ export const Sidebar: React.FC = () => {
       minRating: 0
     });
     setActiveView(source);
+    setIsMobileMenuOpen(false);
   };
 
   const handleReferralPortalClick = () => {
@@ -58,6 +71,7 @@ export const Sidebar: React.FC = () => {
       minRating: 0
     });
     setActiveView('referral');
+    setIsMobileMenuOpen(false);
   };
 
   const handleEmployeeReferralClick = (employeeId: string) => {
@@ -73,6 +87,7 @@ export const Sidebar: React.FC = () => {
       minRating: 0
     });
     setActiveView('referral');
+    setIsMobileMenuOpen(false);
   };
 
   const handleGeneralViewClick = (view: string) => {
@@ -80,17 +95,26 @@ export const Sidebar: React.FC = () => {
       setFilters((prev) => ({ ...prev, source: 'all', referrerId: undefined }));
     }
     setActiveView(view);
+    setIsMobileMenuOpen(false);
   };
 
-  return (
-    <aside className="w-56 bg-white border-r border-slate-100 flex flex-col justify-between h-screen sticky top-0 shrink-0 select-none z-30 font-sans tracking-tight">
-      
+  const renderSidebarContent = (isMobile = false) => (
+    <>
       {/* Top Brand & Navigation */}
       <div className="p-3.5 space-y-5 overflow-y-auto">
         
-        {/* Brand Header with Exact Attached Logo */}
-        <div className="px-1.5 pt-1 pb-2 flex items-center">
+        {/* Brand Header with Close Button for Mobile Drawer */}
+        <div className="px-1.5 pt-1 pb-2 flex items-center justify-between">
           <UrbanGaonLogo size="md" className="h-9 w-auto object-contain" />
+          {isMobile && (
+            <button
+              onClick={() => setIsMobileMenuOpen(false)}
+              className="p-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-500 hover:text-slate-900 transition cursor-pointer"
+              title="Close navigation menu"
+            >
+              <X size={18} />
+            </button>
+          )}
         </div>
 
         {/* Main Navigation Menu */}
@@ -344,7 +368,10 @@ export const Sidebar: React.FC = () => {
           </div>
 
           <button
-            onClick={() => logout()}
+            onClick={() => {
+              logout();
+              setIsMobileMenuOpen(false);
+            }}
             className="flex items-center gap-1 text-[11px] font-medium text-rose-500 hover:text-rose-600 transition tracking-tight shrink-0 cursor-pointer"
             title="Sign out of recruitment portal"
           >
@@ -353,7 +380,33 @@ export const Sidebar: React.FC = () => {
           </button>
         </div>
       </div>
+    </>
+  );
 
-    </aside>
+  return (
+    <>
+      {/* 1. Desktop Sticky Sidebar (Visible on lg+ screens: laptops, desktops, ultra-wide) */}
+      <aside className="hidden lg:flex w-56 bg-white border-r border-slate-100 flex-col justify-between h-screen sticky top-0 shrink-0 select-none z-30 font-sans tracking-tight">
+        {renderSidebarContent(false)}
+      </aside>
+
+      {/* 2. Mobile / Tablet Drawer (Visible on screens < lg) */}
+      {/* Drawer Overlay Backdrop */}
+      {isMobileMenuOpen && (
+        <div 
+          className="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-40 lg:hidden transition-opacity animate-fade-in"
+          onClick={() => setIsMobileMenuOpen(false)}
+        />
+      )}
+
+      {/* Drawer Panel */}
+      <aside
+        className={`fixed inset-y-0 left-0 z-50 w-64 max-w-[85vw] bg-white flex flex-col justify-between shadow-2xl lg:hidden transform transition-transform duration-300 ease-in-out select-none font-sans tracking-tight ${
+          isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'
+        }`}
+      >
+        {renderSidebarContent(true)}
+      </aside>
+    </>
   );
 };

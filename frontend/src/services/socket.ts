@@ -62,10 +62,10 @@ export function getSocket(): Socket {
 
   if (!socketInstance) {
     socketInstance = io(socketUrl, {
-      reconnectionAttempts: 5,
-      reconnectionDelay: 3000,
+      reconnectionAttempts: 10,
+      reconnectionDelay: 2000,
       timeout: 5000,
-      transports: ['websocket', 'polling']
+      transports: ['polling', 'websocket']
     });
 
     socketInstance.on('connect_error', () => {
@@ -77,9 +77,18 @@ export function getSocket(): Socket {
 
 export function closeSocket(): void {
   if (socketInstance) {
-    socketInstance.disconnect();
-    socketInstance = null;
+    if (socketInstance.connected) {
+      socketInstance.disconnect();
+      socketInstance = null;
+    } else {
+      // Avoid aborting in-flight handshake in development React StrictMode
+      socketInstance.once('connect', () => {
+        socketInstance?.disconnect();
+        socketInstance = null;
+      });
+    }
   }
   mockInstance = null;
 }
+
 

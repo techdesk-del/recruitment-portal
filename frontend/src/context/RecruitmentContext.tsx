@@ -327,7 +327,17 @@ export const RecruitmentProvider: React.FC<{ children: React.ReactNode }> = ({ c
     });
 
     return () => {
-      closeSocket();
+      socket.off('NEW_CANDIDATE_INGESTED');
+      socket.off('CANDIDATE_STATUS_UPDATED');
+      socket.off('CANDIDATE_UPDATED');
+      socket.off('CANDIDATE_DELETED');
+      socket.off('INTERVIEW_CREATED');
+      socket.off('INTERVIEW_UPDATED');
+      socket.off('INTERVIEW_DELETED');
+      socket.off('CALL_RECORD_CREATED');
+      socket.off('CALL_RECORD_DELETED');
+      socket.off('QUEUE_PROGRESS');
+      socket.off('QUEUE_BATCH_COMPLETED');
     };
   }, []);
 

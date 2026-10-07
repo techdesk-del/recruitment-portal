@@ -28,12 +28,13 @@ interface CandidateCommunicationsTabProps {
   scheduledInterviews: InterviewSchedule[];
 }
 
-// Helper: Generates instant free Jitsi video call room (100% reliable, zero login)
-export function generateJitsiLink(candId: string, candName: string = ''): string {
-  const cleanId = (candId || 'candidate').replace(/[^a-zA-Z0-9]/g, '').toLowerCase();
-  const cleanName = (candName || '').replace(/[^a-zA-Z0-9]/g, '').toLowerCase().slice(0, 10);
-  const salt = Math.random().toString(36).slice(2, 6);
-  return `https://meet.jit.si/urbangaon-${cleanId}${cleanName ? `-${cleanName}` : ''}-${salt}`;
+// Helper: Get or save default Google Meet link
+export function getSavedGoogleMeetLink(): string {
+  try {
+    const saved = localStorage.getItem('urbangaon_default_google_meet');
+    if (saved && saved.startsWith('http')) return saved;
+  } catch {}
+  return 'https://meet.google.com/new';
 }
 
 // Helper: Calculate Tomorrow's date in YYYY-MM-DD
@@ -156,14 +157,10 @@ export const CandidateCommunicationsTab: React.FC<CandidateCommunicationsTabProp
     existingInterview?.platform || 'google_meet'
   );
   const getInitialMeetLink = () => {
-    if (existingInterview?.meetingLink && !existingInterview.meetingLink.includes('urb-interview')) {
+    if (existingInterview?.meetingLink && existingInterview.meetingLink.includes('meet.google.com') && !existingInterview.meetingLink.includes('urb-interview')) {
       return existingInterview.meetingLink;
     }
-    try {
-      const saved = localStorage.getItem('urbangaon_default_meet_link');
-      if (saved && saved.startsWith('http')) return saved;
-    } catch {}
-    return generateJitsiLink(candidate.id, candidate.name);
+    return getSavedGoogleMeetLink();
   };
 
   const [interviewMeetingLink, setInterviewMeetingLink] = useState<string>(getInitialMeetLink());
@@ -636,69 +633,67 @@ export const CandidateCommunicationsTab: React.FC<CandidateCommunicationsTabProp
 
         </div>
 
-        {/* Live Meeting Link Generation Bar */}
-        <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-3">
+        {/* Live Google Meet Video Room Engine */}
+        <div className="p-4 rounded-xl bg-blue-50/60 border border-blue-200/80 space-y-3">
           <div className="flex flex-wrap items-center justify-between gap-2">
             <div className="flex items-center gap-2">
-              <Video size={15} className="text-blue-600" />
-              <span className="font-bold text-slate-800 text-xs">Live Video Meeting Room Link:</span>
-              <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${
-                interviewMeetingLink.includes('meet.jit.si') 
-                  ? 'bg-emerald-50 text-emerald-800 border-emerald-200' 
-                  : interviewMeetingLink.includes('meet.google.com')
-                  ? 'bg-blue-50 text-blue-800 border-blue-200'
-                  : 'bg-indigo-50 text-indigo-800 border-indigo-200'
-              }`}>
-                {interviewMeetingLink.includes('meet.jit.si') 
-                  ? '⚡ Instant Room (100% Guaranteed Live)' 
-                  : interviewMeetingLink.includes('meet.google.com')
-                  ? '📹 Google Meet'
-                  : '🔗 Custom Video Link'}
+              <div className="w-6 h-6 rounded-lg bg-blue-600 text-white flex items-center justify-center">
+                <Video size={13} />
+              </div>
+              <span className="font-bold text-slate-900 text-xs">Google Meet Official Video Room:</span>
+              <span className="text-[10px] font-black uppercase tracking-wider text-blue-700 bg-blue-100 px-2 py-0.5 rounded-full border border-blue-200">
+                Google Meet Active
               </span>
             </div>
 
             <div className="flex flex-wrap items-center gap-1.5">
-              <button
-                type="button"
-                onClick={() => {
-                  const jitsiLink = generateJitsiLink(candidate.id, candidate.name);
-                  setInterviewMeetingLink(jitsiLink);
-                  showToast('success', 'Instant Video Room Ready', 'Live zero-login video room activated.');
-                }}
-                className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-bold transition cursor-pointer shadow-2xs ${
-                  interviewMeetingLink.includes('meet.jit.si')
-                    ? 'bg-emerald-600 text-white shadow-xs'
-                    : 'bg-white border border-slate-200 hover:bg-emerald-50 text-emerald-700'
-                }`}
-                title="Instant room: Never expires, zero login required for candidate or interviewer"
-              >
-                <Sparkles size={11} />
-                <span>Instant Video Room (Zero Login)</span>
-              </button>
-
               <a
                 href="https://meet.google.com/new"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-white border border-blue-200 hover:bg-blue-50 text-blue-700 font-bold text-[11px] shadow-2xs cursor-pointer transition active:scale-95"
-                title="Opens Google Meet to generate an official verified room under your Google account"
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-bold text-[11px] shadow-xs cursor-pointer transition active:scale-95"
+                title="Opens Google Meet to generate an authentic verified room under your Google account"
               >
-                <ExternalLink size={11} />
-                <span>Create on Google Meet (meet.new)</span>
+                <ExternalLink size={12} />
+                <span>1-Click Create on Google Meet (meet.new)</span>
               </a>
+
+              <button
+                type="button"
+                onClick={async () => {
+                  try {
+                    const text = await navigator.clipboard.readText();
+                    if (text && text.trim().startsWith('http')) {
+                      const clean = text.trim();
+                      setInterviewMeetingLink(clean);
+                      localStorage.setItem('urbangaon_default_google_meet', clean);
+                      showToast('success', 'Google Meet Link Pasted', `Active room updated: ${clean}`);
+                    } else {
+                      showToast('warning', 'Clipboard Empty', 'Please copy a valid Google Meet link first.');
+                    }
+                  } catch {
+                    showToast('info', 'Paste Manually', 'Please paste your Google Meet link directly into the box.');
+                  }
+                }}
+                className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-white border border-blue-200 hover:bg-blue-50 text-blue-700 font-bold text-[11px] shadow-2xs cursor-pointer transition active:scale-95"
+                title="Paste copied Google Meet link directly into the input"
+              >
+                <Copy size={11} />
+                <span>Paste from Clipboard</span>
+              </button>
 
               <button
                 type="button"
                 onClick={() => {
                   if (interviewMeetingLink && interviewMeetingLink.startsWith('http')) {
-                    localStorage.setItem('urbangaon_default_meet_link', interviewMeetingLink);
-                    showToast('success', 'Default Link Saved', 'This meeting link will be auto-used for upcoming candidate invites.');
+                    localStorage.setItem('urbangaon_default_google_meet', interviewMeetingLink);
+                    showToast('success', 'Saved as Default Room', 'This Google Meet link will be auto-used for upcoming candidate invites.');
                   }
                 }}
-                className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-white border border-slate-200 hover:bg-slate-100 text-slate-700 font-semibold text-[11px] shadow-2xs cursor-pointer transition"
-                title="Save this link as your default meeting URL for future candidate invites"
+                className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-white border border-slate-200 hover:bg-slate-100 text-slate-700 font-semibold text-[11px] shadow-2xs cursor-pointer transition"
+                title="Save this link as your permanent Google Meet room for future candidate invites"
               >
-                <span>Save as Default</span>
+                <span>Save as Permanent Room</span>
               </button>
             </div>
           </div>
@@ -709,17 +704,17 @@ export const CandidateCommunicationsTab: React.FC<CandidateCommunicationsTabProp
                 type="text"
                 value={interviewMeetingLink}
                 onChange={(e) => setInterviewMeetingLink(e.target.value)}
-                placeholder="https://meet.jit.si/... or https://meet.google.com/..."
-                className="w-full text-xs font-mono font-bold py-2 pl-3 pr-24 rounded-xl bg-white border border-slate-300 text-slate-800 focus:outline-none focus:border-blue-500 shadow-2xs"
+                placeholder="https://meet.google.com/xxx-yyyy-zzz"
+                className="w-full text-xs font-mono font-bold py-2 pl-3 pr-28 rounded-xl bg-white border border-blue-200 text-blue-900 focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-2xs"
               />
-              <span className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[10px] font-bold text-slate-400 bg-slate-50 px-1.5 py-0.5 rounded border border-slate-200">
-                Active URL
+              <span className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[10px] font-bold text-blue-700 bg-blue-50 px-2 py-0.5 rounded border border-blue-200">
+                Google Meet
               </span>
             </div>
 
             <button
               type="button"
-              onClick={() => handleCopy(interviewMeetingLink, 'meet_link', 'Meeting Link')}
+              onClick={() => handleCopy(interviewMeetingLink, 'meet_link', 'Google Meet Link')}
               className="px-3 py-2 rounded-xl bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 text-xs font-bold flex items-center gap-1.5 shadow-2xs cursor-pointer active:scale-95 transition"
               title="Copy meeting link"
             >
@@ -732,10 +727,10 @@ export const CandidateCommunicationsTab: React.FC<CandidateCommunicationsTabProp
               target="_blank"
               rel="noopener noreferrer"
               className="px-3 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold flex items-center gap-1.5 shadow-xs cursor-pointer active:scale-95 transition"
-              title="Test open meeting room in new tab"
+              title="Test open Google Meet room in new tab"
             >
               <ExternalLink size={13} />
-              <span>Test Room</span>
+              <span>Test Meet</span>
             </a>
 
             <a
@@ -750,12 +745,10 @@ export const CandidateCommunicationsTab: React.FC<CandidateCommunicationsTabProp
             </a>
           </div>
 
-          <p className="text-[11px] text-slate-500 leading-relaxed flex items-center gap-1.5">
-            <span className="font-bold text-slate-700">💡 Tip:</span>
+          <p className="text-[11px] text-slate-600 leading-relaxed flex items-center gap-1.5">
+            <span className="font-bold text-blue-900">⚡ Google Meet Workflow:</span>
             <span>
-              {interviewMeetingLink.includes('meet.jit.si')
-                ? 'Instant Video Room works 100% on all mobile devices and laptops without login or Google accounts.'
-                : 'Google Meet requires a real room created under a Google account. Click "Create on Google Meet (meet.new)" above to initialize one in 1 click.'}
+              Click <strong>"1-Click Create on Google Meet (meet.new)"</strong> to initialize a verified Google Meet room under your account, then click <strong>"Paste from Clipboard"</strong> and <strong>"Save as Permanent Room"</strong> so all subsequent invites use your verified room automatically.
             </span>
           </p>
         </div>

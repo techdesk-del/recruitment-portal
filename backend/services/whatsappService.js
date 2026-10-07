@@ -22,13 +22,10 @@ export function normalizePhoneNumber(rawPhone) {
 import { generateGoogleCalendarUrl } from './calendarService.js';
 
 /**
- * Generates instant working video meeting room link (Jitsi Meet WebRTC)
- * Works 100% reliably in real-time without Google Account or login requirement.
+ * Returns default Google Meet link or room launcher
  */
-export function generateInstantMeetingLink(candidateId = 'interview') {
-  const cleanId = String(candidateId).replace(/[^a-zA-Z0-9]/g, '').toLowerCase() || 'interview';
-  const salt = Math.random().toString(36).slice(2, 7);
-  return `https://meet.jit.si/urbangaon-${cleanId}-${salt}`;
+export function getDefaultGoogleMeetLink() {
+  return process.env.DEFAULT_GOOGLE_MEET_URL || 'https://meet.google.com/new';
 }
 
 /**
@@ -43,12 +40,11 @@ export function buildInterviewWhatsAppMessage({
   endTime,
   meetingLink,
   interviewerName,
-  calendarUrl,
-  candidateId
+  calendarUrl
 }) {
   const validMeetLink = (meetingLink && !meetingLink.includes('urb-interview'))
     ? meetingLink
-    : generateInstantMeetingLink(candidateId);
+    : getDefaultGoogleMeetLink();
 
   const calLink = calendarUrl || generateGoogleCalendarUrl({
     title: `UrbanGaon Interview: ${round || 'Discussion'} - ${candidateName || 'Candidate'}`,
@@ -69,7 +65,7 @@ export function buildInterviewWhatsAppMessage({
     `📅 *Date*: ${date || 'Upcoming'}`,
     `⏰ *Time*: ${startTime || '10:00 AM'} - ${endTime || '11:00 AM'} (IST)`,
     `👨‍💼 *Interviewer*: ${interviewerName || 'Dr Sharmila Yadav'}`,
-    `🔗 *Join Meeting*: ${validMeetLink}`,
+    `🔗 *Google Meet*: ${validMeetLink}`,
     `📅 *Add to Google Calendar*: ${calLink}`,
     ``,
     `Please ensure you join in a quiet environment with high-speed internet and working audio/video.`,

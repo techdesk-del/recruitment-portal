@@ -1,7 +1,7 @@
 import nodemailer from 'nodemailer';
 import { ENV } from '../config/env.js';
 import { generateIcsInvite, generateGoogleCalendarUrl } from './calendarService.js';
-import { generateInstantMeetingLink } from './whatsappService.js';
+import { getDefaultGoogleMeetLink } from './whatsappService.js';
 
 let cachedTransporter = null;
 let etherealAccount = null;
@@ -132,7 +132,7 @@ export async function sendInterviewInviteEmail({ candidate, interview, customNot
   const endTime = interview.endTime || '11:00 AM';
   const meetingLink = (interview.meetingLink && !interview.meetingLink.includes('urb-interview'))
     ? interview.meetingLink
-    : generateInstantMeetingLink(candidate.id);
+    : getDefaultGoogleMeetLink();
   const interviewer = interview.interviewerName || 'Dr Sharmila Yadav (Lead Recruiter)';
 
   const googleCalLink = generateGoogleCalendarUrl({

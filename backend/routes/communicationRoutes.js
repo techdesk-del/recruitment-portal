@@ -13,7 +13,7 @@ import {
   buildRejectionWhatsAppMessage, 
   generateWhatsAppDeepLink, 
   sendWhatsAppAlert,
-  generateInstantMeetingLink
+  getDefaultGoogleMeetLink
 } from '../services/whatsappService.js';
 
 const router = Router();
@@ -79,11 +79,11 @@ router.post('/email/interview', async (req, res) => {
         startTime: '10:00 AM',
         endTime: '11:00 AM',
         platform: 'google_meet',
-        meetingLink: generateInstantMeetingLink(candidate.id),
+        meetingLink: getDefaultGoogleMeetLink(),
         interviewerName: candidate.recruiterAssigned || 'Dr Sharmila Yadav'
       };
     } else if (!interview.meetingLink || interview.meetingLink.includes('urb-interview')) {
-      interview.meetingLink = generateInstantMeetingLink(candidate.id);
+      interview.meetingLink = getDefaultGoogleMeetLink();
     }
 
     // Persist interview in MongoDB if it has an id
@@ -239,11 +239,11 @@ router.post('/whatsapp/interview', async (req, res) => {
         startTime: '10:00 AM',
         endTime: '11:00 AM',
         platform: 'google_meet',
-        meetingLink: generateInstantMeetingLink(candidate.id),
+        meetingLink: getDefaultGoogleMeetLink(),
         interviewerName: candidate.recruiterAssigned || 'Dr Sharmila Yadav'
       };
     } else if (!interview.meetingLink || interview.meetingLink.includes('urb-interview')) {
-      interview.meetingLink = generateInstantMeetingLink(candidate.id);
+      interview.meetingLink = getDefaultGoogleMeetLink();
     }
 
     // Persist interview in MongoDB if it has an id

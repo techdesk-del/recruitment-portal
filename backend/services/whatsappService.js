@@ -19,6 +19,18 @@ export function normalizePhoneNumber(rawPhone) {
   return digits;
 }
 
+import { generateGoogleCalendarUrl } from './calendarService.js';
+
+/**
+ * Generates instant working video meeting room link (Jitsi Meet WebRTC)
+ * Works 100% reliably in real-time without Google Account or login requirement.
+ */
+export function generateInstantMeetingLink(candidateId = 'interview') {
+  const cleanId = String(candidateId).replace(/[^a-zA-Z0-9]/g, '').toLowerCase() || 'interview';
+  const salt = Math.random().toString(36).slice(2, 7);
+  return `https://meet.jit.si/urbangaon-${cleanId}-${salt}`;
+}
+
 /**
  * Builds formatted text for Interview Invitation
  */
@@ -30,19 +42,35 @@ export function buildInterviewWhatsAppMessage({
   startTime,
   endTime,
   meetingLink,
-  interviewerName
+  interviewerName,
+  calendarUrl,
+  candidateId
 }) {
+  const validMeetLink = (meetingLink && !meetingLink.includes('urb-interview'))
+    ? meetingLink
+    : generateInstantMeetingLink(candidateId);
+
+  const calLink = calendarUrl || generateGoogleCalendarUrl({
+    title: `UrbanGaon Interview: ${round || 'Discussion'} - ${candidateName || 'Candidate'}`,
+    description: `Interview for ${jobTitle || 'Role'} with ${interviewerName || 'Talent Team'}.\nVideo Link: ${validMeetLink}`,
+    location: validMeetLink,
+    date: date || new Date().toISOString().split('T')[0],
+    startTime: startTime || '10:00 AM',
+    endTime: endTime || '11:00 AM'
+  });
+
   return [
     `🏡 *URBANGAON CAREERS* - Interview Invitation`,
     ``,
     `Dear *${candidateName || 'Candidate'}*,`,
-    `Greetings from UrbanGaon! Your interview for the role of *${jobTitle || 'Open Position'}* has been confirmed.`,
+    `Greetings from UrbanGaon! Your interview for *${jobTitle || 'Open Position'}* has been confirmed.`,
     ``,
-    `📋 *Round*: ${round || 'Technical Discussion'}`,
+    `📋 *Round*: ${round || 'Round 1: Screening & Technical'}`,
     `📅 *Date*: ${date || 'Upcoming'}`,
     `⏰ *Time*: ${startTime || '10:00 AM'} - ${endTime || '11:00 AM'} (IST)`,
     `👨‍💼 *Interviewer*: ${interviewerName || 'Dr Sharmila Yadav'}`,
-    `🔗 *Google Meet*: ${meetingLink || 'https://meet.google.com/urb-interview'}`,
+    `🔗 *Join Meeting*: ${validMeetLink}`,
+    `📅 *Add to Google Calendar*: ${calLink}`,
     ``,
     `Please ensure you join in a quiet environment with high-speed internet and working audio/video.`,
     ``,

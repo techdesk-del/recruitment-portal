@@ -12,7 +12,8 @@ import {
   buildStatusWhatsAppMessage, 
   buildRejectionWhatsAppMessage, 
   generateWhatsAppDeepLink, 
-  sendWhatsAppAlert 
+  sendWhatsAppAlert,
+  generateInstantMeetingLink
 } from '../services/whatsappService.js';
 
 const router = Router();
@@ -66,7 +67,32 @@ router.post('/email/interview', async (req, res) => {
     }
 
     if (!interview) {
-      return res.status(400).json({ error: 'Interview schedule details are required.' });
+      interview = {
+        id: `int-${Date.now().toString().slice(-6)}`,
+        candidateId: candidate.id,
+        candidateName: candidate.name,
+        candidateEmail: candidate.email,
+        candidatePhone: candidate.phone,
+        jobTitle: candidate.jobAppliedFor || 'Open Position',
+        round: 'Round 1: Screening & Technical',
+        date: new Date().toISOString().split('T')[0],
+        startTime: '10:00 AM',
+        endTime: '11:00 AM',
+        platform: 'google_meet',
+        meetingLink: generateInstantMeetingLink(candidate.id),
+        interviewerName: candidate.recruiterAssigned || 'Dr Sharmila Yadav'
+      };
+    } else if (!interview.meetingLink || interview.meetingLink.includes('urb-interview')) {
+      interview.meetingLink = generateInstantMeetingLink(candidate.id);
+    }
+
+    // Persist interview in MongoDB if it has an id
+    if (interview.id) {
+      await Interview.findOneAndUpdate(
+        { id: interview.id },
+        { ...interview, candidateId: candidate.id },
+        { upsert: true, new: true, setDefaultsOnInsert: true }
+      ).catch((err) => console.warn('Could not persist interview in MongoDB:', err.message));
     }
 
     const emailResult = await sendInterviewInviteEmail({
@@ -85,6 +111,7 @@ router.post('/email/interview', async (req, res) => {
     res.json({
       success: true,
       message: `Interview invitation delivered to ${candidate.email}`,
+      interview,
       ...emailResult
     });
   } catch (err) {
@@ -199,6 +226,35 @@ router.post('/whatsapp/interview', async (req, res) => {
       return res.status(400).json({ error: 'Candidate phone number is required for WhatsApp alerts.' });
     }
 
+    if (!interview) {
+      interview = {
+        id: `int-${Date.now().toString().slice(-6)}`,
+        candidateId: candidate.id,
+        candidateName: candidate.name,
+        candidateEmail: candidate.email,
+        candidatePhone: candidate.phone,
+        jobTitle: candidate.jobAppliedFor || 'Open Position',
+        round: 'Round 1: Screening & Technical',
+        date: new Date().toISOString().split('T')[0],
+        startTime: '10:00 AM',
+        endTime: '11:00 AM',
+        platform: 'google_meet',
+        meetingLink: generateInstantMeetingLink(candidate.id),
+        interviewerName: candidate.recruiterAssigned || 'Dr Sharmila Yadav'
+      };
+    } else if (!interview.meetingLink || interview.meetingLink.includes('urb-interview')) {
+      interview.meetingLink = generateInstantMeetingLink(candidate.id);
+    }
+
+    // Persist interview in MongoDB if it has an id
+    if (interview.id) {
+      await Interview.findOneAndUpdate(
+        { id: interview.id },
+        { ...interview, candidateId: candidate.id },
+        { upsert: true, new: true, setDefaultsOnInsert: true }
+      ).catch((err) => console.warn('Could not persist interview in MongoDB:', err.message));
+    }
+
     const message = buildInterviewWhatsAppMessage({
       candidateName: candidate.name,
       jobTitle: interview?.jobTitle || candidate.jobAppliedFor,
@@ -226,6 +282,7 @@ router.post('/whatsapp/interview', async (req, res) => {
     res.json({
       success: true,
       message: 'WhatsApp notification ready',
+      interview,
       ...alertResult,
       rawText: message
     });

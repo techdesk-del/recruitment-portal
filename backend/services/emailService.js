@@ -1,6 +1,7 @@
 import nodemailer from 'nodemailer';
 import { ENV } from '../config/env.js';
-import { generateIcsInvite } from './calendarService.js';
+import { generateIcsInvite, generateGoogleCalendarUrl } from './calendarService.js';
+import { generateInstantMeetingLink } from './whatsappService.js';
 
 let cachedTransporter = null;
 let etherealAccount = null;
@@ -127,10 +128,21 @@ export async function sendInterviewInviteEmail({ candidate, interview, customNot
   const jobTitle = interview.jobTitle || candidate.jobAppliedFor || 'Specialist Role';
   const round = interview.round || 'Round 1: Technical Discussion';
   const dateStr = interview.date || 'To be announced';
-  const startTime = interview.startTime || '10:00';
-  const endTime = interview.endTime || '11:00';
-  const meetingLink = interview.meetingLink || 'https://meet.google.com/urb-interview';
+  const startTime = interview.startTime || '10:00 AM';
+  const endTime = interview.endTime || '11:00 AM';
+  const meetingLink = (interview.meetingLink && !interview.meetingLink.includes('urb-interview'))
+    ? interview.meetingLink
+    : generateInstantMeetingLink(candidate.id);
   const interviewer = interview.interviewerName || 'Dr Sharmila Yadav (Lead Recruiter)';
+
+  const googleCalLink = generateGoogleCalendarUrl({
+    title: `UrbanGaon Interview: ${round} - ${candidateName}`,
+    description: `Interview for ${jobTitle} with ${interviewer}.\nMeeting Link: ${meetingLink}`,
+    location: meetingLink,
+    date: dateStr,
+    startTime,
+    endTime
+  });
 
   // Generate .ics attachment
   const icsContent = generateIcsInvite({
@@ -177,12 +189,15 @@ export async function sendInterviewInviteEmail({ candidate, interview, customNot
         </tr>
       </table>
 
-      <div style="text-align: center; margin-top: 18px;">
-        <a href="${meetingLink}" target="_blank" class="btn">
-          🚀 Join Google Meet Video Call
+      <div style="text-align: center; margin-top: 18px; display: flex; flex-wrap: wrap; justify-content: center; gap: 10px;">
+        <a href="${meetingLink}" target="_blank" class="btn" style="display: inline-block;">
+          🚀 Join Video Call (Google Meet)
+        </a>
+        <a href="${googleCalLink}" target="_blank" style="display: inline-block; background-color: #10b981; color: #ffffff !important; padding: 14px 24px; font-size: 14px; font-weight: 700; text-decoration: none; border-radius: 10px; margin-top: 12px; text-align: center;">
+          📅 Add to Google Calendar
         </a>
       </div>
-      <p style="font-size: 11px; text-align: center; color: #64748b; margin-top: 8px;">Meeting Link: <a href="${meetingLink}" style="color: #2563eb;">${meetingLink}</a></p>
+      <p style="font-size: 11px; text-align: center; color: #64748b; margin-top: 12px;">Meeting Link: <a href="${meetingLink}" target="_blank" style="color: #2563eb; word-break: break-all;">${meetingLink}</a></p>
     </div>
 
     ${customNotes ? `<p style="background: #fffbeb; border-left: 4px solid #f59e0b; padding: 12px; font-size: 13px; color: #92400e;"><strong>Recruiter Note:</strong> ${customNotes}</p>` : ''}

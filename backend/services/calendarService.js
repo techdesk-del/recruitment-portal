@@ -56,7 +56,7 @@ export function generateGoogleCalendarUrl({
     text: title || 'UrbanGaon Candidate Interview',
     dates: `${dtStart}/${dtEnd}`,
     details: description || '',
-    location: location || 'https://meet.google.com'
+    location: location || 'https://zoom.us'
   });
   return `https://calendar.google.com/calendar/render?${params.toString()}`;
 }
@@ -85,7 +85,7 @@ export function generateIcsInvite({
   // Escape special characters for iCalendar format
   const safeTitle = (title || 'Interview with UrbanGaon').replace(/[,;\\]/g, '\\$&');
   const safeDesc = (description || 'UrbanGaon Candidate Interview').replace(/\n/g, '\\n').replace(/[,;\\]/g, '\\$&');
-  const safeLocation = (location || 'Google Meet').replace(/[,;\\]/g, '\\$&');
+  const safeLocation = (location || 'Zoom Meeting').replace(/[,;\\]/g, '\\$&');
 
   const lines = [
     'BEGIN:VCALENDAR',

@@ -1,7 +1,7 @@
 import nodemailer from 'nodemailer';
 import { ENV } from '../config/env.js';
 import { generateIcsInvite, generateGoogleCalendarUrl } from './calendarService.js';
-import { getDefaultGoogleMeetLink } from './whatsappService.js';
+import { getDefaultZoomMeetingLink } from './whatsappService.js';
 
 let cachedTransporter = null;
 let etherealAccount = null;
@@ -132,12 +132,12 @@ export async function sendInterviewInviteEmail({ candidate, interview, customNot
   const endTime = interview.endTime || '11:00 AM';
   const meetingLink = (interview.meetingLink && !interview.meetingLink.includes('urb-interview'))
     ? interview.meetingLink
-    : getDefaultGoogleMeetLink();
+    : getDefaultZoomMeetingLink();
   const interviewer = interview.interviewerName || 'Dr Sharmila Yadav (Lead Recruiter)';
 
   const googleCalLink = generateGoogleCalendarUrl({
     title: `UrbanGaon Interview: ${round} - ${candidateName}`,
-    description: `Interview for ${jobTitle} with ${interviewer}.\nMeeting Link: ${meetingLink}`,
+    description: `Interview for ${jobTitle} with ${interviewer}.\nZoom Meeting Link: ${meetingLink}`,
     location: meetingLink,
     date: dateStr,
     startTime,
@@ -148,7 +148,7 @@ export async function sendInterviewInviteEmail({ candidate, interview, customNot
   const icsContent = generateIcsInvite({
     uid: `${interview.id || Date.now()}@urbangaon.com`,
     title: `UrbanGaon Interview: ${round} - ${candidateName}`,
-    description: `Interview for ${jobTitle} with ${interviewer}.\nMeeting Link: ${meetingLink}\n\nCandidate: ${candidateName} (${candidate.phone || ''})`,
+    description: `Interview for ${jobTitle} with ${interviewer}.\nZoom Meeting Link: ${meetingLink}\n\nCandidate: ${candidateName} (${candidate.phone || ''})`,
     location: meetingLink,
     date: dateStr,
     startTime,
@@ -160,12 +160,12 @@ export async function sendInterviewInviteEmail({ candidate, interview, customNot
   });
 
   const bodyHtml = `
-    <span class="badge">Interview Invitation</span>
-    <h2 style="margin: 4px 0 16px; font-size: 20px; color: #0f172a;">Interview Scheduled: ${round}</h2>
+    <span class="badge" style="background: #e0f2fe; color: #0284c7; font-weight: 700; padding: 4px 10px; border-radius: 6px; font-size: 11px; text-transform: uppercase;">Zoom Video Interview</span>
+    <h2 style="margin: 6px 0 16px; font-size: 20px; color: #0f172a;">Interview Scheduled: ${round}</h2>
     <p>Dear <strong>${candidateName}</strong>,</p>
     <p>Thank you for your interest in joining <strong>UrbanGaon</strong>. We were thoroughly impressed by your profile for the <strong>${jobTitle}</strong> opening, and we are excited to invite you to the next round of discussions.</p>
     
-    <div class="card">
+    <div class="card" style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 20px; margin: 16px 0;">
       <table style="width: 100%; border-collapse: collapse; font-size: 14px;">
         <tr>
           <td style="padding: 6px 0; color: #64748b; width: 130px;"><strong>Position:</strong></td>
@@ -173,7 +173,7 @@ export async function sendInterviewInviteEmail({ candidate, interview, customNot
         </tr>
         <tr>
           <td style="padding: 6px 0; color: #64748b;"><strong>Round:</strong></td>
-          <td style="padding: 6px 0; color: #2563eb; font-weight: 700;">${round}</td>
+          <td style="padding: 6px 0; color: #0b5cff; font-weight: 700;">${round}</td>
         </tr>
         <tr>
           <td style="padding: 6px 0; color: #64748b;"><strong>Date:</strong></td>
@@ -187,26 +187,30 @@ export async function sendInterviewInviteEmail({ candidate, interview, customNot
           <td style="padding: 6px 0; color: #64748b;"><strong>Interviewer:</strong></td>
           <td style="padding: 6px 0; color: #0f172a; font-weight: 600;">👨‍💼 ${interviewer}</td>
         </tr>
+        <tr>
+          <td style="padding: 6px 0; color: #64748b;"><strong>Platform:</strong></td>
+          <td style="padding: 6px 0; color: #0b5cff; font-weight: 700;">🎥 Zoom Meetings</td>
+        </tr>
       </table>
 
-      <div style="text-align: center; margin-top: 18px; display: flex; flex-wrap: wrap; justify-content: center; gap: 10px;">
-        <a href="${meetingLink}" target="_blank" class="btn" style="display: inline-block;">
-          🚀 Join Video Call (Google Meet)
+      <div style="text-align: center; margin-top: 20px;">
+        <a href="${meetingLink}" target="_blank" style="display: inline-block; background-color: #0b5cff; color: #ffffff !important; padding: 14px 28px; font-size: 14px; font-weight: 700; text-decoration: none; border-radius: 10px; margin: 6px; box-shadow: 0 4px 12px rgba(11, 92, 255, 0.3);">
+          🚀 Join Zoom Meeting
         </a>
-        <a href="${googleCalLink}" target="_blank" style="display: inline-block; background-color: #10b981; color: #ffffff !important; padding: 14px 24px; font-size: 14px; font-weight: 700; text-decoration: none; border-radius: 10px; margin-top: 12px; text-align: center;">
-          📅 Add to Google Calendar
+        <a href="${googleCalLink}" target="_blank" style="display: inline-block; background-color: #10b981; color: #ffffff !important; padding: 14px 24px; font-size: 14px; font-weight: 700; text-decoration: none; border-radius: 10px; margin: 6px;">
+          📅 Add to Calendar
         </a>
       </div>
-      <p style="font-size: 11px; text-align: center; color: #64748b; margin-top: 12px;">Meeting Link: <a href="${meetingLink}" target="_blank" style="color: #2563eb; word-break: break-all;">${meetingLink}</a></p>
+      <p style="font-size: 12px; text-align: center; color: #64748b; margin-top: 14px;">Zoom Direct Link: <a href="${meetingLink}" target="_blank" style="color: #0b5cff; word-break: break-all; font-weight: 600;">${meetingLink}</a></p>
     </div>
 
     ${customNotes ? `<p style="background: #fffbeb; border-left: 4px solid #f59e0b; padding: 12px; font-size: 13px; color: #92400e;"><strong>Recruiter Note:</strong> ${customNotes}</p>` : ''}
 
     <h4 style="margin: 20px 0 8px; font-size: 14px; color: #334155;">Quick Tips for Your Discussion:</h4>
     <ul style="font-size: 13px; color: #475569; padding-left: 20px; line-height: 1.6;">
-      <li>Please join 5 minutes early to test your audio, camera, and internet connection.</li>
-      <li>Have your resume and project portfolio accessible for reference.</li>
-      <li>A calendar invitation (<code>.ics</code>) has been attached to this email. Click "Add to Calendar" to sync it automatically with your Google or Outlook Calendar.</li>
+      <li>Please install Zoom or join directly through your browser 5 minutes prior to test audio and camera.</li>
+      <li>Have your resume and work portfolio handy for discussion.</li>
+      <li>A calendar invitation (<code>.ics</code>) is attached to this email. Click "Add to Calendar" to sync it automatically.</li>
     </ul>
 
     <p style="margin-top: 24px; font-size: 14px;">We look forward to speaking with you!<br>Warm regards,<br><strong>UrbanGaon Talent Acquisition Team</strong></p>

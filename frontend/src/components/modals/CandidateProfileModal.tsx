@@ -22,7 +22,8 @@ import {
   Building,
   GraduationCap,
   Sparkles,
-  Check
+  Check,
+  ExternalLink
 } from 'lucide-react';
 import { useRecruitment } from '../../context/RecruitmentContext';
 import { useAuth } from '../../context/AuthContext';
@@ -424,7 +425,7 @@ export const CandidateProfileModal: React.FC = () => {
                   ? 'bg-blue-50 text-blue-800 border-blue-300 ring-2 ring-blue-300'
                   : 'bg-slate-100 hover:bg-slate-200 text-slate-700 border-slate-200'
               }`}
-              title="Send candidate email with Google Meet & calendar invite, or WhatsApp status alert"
+              title="Send candidate email with Zoom Meeting & calendar invite, or WhatsApp status alert"
             >
               <Mail size={14} className="text-blue-600" />
               <span>Outreach (Email & WhatsApp)</span>
@@ -1078,6 +1079,18 @@ export const CandidateProfileModal: React.FC = () => {
                 </div>
                 {!isEditingResume ? (
                   <div className="flex items-center gap-2">
+                    {cand.resumeUrl && (
+                      <a
+                        href={cand.resumeUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold transition active:scale-95 cursor-pointer shadow-2xs"
+                        title="Open candidate's original uploaded document"
+                      >
+                        <ExternalLink size={14} />
+                        <span>Original Resume</span>
+                      </a>
+                    )}
                     <button
                       onClick={() => setIsEditingResume(true)}
                       className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-blue-50 hover:bg-blue-100 text-blue-700 text-xs font-bold transition border border-blue-200 active:scale-95 cursor-pointer shadow-2xs"

@@ -21,8 +21,8 @@ const InterviewSchema = new mongoose.Schema({
   interviewerEmail: { type: String, required: true },
   platform: { 
     type: String, 
-    enum: ['google_meet', 'zoom', 'teams', 'onsite', 'phone'],
-    default: 'google_meet' 
+    enum: ['zoom', 'google_meet', 'teams', 'onsite', 'phone'],
+    default: 'zoom' 
   },
   meetingLink: { type: String, default: '' },
   meetingId: { type: String, default: '' },

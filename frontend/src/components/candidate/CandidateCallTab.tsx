@@ -179,7 +179,7 @@ export const CandidateCallTab: React.FC<CandidateCallTabProps> = ({ candidate, o
           interviewerName,
           interviewerRole: 'HR Recruiter',
           interviewerEmail: interviewerName === 'Dr Rekha Pareek' ? 'rekha.pareek@urbangaon.com' : interviewerName === 'Satyaveer Singh' ? 'satyaveer.singh@urbangaon.com' : 'sharmila.yadav@urbangaon.com',
-          platform: 'google_meet'
+          platform: 'zoom'
         } : undefined
       });
 

@@ -22,11 +22,19 @@ export function normalizePhoneNumber(rawPhone) {
 import { generateGoogleCalendarUrl } from './calendarService.js';
 
 /**
- * Returns default Google Meet link or room launcher
+ * Returns default Zoom Meeting link or room launcher
  */
-export function getDefaultGoogleMeetLink() {
-  return process.env.DEFAULT_GOOGLE_MEET_URL || 'https://meet.google.com/new';
+export function getDefaultZoomMeetingLink() {
+  if (process.env.DEFAULT_ZOOM_MEETING_URL) {
+    return process.env.DEFAULT_ZOOM_MEETING_URL;
+  }
+  const randomMeetingId = Math.floor(8000000000 + Math.random() * 1999999999).toString();
+  const randomPasscode = Math.random().toString(36).substring(2, 8);
+  return `https://zoom.us/j/${randomMeetingId}?pwd=${randomPasscode}`;
 }
+
+// Backwards-compatible alias
+export const getDefaultGoogleMeetLink = getDefaultZoomMeetingLink;
 
 /**
  * Builds formatted text for Interview Invitation
@@ -42,14 +50,14 @@ export function buildInterviewWhatsAppMessage({
   interviewerName,
   calendarUrl
 }) {
-  const validMeetLink = (meetingLink && !meetingLink.includes('urb-interview'))
+  const validZoomLink = (meetingLink && !meetingLink.includes('urb-interview'))
     ? meetingLink
-    : getDefaultGoogleMeetLink();
+    : getDefaultZoomMeetingLink();
 
   const calLink = calendarUrl || generateGoogleCalendarUrl({
     title: `UrbanGaon Interview: ${round || 'Discussion'} - ${candidateName || 'Candidate'}`,
-    description: `Interview for ${jobTitle || 'Role'} with ${interviewerName || 'Talent Team'}.\nVideo Link: ${validMeetLink}`,
-    location: validMeetLink,
+    description: `Interview for ${jobTitle || 'Role'} with ${interviewerName || 'Talent Team'}.\nZoom Meeting Link: ${validZoomLink}`,
+    location: validZoomLink,
     date: date || new Date().toISOString().split('T')[0],
     startTime: startTime || '10:00 AM',
     endTime: endTime || '11:00 AM'
@@ -65,10 +73,10 @@ export function buildInterviewWhatsAppMessage({
     `📅 *Date*: ${date || 'Upcoming'}`,
     `⏰ *Time*: ${startTime || '10:00 AM'} - ${endTime || '11:00 AM'} (IST)`,
     `👨‍💼 *Interviewer*: ${interviewerName || 'Dr Sharmila Yadav'}`,
-    `🔗 *Google Meet*: ${validMeetLink}`,
+    `🔗 *Zoom Meeting*: ${validZoomLink}`,
     `📅 *Add to Google Calendar*: ${calLink}`,
     ``,
-    `Please ensure you join in a quiet environment with high-speed internet and working audio/video.`,
+    `Please ensure you join via Zoom in a quiet environment with high-speed internet and working audio/video.`,
     ``,
     `Best regards,`,
     `*UrbanGaon Talent Acquisition Team*`

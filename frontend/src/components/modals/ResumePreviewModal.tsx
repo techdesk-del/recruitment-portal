@@ -1,5 +1,5 @@
 import React from 'react';
-import { X, Download, Printer, Copy, CheckCircle2 } from 'lucide-react';
+import { X, Download, Printer, Copy, CheckCircle2, ExternalLink } from 'lucide-react';
 import { useRecruitment } from '../../context/RecruitmentContext';
 import { getSourceMeta } from '../../utils/resumeGenerator';
 import { UrbanGaonIcon, UrbanGaonLogo } from '../common/UrbanGaonLogo';
@@ -68,6 +68,18 @@ ${cand.resumeData.skills.join(', ')}`;
               <Printer size={14} />
               <span className="hidden sm:inline">Print</span>
             </button>
+            {cand.resumeUrl && (
+              <a
+                href={cand.resumeUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow-xs transition"
+                title="View original uploaded resume document"
+              >
+                <ExternalLink size={14} />
+                <span>Original CV</span>
+              </a>
+            )}
             <button
               onClick={() => downloadResume(cand.id)}
               className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs shadow-xs transition"

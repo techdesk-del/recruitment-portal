@@ -346,8 +346,8 @@ export const CallingDesk: React.FC = () => {
         interviewerName,
         interviewerRole,
         interviewerEmail: interviewerName === 'Dr Rekha Pareek' ? 'rekha.pareek@urbangaon.com' : interviewerName === 'Satyaveer Singh' ? 'satyaveer.singh@urbangaon.com' : 'sharmila.yadav@urbangaon.com',
-        platform: 'google_meet',
-        meetingLink: 'https://meet.google.com/ug-screening-call'
+        platform: 'zoom',
+        meetingLink: 'https://zoom.us/j/84920391192?pwd=ug2026'
       }
     });
 

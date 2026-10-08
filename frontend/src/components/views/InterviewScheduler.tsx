@@ -101,9 +101,9 @@ export const InterviewScheduler: React.FC = () => {
     interviewerName: 'Dr Sharmila Yadav',
     interviewerRole: 'HR Recruiter',
     interviewerEmail: 'sharmila.yadav@urbangaon.com',
-    platform: 'google_meet' as InterviewPlatform,
-    meetingLink: 'https://meet.google.com/urb-new-session',
-    meetingId: 'urb-new-session',
+    platform: 'zoom' as InterviewPlatform,
+    meetingLink: 'https://zoom.us/j/84920391192?pwd=ug2026',
+    meetingId: '84920391192',
     meetingPasscode: 'ug2026',
     location: 'UrbanGaon HQ - Executive Conference 3B',
     status: 'scheduled' as InterviewStatus,
@@ -289,9 +289,10 @@ export const InterviewScheduler: React.FC = () => {
     else if (cand.status === 'interview_r2') suggestedRound = 'Round 3: HR & Culture Fit';
     else if (cand.status === 'shortlisted') suggestedRound = 'Round 1: Screening / Technical';
 
-    // Auto-generate realistic Google Meet code
-    const slug = cand.name.toLowerCase().replace(/[^a-z0-9]/g, '-').slice(0, 12);
-    const generatedMeet = `https://meet.google.com/urb-${slug}`;
+    // Auto-generate realistic Zoom Meeting link & room ID
+    const randomZoomId = Math.floor(8000000000 + Math.random() * 1999999999).toString();
+    const randomPasscode = Math.random().toString(36).substring(2, 8);
+    const generatedZoom = `https://zoom.us/j/${randomZoomId}?pwd=${randomPasscode}`;
 
     setFormData((prev) => ({
       ...prev,
@@ -304,8 +305,10 @@ export const InterviewScheduler: React.FC = () => {
       jobId: cand.jobId,
       department: cand.department,
       round: suggestedRound,
-      meetingLink: generatedMeet,
-      meetingId: `urb-${slug}`,
+      platform: 'zoom',
+      meetingLink: generatedZoom,
+      meetingId: randomZoomId,
+      meetingPasscode: randomPasscode,
       atsMatchScore: cand.atsMatchScore,
       interviewerName: cand.recruiterAssigned || 'Dr Sharmila Yadav'
     }));
@@ -415,7 +418,7 @@ export const InterviewScheduler: React.FC = () => {
       return;
     }
     try {
-      showToast('info', 'Sending Email...', `Dispatching invitation with Google Meet & .ics calendar invite to ${emailToUse}`);
+      showToast('info', 'Sending Email...', `Dispatching invitation with Zoom Meeting & .ics calendar invite to ${emailToUse}`);
       const res = await communicationApi.sendInterviewEmail({
         interviewId: interview.id,
         candidateId: interview.candidateId,
@@ -1464,8 +1467,8 @@ export const InterviewScheduler: React.FC = () => {
                     onChange={(e) => setFormData({ ...formData, platform: e.target.value as InterviewPlatform })}
                     className="w-full px-3 py-2 rounded-xl bg-slate-50 border border-slate-200 text-slate-800 font-semibold"
                   >
-                    <option value="google_meet">Google Meet</option>
                     <option value="zoom">Zoom</option>
+                    <option value="google_meet">Google Meet</option>
                     <option value="teams">Microsoft Teams</option>
                     <option value="onsite">In-Person (UrbanGaon HQ)</option>
                   </select>
@@ -1502,7 +1505,7 @@ export const InterviewScheduler: React.FC = () => {
                   <span>Automated Candidate Communications (Email + Calendar + WhatsApp)</span>
                 </div>
                 <p className="text-[11px] text-blue-800 leading-relaxed">
-                  Upon scheduling, the candidate will automatically receive a branded <strong>UrbanGaon HTML Interview Invitation</strong> containing the Google Meet link, interview guide, and a synchronized <strong>.ics Calendar Invite</strong>. A <strong>WhatsApp status alert</strong> is also generated.
+                  Upon scheduling, the candidate will automatically receive a branded <strong>UrbanGaon HTML Interview Invitation</strong> containing the Zoom Meeting link, interview guide, and a synchronized <strong>.ics Calendar Invite</strong>. A <strong>WhatsApp status alert</strong> is also generated.
                 </p>
               </div>
 

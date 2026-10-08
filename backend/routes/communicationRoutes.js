@@ -2,6 +2,7 @@ import { Router } from 'express';
 import { Candidate } from '../models/Candidate.js';
 import { Interview } from '../models/Interview.js';
 import { ensureDBConnected } from '../config/database.js';
+import { broadcastInterviewUpdated } from '../sockets/socketHandler.js';
 import { 
   sendInterviewInviteEmail, 
   sendCandidateStatusEmail, 
@@ -13,7 +14,7 @@ import {
   buildRejectionWhatsAppMessage, 
   generateWhatsAppDeepLink, 
   sendWhatsAppAlert,
-  getDefaultGoogleMeetLink
+  getDefaultZoomMeetingLink
 } from '../services/whatsappService.js';
 
 const router = Router();
@@ -45,7 +46,7 @@ async function logCandidateCommunication(candidateId, action, details, performed
 
 /**
  * POST /api/communications/email/interview
- * Dispatches interview invite with Google Meet and .ics calendar file
+ * Dispatches interview invite with Zoom Meeting and .ics calendar file
  */
 router.post('/email/interview', async (req, res) => {
   try {
@@ -78,21 +79,26 @@ router.post('/email/interview', async (req, res) => {
         date: new Date().toISOString().split('T')[0],
         startTime: '10:00 AM',
         endTime: '11:00 AM',
-        platform: 'google_meet',
-        meetingLink: getDefaultGoogleMeetLink(),
+        platform: 'zoom',
+        meetingLink: getDefaultZoomMeetingLink(),
         interviewerName: candidate.recruiterAssigned || 'Dr Sharmila Yadav'
       };
     } else if (!interview.meetingLink || interview.meetingLink.includes('urb-interview')) {
-      interview.meetingLink = getDefaultGoogleMeetLink();
+      interview.meetingLink = getDefaultZoomMeetingLink();
+      interview.platform = 'zoom';
     }
 
-    // Persist interview in MongoDB if it has an id
+    // Persist interview in MongoDB and broadcast in real-time across devices
     if (interview.id) {
-      await Interview.findOneAndUpdate(
+      const savedInt = await Interview.findOneAndUpdate(
         { id: interview.id },
         { ...interview, candidateId: candidate.id },
         { upsert: true, new: true, setDefaultsOnInsert: true }
       ).catch((err) => console.warn('Could not persist interview in MongoDB:', err.message));
+
+      if (savedInt) {
+        broadcastInterviewUpdated(savedInt.toObject ? savedInt.toObject() : savedInt);
+      }
     }
 
     const emailResult = await sendInterviewInviteEmail({
@@ -104,7 +110,7 @@ router.post('/email/interview', async (req, res) => {
     await logCandidateCommunication(
       candidate.id,
       'Email Sent: Interview Invitation',
-      `Invitation for ${interview.round || 'Discussion'} dispatched with Google Meet & .ics calendar invite to ${candidate.email}`,
+      `Invitation for ${interview.round || 'Discussion'} dispatched with Zoom Meeting & .ics calendar invite to ${candidate.email}`,
       interview.interviewerName || 'Talent Team'
     );
 

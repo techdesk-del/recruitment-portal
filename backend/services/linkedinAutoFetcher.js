@@ -1,23 +1,25 @@
 import imaps from 'imap-simple';
 import cron from 'node-cron';
 import { parseLinkedInEmail } from './linkedinParser.js';
+import { parseApnaEmail } from './apnaEmailParser.js';
 import { Candidate } from '../models/Candidate.js';
+import { persistCandidate } from './candidateStore.js';
 
 let isFetching = false;
 
 /**
- * Connects to the recruiting inbox via IMAP and parses new LinkedIn application emails.
+ * Connects to the recruiting inbox via IMAP and parses new LinkedIn & Apna application emails.
  */
 export async function fetchLinkedInEmails(ioInstance) {
-  const email = process.env.LINKEDIN_SYNC_EMAIL;
-  const password = process.env.LINKEDIN_SYNC_PASSWORD;
-  const host = process.env.LINKEDIN_IMAP_HOST || 'imap.gmail.com';
+  const email = process.env.LINKEDIN_SYNC_EMAIL || process.env.RECRUITMENT_SYNC_EMAIL;
+  const password = process.env.LINKEDIN_SYNC_PASSWORD || process.env.RECRUITMENT_SYNC_PASSWORD;
+  const host = process.env.LINKEDIN_IMAP_HOST || process.env.RECRUITMENT_IMAP_HOST || 'imap.gmail.com';
   const port = parseInt(process.env.LINKEDIN_IMAP_PORT || '993', 10);
 
   if (!email || !password || email === 'yourcompany.hiring@gmail.com') {
     return {
       status: 'idle',
-      message: 'Add LINKEDIN_SYNC_EMAIL and LINKEDIN_SYNC_PASSWORD in .env to enable 60-second live inbox polling.'
+      message: 'Add LINKEDIN_SYNC_EMAIL and LINKEDIN_SYNC_PASSWORD (or RECRUITMENT_SYNC_EMAIL) in .env to enable 60-second live inbox polling.'
     };
   }
 
@@ -26,7 +28,7 @@ export async function fetchLinkedInEmails(ioInstance) {
   }
 
   isFetching = true;
-  console.log(`[LinkedIn Sync] 🔍 Checking inbox (${email}) for new LinkedIn applications...`);
+  console.log(`[Auto Email Sync] 🔍 Checking inbox (${email}) for new LinkedIn & Apna applications...`);
 
   const config = {
     imap: {
@@ -47,10 +49,16 @@ export async function fetchLinkedInEmails(ioInstance) {
     connection = await imaps.connect(config);
     await connection.openBox('INBOX');
 
-    // Search for UNSEEN emails from linkedin.com
+    // Search for UNSEEN emails from linkedin.com or apna.co or containing application
     const searchCriteria = [
       'UNSEEN',
-      ['OR', ['FROM', 'linkedin.com'], ['SUBJECT', 'application']]
+      ['OR', 
+        ['FROM', 'linkedin.com'], 
+        ['OR', 
+          ['FROM', 'apna.co'], 
+          ['OR', ['SUBJECT', 'application'], ['SUBJECT', 'apna']]
+        ]
+      ]
     ];
 
     const fetchOptions = {
@@ -59,21 +67,18 @@ export async function fetchLinkedInEmails(ioInstance) {
     };
 
     const messages = await connection.search(searchCriteria, fetchOptions);
-    console.log(`[LinkedIn Sync] Found ${messages.length} unread LinkedIn candidate email(s).`);
+    console.log(`[Auto Email Sync] Found ${messages.length} unread candidate email(s).`);
 
     for (const msg of messages) {
       const allParts = msg.parts.find(part => part.which === '');
       const rawText = allParts?.body || '';
 
       if (rawText) {
-        const candidateData = await parseLinkedInEmail(rawText);
+        const isApna = rawText.includes('apna.co') || rawText.toLowerCase().includes('apna');
+        const candidateData = isApna ? await parseApnaEmail(rawText) : await parseLinkedInEmail(rawText);
 
-        // Save to MongoDB Atlas
-        const saved = await Candidate.findOneAndUpdate(
-          { email: candidateData.email },
-          candidateData,
-          { upsert: true, returnDocument: 'after' }
-        );
+        // Save to MongoDB Atlas via candidateStore
+        const saved = await persistCandidate(candidateData);
 
         // Push real-time event to Dashboard
         if (ioInstance) {
@@ -81,7 +86,7 @@ export async function fetchLinkedInEmails(ioInstance) {
         }
 
         ingestedCount++;
-        console.log(`[LinkedIn Sync] ✅ Successfully ingested candidate: ${candidateData.name} (${candidateData.jobAppliedFor})`);
+        console.log(`[Auto Email Sync] ✅ Successfully ingested candidate from ${isApna ? 'Apna' : 'LinkedIn'}: ${candidateData.name} (${candidateData.jobAppliedFor})`);
       }
     }
 

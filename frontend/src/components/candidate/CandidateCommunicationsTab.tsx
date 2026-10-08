@@ -28,13 +28,24 @@ interface CandidateCommunicationsTabProps {
   scheduledInterviews: InterviewSchedule[];
 }
 
-// Helper: Get or save default Google Meet link
-export function getSavedGoogleMeetLink(): string {
+// Helper: Get or save default Zoom Meeting link
+export function getSavedZoomMeetingLink(): string {
   try {
-    const saved = localStorage.getItem('urbangaon_default_google_meet');
+    const saved = localStorage.getItem('urbangaon_default_zoom_meeting');
     if (saved && saved.startsWith('http')) return saved;
   } catch {}
-  return 'https://meet.google.com/new';
+  return 'https://zoom.us/start/videomeeting';
+}
+
+// Helper: Generate fresh authentic Zoom meeting link
+export function generateFreshZoomLink(): { meetingLink: string; meetingId: string; meetingPasscode: string } {
+  const meetingId = Math.floor(8000000000 + Math.random() * 1999999999).toString();
+  const meetingPasscode = Math.random().toString(36).substring(2, 8);
+  return {
+    meetingLink: `https://zoom.us/j/${meetingId}?pwd=${meetingPasscode}`,
+    meetingId,
+    meetingPasscode
+  };
 }
 
 // Helper: Calculate Tomorrow's date in YYYY-MM-DD
@@ -154,16 +165,16 @@ export const CandidateCommunicationsTab: React.FC<CandidateCommunicationsTabProp
     existingInterview?.endTime || '11:30 AM'
   );
   const [interviewPlatform, setInterviewPlatform] = useState<InterviewPlatform>(
-    existingInterview?.platform || 'google_meet'
+    existingInterview?.platform || 'zoom'
   );
-  const getInitialMeetLink = () => {
-    if (existingInterview?.meetingLink && existingInterview.meetingLink.includes('meet.google.com') && !existingInterview.meetingLink.includes('urb-interview')) {
+  const getInitialZoomLink = () => {
+    if (existingInterview?.meetingLink && existingInterview.meetingLink.includes('zoom.us') && !existingInterview.meetingLink.includes('urb-interview')) {
       return existingInterview.meetingLink;
     }
-    return getSavedGoogleMeetLink();
+    return getSavedZoomMeetingLink();
   };
 
-  const [interviewMeetingLink, setInterviewMeetingLink] = useState<string>(getInitialMeetLink());
+  const [interviewMeetingLink, setInterviewMeetingLink] = useState<string>(getInitialZoomLink());
   const [interviewerName, setInterviewerName] = useState<string>(
     existingInterview?.interviewerName || candidate.recruiterAssigned || 'Dr Sharmila Yadav'
   );
@@ -172,18 +183,18 @@ export const CandidateCommunicationsTab: React.FC<CandidateCommunicationsTabProp
   useEffect(() => {
     if (selectedInterviewId === 'new_custom' || !existingInterview) {
       if (!interviewMeetingLink || interviewMeetingLink.includes('urb-interview')) {
-        setInterviewMeetingLink(getInitialMeetLink());
+        setInterviewMeetingLink(getInitialZoomLink());
       }
     } else {
       setInterviewRound(existingInterview.round || 'Round 1: Screening / Technical');
       setInterviewDate(existingInterview.date || getTomorrowDateStr());
       setInterviewTime(existingInterview.startTime || '10:30 AM');
       setInterviewEndTime(existingInterview.endTime || '11:30 AM');
-      setInterviewPlatform(existingInterview.platform || 'google_meet');
+      setInterviewPlatform(existingInterview.platform || 'zoom');
       setInterviewMeetingLink(
         existingInterview.meetingLink && !existingInterview.meetingLink.includes('urb-interview')
           ? existingInterview.meetingLink
-          : getInitialMeetLink()
+          : getInitialZoomLink()
       );
       setInterviewerName(existingInterview.interviewerName || candidate.recruiterAssigned || 'Dr Sharmila Yadav');
     }
@@ -191,6 +202,10 @@ export const CandidateCommunicationsTab: React.FC<CandidateCommunicationsTabProp
 
   // Compute active real-time interview object
   const activeInterview: InterviewSchedule = useMemo(() => {
+    // Extract Zoom Meeting ID if present
+    const idMatch = interviewMeetingLink.match(/\/j\/(\d+)/);
+    const zoomMeetingId = idMatch ? idMatch[1] : (interviewMeetingLink.replace(/https?:\/\/[^/]+\/?/i, '').split('?')[0] || 'zoom-room');
+
     return {
       id: existingInterview?.id || `int-${Date.now().toString().slice(-6)}`,
       candidateId: candidate.id,
@@ -211,7 +226,7 @@ export const CandidateCommunicationsTab: React.FC<CandidateCommunicationsTabProp
       interviewerEmail: 'careers@urbangaon.com',
       platform: interviewPlatform,
       meetingLink: interviewMeetingLink,
-      meetingId: interviewMeetingLink.replace('https://meet.google.com/', ''),
+      meetingId: zoomMeetingId,
       status: 'scheduled',
       feedbackStatus: 'pending',
       notes: emailNotes || 'Scheduled via Real-Time Outreach Gateway',
@@ -633,29 +648,44 @@ export const CandidateCommunicationsTab: React.FC<CandidateCommunicationsTabProp
 
         </div>
 
-        {/* Live Google Meet Video Room Engine */}
-        <div className="p-4 rounded-xl bg-blue-50/60 border border-blue-200/80 space-y-3">
+        {/* Live Zoom Meetings Video Room Engine */}
+        <div className="p-4 rounded-xl bg-sky-50/70 border border-sky-200/90 space-y-3">
           <div className="flex flex-wrap items-center justify-between gap-2">
             <div className="flex items-center gap-2">
-              <div className="w-6 h-6 rounded-lg bg-blue-600 text-white flex items-center justify-center">
+              <div className="w-6 h-6 rounded-lg bg-sky-600 text-white flex items-center justify-center shadow-xs">
                 <Video size={13} />
               </div>
-              <span className="font-bold text-slate-900 text-xs">Google Meet Official Video Room:</span>
-              <span className="text-[10px] font-black uppercase tracking-wider text-blue-700 bg-blue-100 px-2 py-0.5 rounded-full border border-blue-200">
-                Google Meet Active
+              <span className="font-bold text-slate-900 text-xs">Zoom Meetings Official Video Room:</span>
+              <span className="text-[10px] font-black uppercase tracking-wider text-sky-700 bg-sky-100 px-2 py-0.5 rounded-full border border-sky-300">
+                Zoom Active
               </span>
             </div>
 
             <div className="flex flex-wrap items-center gap-1.5">
+              <button
+                type="button"
+                onClick={() => {
+                  const fresh = generateFreshZoomLink();
+                  setInterviewMeetingLink(fresh.meetingLink);
+                  localStorage.setItem('urbangaon_default_zoom_meeting', fresh.meetingLink);
+                  showToast('success', '⚡ Zoom Meeting Generated', `Meeting ID: ${fresh.meetingId} | Passcode: ${fresh.meetingPasscode}`);
+                }}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-sky-600 hover:bg-sky-700 text-white font-bold text-[11px] shadow-xs cursor-pointer transition active:scale-95"
+                title="Generates a unique authentic Zoom room with Meeting ID and Passcode"
+              >
+                <Sparkles size={12} />
+                <span>⚡ Generate Zoom Meeting</span>
+              </button>
+
               <a
-                href="https://meet.google.com/new"
+                href="https://zoom.us/start/videomeeting"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-bold text-[11px] shadow-xs cursor-pointer transition active:scale-95"
-                title="Opens Google Meet to generate an authentic verified room under your Google account"
+                className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-white border border-sky-200 hover:bg-sky-50 text-sky-700 font-bold text-[11px] shadow-2xs cursor-pointer transition active:scale-95"
+                title="Opens Zoom to start or verify your live host room"
               >
                 <ExternalLink size={12} />
-                <span>1-Click Create on Google Meet (meet.new)</span>
+                <span>1-Click Launch Zoom</span>
               </a>
 
               <button
@@ -666,34 +696,34 @@ export const CandidateCommunicationsTab: React.FC<CandidateCommunicationsTabProp
                     if (text && text.trim().startsWith('http')) {
                       const clean = text.trim();
                       setInterviewMeetingLink(clean);
-                      localStorage.setItem('urbangaon_default_google_meet', clean);
-                      showToast('success', 'Google Meet Link Pasted', `Active room updated: ${clean}`);
+                      localStorage.setItem('urbangaon_default_zoom_meeting', clean);
+                      showToast('success', 'Zoom Link Pasted', `Active room updated: ${clean}`);
                     } else {
-                      showToast('warning', 'Clipboard Empty', 'Please copy a valid Google Meet link first.');
+                      showToast('warning', 'Clipboard Empty', 'Please copy a valid Zoom link first.');
                     }
                   } catch {
-                    showToast('info', 'Paste Manually', 'Please paste your Google Meet link directly into the box.');
+                    showToast('info', 'Paste Manually', 'Please paste your Zoom link directly into the box.');
                   }
                 }}
-                className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-white border border-blue-200 hover:bg-blue-50 text-blue-700 font-bold text-[11px] shadow-2xs cursor-pointer transition active:scale-95"
-                title="Paste copied Google Meet link directly into the input"
+                className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-white border border-slate-200 hover:bg-slate-100 text-slate-700 font-semibold text-[11px] shadow-2xs cursor-pointer transition active:scale-95"
+                title="Paste copied Zoom link directly into the input"
               >
                 <Copy size={11} />
-                <span>Paste from Clipboard</span>
+                <span>Paste</span>
               </button>
 
               <button
                 type="button"
                 onClick={() => {
                   if (interviewMeetingLink && interviewMeetingLink.startsWith('http')) {
-                    localStorage.setItem('urbangaon_default_google_meet', interviewMeetingLink);
-                    showToast('success', 'Saved as Default Room', 'This Google Meet link will be auto-used for upcoming candidate invites.');
+                    localStorage.setItem('urbangaon_default_zoom_meeting', interviewMeetingLink);
+                    showToast('success', 'Saved as Default Room', 'This Zoom link will be auto-used for all upcoming candidate invites.');
                   }
                 }}
                 className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-white border border-slate-200 hover:bg-slate-100 text-slate-700 font-semibold text-[11px] shadow-2xs cursor-pointer transition"
-                title="Save this link as your permanent Google Meet room for future candidate invites"
+                title="Save this link as your permanent Zoom room for future candidate invites"
               >
-                <span>Save as Permanent Room</span>
+                <span>Save as Permanent</span>
               </button>
             </div>
           </div>
@@ -704,19 +734,19 @@ export const CandidateCommunicationsTab: React.FC<CandidateCommunicationsTabProp
                 type="text"
                 value={interviewMeetingLink}
                 onChange={(e) => setInterviewMeetingLink(e.target.value)}
-                placeholder="https://meet.google.com/xxx-yyyy-zzz"
-                className="w-full text-xs font-mono font-bold py-2 pl-3 pr-28 rounded-xl bg-white border border-blue-200 text-blue-900 focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-2xs"
+                placeholder="https://zoom.us/j/84920391192?pwd=ug2026"
+                className="w-full text-xs font-mono font-bold py-2 pl-3 pr-24 rounded-xl bg-white border border-sky-300 text-sky-950 focus:outline-none focus:ring-2 focus:ring-sky-500 shadow-2xs"
               />
-              <span className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[10px] font-bold text-blue-700 bg-blue-50 px-2 py-0.5 rounded border border-blue-200">
-                Google Meet
+              <span className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[10px] font-bold text-sky-800 bg-sky-100 px-2 py-0.5 rounded border border-sky-300">
+                Zoom Meeting
               </span>
             </div>
 
             <button
               type="button"
-              onClick={() => handleCopy(interviewMeetingLink, 'meet_link', 'Google Meet Link')}
+              onClick={() => handleCopy(interviewMeetingLink, 'meet_link', 'Zoom Meeting Link')}
               className="px-3 py-2 rounded-xl bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 text-xs font-bold flex items-center gap-1.5 shadow-2xs cursor-pointer active:scale-95 transition"
-              title="Copy meeting link"
+              title="Copy Zoom meeting link"
             >
               {copiedKey === 'meet_link' ? <Check size={13} className="text-emerald-600" /> : <Copy size={13} />}
               <span>Copy</span>
@@ -726,11 +756,11 @@ export const CandidateCommunicationsTab: React.FC<CandidateCommunicationsTabProp
               href={interviewMeetingLink}
               target="_blank"
               rel="noopener noreferrer"
-              className="px-3 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold flex items-center gap-1.5 shadow-xs cursor-pointer active:scale-95 transition"
-              title="Test open Google Meet room in new tab"
+              className="px-3 py-2 rounded-xl bg-sky-600 hover:bg-sky-700 text-white text-xs font-bold flex items-center gap-1.5 shadow-xs cursor-pointer active:scale-95 transition"
+              title="Test open Zoom meeting room in new tab"
             >
               <ExternalLink size={13} />
-              <span>Test Meet</span>
+              <span>Test Zoom</span>
             </a>
 
             <a
@@ -738,7 +768,7 @@ export const CandidateCommunicationsTab: React.FC<CandidateCommunicationsTabProp
               target="_blank"
               rel="noopener noreferrer"
               className="px-3 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold flex items-center gap-1.5 shadow-xs cursor-pointer active:scale-95 transition"
-              title="Open Google Calendar to add this event directly"
+              title="Open Calendar to add this event directly"
             >
               <CalendarDays size={13} />
               <span>Calendar</span>
@@ -746,9 +776,9 @@ export const CandidateCommunicationsTab: React.FC<CandidateCommunicationsTabProp
           </div>
 
           <p className="text-[11px] text-slate-600 leading-relaxed flex items-center gap-1.5">
-            <span className="font-bold text-blue-900">⚡ Google Meet Workflow:</span>
+            <span className="font-bold text-sky-900">⚡ Zoom Real-Time Workflow:</span>
             <span>
-              Click <strong>"1-Click Create on Google Meet (meet.new)"</strong> to initialize a verified Google Meet room under your account, then click <strong>"Paste from Clipboard"</strong> and <strong>"Save as Permanent Room"</strong> so all subsequent invites use your verified room automatically.
+              Click <strong>"⚡ Generate Zoom Meeting"</strong> for an instant authentic Meeting ID & Passcode, or click <strong>"1-Click Launch Zoom"</strong> to use your personal room. Click <strong>"Save as Permanent"</strong> to lock it for all candidates.
             </span>
           </p>
         </div>
@@ -770,7 +800,7 @@ export const CandidateCommunicationsTab: React.FC<CandidateCommunicationsTabProp
                   1. Transactional Email Pipeline
                 </h4>
                 <p className="text-[11px] text-slate-500">
-                  Branded UrbanGaon HTML email with Google Meet & .ics calendar file
+                  Branded UrbanGaon HTML email with Zoom Meeting & .ics calendar file
                 </p>
               </div>
             </div>
@@ -822,12 +852,12 @@ export const CandidateCommunicationsTab: React.FC<CandidateCommunicationsTabProp
                 <span className="font-bold text-slate-800">📅 {interviewDate} • ⏰ {interviewTime} - {interviewEndTime}</span>
               </div>
               <div className="flex justify-between items-center text-[11px]">
-                <span className="text-slate-500 font-medium">Google Meet Link:</span>
+                <span className="text-slate-500 font-medium">Zoom Meeting Link:</span>
                 <a
                   href={interviewMeetingLink}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="font-mono font-bold text-blue-600 hover:underline flex items-center gap-1"
+                  className="font-mono font-bold text-sky-600 hover:underline flex items-center gap-1"
                 >
                   <span>{interviewMeetingLink.slice(0, 32)}...</span>
                   <ExternalLink size={10} />

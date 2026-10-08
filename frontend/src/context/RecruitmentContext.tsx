@@ -1058,8 +1058,8 @@ export const RecruitmentProvider: React.FC<{ children: React.ReactNode }> = ({ c
         interviewerName: data.interviewData.interviewerName || 'Engineering Lead',
         interviewerRole: data.interviewData.interviewerRole || 'Engineering Lead',
         interviewerEmail: data.interviewData.interviewerEmail || 'lead@urbangaon.com',
-        platform: data.interviewData.platform || 'google_meet',
-        meetingLink: data.interviewData.meetingLink || 'https://meet.google.com/urbangaon-interview',
+        platform: data.interviewData.platform || 'zoom',
+        meetingLink: data.interviewData.meetingLink || 'https://zoom.us/j/84920391192?pwd=ug2026',
         status: 'scheduled',
         feedbackStatus: 'pending',
         notes: data.notes

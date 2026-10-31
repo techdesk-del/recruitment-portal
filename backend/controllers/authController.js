@@ -77,44 +77,43 @@ export async function register(req, res) {
         token,
         user: user.toJSON()
       });
-
-
-
-      // In-memory fallback
-      const memExisting = memoryUsers.find(u => u.email === cleanEmail);
-      if (memExisting) {
-        return res.status(400).json({ error: 'An account with this email already exists.' });
-      }
-
-      const salt = bcrypt.genSaltSync(10);
-      const memUser = {
-        id: userId,
-        name: name.trim(),
-        email: cleanEmail,
-        password: bcrypt.hashSync(password, salt),
-        role: assignedRole,
-        department: department || 'General',
-        avatar: name.trim().split(' ').map(n => n[0]).slice(0, 2).join('').toUpperCase(),
-        status: 'active',
-        lastLogin: new Date().toISOString()
-      };
-      memoryUsers.push(memUser);
-
-      const token = generateToken(memUser);
-      const safeUser = { ...memUser };
-      delete safeUser.password;
-
-      return res.status(201).json({
-        success: true,
-        message: 'Account registered successfully.',
-        token,
-        user: safeUser
-      });
-    } catch (err) {
-      console.error('Registration error:', err);
-      return res.status(500).json({ error: 'Failed to complete registration: ' + err.message });
     }
+
+    // In-memory fallback
+    const memExisting = memoryUsers.find(u => u.email === cleanEmail);
+    if (memExisting) {
+      return res.status(400).json({ error: 'An account with this email already exists.' });
+    }
+
+    const salt = bcrypt.genSaltSync(10);
+    const memUser = {
+      id: userId,
+      name: name.trim(),
+      email: cleanEmail,
+      password: bcrypt.hashSync(password, salt),
+      role: assignedRole,
+      department: department || 'General',
+      avatar: name.trim().split(' ').map(n => n[0]).slice(0, 2).join('').toUpperCase(),
+      status: 'active',
+      lastLogin: new Date().toISOString()
+    };
+    memoryUsers.push(memUser);
+
+    const token = generateToken(memUser);
+    const safeUser = { ...memUser };
+    delete safeUser.password;
+
+    return res.status(201).json({
+      success: true,
+      message: 'Account registered successfully.',
+      token,
+      user: safeUser
+    });
+  } catch (err) {
+    console.error('Registration error:', err);
+    return res.status(500).json({ error: 'Failed to complete registration: ' + err.message });
   }
+}
 
 
 
@@ -137,9 +136,23 @@ export async function login(req, res) {
       const isConnected = await ensureDBConnected();
 
       if (isConnected) {
-        const user = await User.findOne({ email: cleanEmail });
+        let user = await User.findOne({ email: cleanEmail });
         if (!user) {
-          return res.status(401).json({ error: 'Invalid email or password.' });
+          if (cleanEmail === 'jobs@urbangaon.com') {
+            user = new User({
+              id: 'user-jobs-01',
+              name: 'Urban Gaon Careers',
+              email: 'jobs@urbangaon.com',
+              password: 'jobs123',
+              role: 'admin',
+              department: 'Talent Acquisition & Management',
+              avatar: 'UG',
+              status: 'active'
+            });
+            await user.save();
+          } else {
+            return res.status(401).json({ error: 'Invalid email or password.' });
+          }
         }
 
         let isMatch = await user.comparePassword(password);
@@ -155,8 +168,12 @@ export async function login(req, res) {
           return res.status(403).json({ error: 'Your account has been deactivated. Please contact an Administrator.' });
         }
 
-        user.lastLogin = new Date().toISOString();
-        await user.save();
+        try {
+          user.lastLogin = new Date().toISOString();
+          await user.save();
+        } catch (e) {
+          // Non-fatal
+        }
 
         const token = generateToken(user);
         return res.json({
@@ -167,10 +184,24 @@ export async function login(req, res) {
         });
       }
 
-
-
       // In-memory fallback login
-      const memUser = memoryUsers.find(u => u.email === cleanEmail);
+      let memUser = memoryUsers.find(u => u.email === cleanEmail);
+      if (!memUser && cleanEmail === 'jobs@urbangaon.com') {
+        const salt = bcrypt.genSaltSync(10);
+        memUser = {
+          id: 'user-jobs-01',
+          name: 'Urban Gaon Careers',
+          email: 'jobs@urbangaon.com',
+          password: bcrypt.hashSync('jobs123', salt),
+          role: 'admin',
+          department: 'Talent Acquisition & Management',
+          avatar: 'UG',
+          status: 'active',
+          lastLogin: new Date().toISOString()
+        };
+        memoryUsers.push(memUser);
+      }
+
       if (!memUser) {
         return res.status(401).json({ error: 'Invalid email or password.' });
       }

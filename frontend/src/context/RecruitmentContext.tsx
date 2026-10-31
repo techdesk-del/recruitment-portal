@@ -182,16 +182,16 @@ export const RecruitmentProvider: React.FC<{ children: React.ReactNode }> = ({ c
         if (c.id !== id) return c;
         const history = activity
           ? [
-              {
-                id: `act-${Date.now()}`,
-                action: activity.action,
-                details: activity.details,
-                performedBy: activity.performedBy || 'Lead Recruiter',
-                timestamp: new Date().toISOString(),
-                type: activity.type || 'status'
-              },
-              ...c.activityHistory
-            ]
+            {
+              id: `act-${Date.now()}`,
+              action: activity.action,
+              details: activity.details,
+              performedBy: activity.performedBy || 'Lead Recruiter',
+              timestamp: new Date().toISOString(),
+              type: activity.type || 'status'
+            },
+            ...c.activityHistory
+          ]
           : c.activityHistory;
 
         const updated: Candidate = {
@@ -244,7 +244,7 @@ export const RecruitmentProvider: React.FC<{ children: React.ReactNode }> = ({ c
           setCandidates(cleanCandidates);
           try {
             localStorage.setItem(STORAGE_KEYS.candidates, JSON.stringify(cleanCandidates));
-          } catch (e) {}
+          } catch (e) { }
         }
         if (jobRes.status === 'fulfilled' && jobRes.value.length > 0) setJobs(jobRes.value);
         if (intRes.status === 'fulfilled' && intRes.value.length > 0) setInterviews(intRes.value);
@@ -267,7 +267,7 @@ export const RecruitmentProvider: React.FC<{ children: React.ReactNode }> = ({ c
       setCandidates((prev) => {
         if (prev.some((c) => c.id === newCand.id || (newCand.email && c.email === newCand.email))) return prev;
         const updated = [newCand, ...prev];
-        try { localStorage.setItem(STORAGE_KEYS.candidates, JSON.stringify(updated)); } catch (e) {}
+        try { localStorage.setItem(STORAGE_KEYS.candidates, JSON.stringify(updated)); } catch (e) { }
         return updated;
       });
 
@@ -289,7 +289,7 @@ export const RecruitmentProvider: React.FC<{ children: React.ReactNode }> = ({ c
           }
           return c;
         });
-        try { localStorage.setItem(STORAGE_KEYS.candidates, JSON.stringify(next)); } catch (e) {}
+        try { localStorage.setItem(STORAGE_KEYS.candidates, JSON.stringify(next)); } catch (e) { }
         return next;
       });
     });
@@ -299,7 +299,7 @@ export const RecruitmentProvider: React.FC<{ children: React.ReactNode }> = ({ c
       if (!candUpdate || !candUpdate.id) return;
       setCandidates((prev) => {
         const next = prev.map((c) => (c.id === candUpdate.id ? { ...c, ...candUpdate, lastUpdatedDate: new Date().toISOString() } : c));
-        try { localStorage.setItem(STORAGE_KEYS.candidates, JSON.stringify(next)); } catch (e) {}
+        try { localStorage.setItem(STORAGE_KEYS.candidates, JSON.stringify(next)); } catch (e) { }
         return next;
       });
     });
@@ -309,7 +309,7 @@ export const RecruitmentProvider: React.FC<{ children: React.ReactNode }> = ({ c
       if (!id) return;
       setCandidates((prev) => {
         const next = prev.filter((c) => c.id !== id);
-        try { localStorage.setItem(STORAGE_KEYS.candidates, JSON.stringify(next)); } catch (e) {}
+        try { localStorage.setItem(STORAGE_KEYS.candidates, JSON.stringify(next)); } catch (e) { }
         return next;
       });
     });
@@ -442,7 +442,7 @@ export const RecruitmentProvider: React.FC<{ children: React.ReactNode }> = ({ c
 
             // Only update React state if data genuinely changed (eliminates candidate flapping and UI flickering)
             if (hasStructuralChange || hasFieldChange) {
-              try { localStorage.setItem(STORAGE_KEYS.candidates, JSON.stringify(unified)); } catch (e) {}
+              try { localStorage.setItem(STORAGE_KEYS.candidates, JSON.stringify(unified)); } catch (e) { }
               return unified;
             }
             return current;
@@ -513,7 +513,7 @@ export const RecruitmentProvider: React.FC<{ children: React.ReactNode }> = ({ c
       details: details || `Moved to ${newStatus}`
     });
 
-    recruitmentApi.updateCandidateStatus(id, newStatus, details).catch(() => {});
+    recruitmentApi.updateCandidateStatus(id, newStatus, details).catch(() => { });
 
     if (newStatus === 'offered' || newStatus === 'joined') {
       confetti({ particleCount: 80, spread: 70, origin: { y: 0.6 } });
@@ -525,7 +525,7 @@ export const RecruitmentProvider: React.FC<{ children: React.ReactNode }> = ({ c
 
   const updateCandidateNotes = (id: string, notes: string) => {
     updateCandidateState(id, { notes });
-    recruitmentApi.updateCandidateNotes(id, notes).catch(() => {});
+    recruitmentApi.updateCandidateNotes(id, notes).catch(() => { });
     showToast('success', 'Notes Saved', 'Recruiter notes saved to MongoDB.');
   };
 
@@ -536,7 +536,7 @@ export const RecruitmentProvider: React.FC<{ children: React.ReactNode }> = ({ c
       type: 'scorecard',
       performedBy: scorecard.evaluatedBy || 'Interviewer'
     });
-    recruitmentApi.updateCandidateScorecard(id, scorecard).catch(() => {});
+    recruitmentApi.updateCandidateScorecard(id, scorecard).catch(() => { });
     showToast('success', 'Scorecard Recorded', 'Interview scorecard saved.');
   };
 
@@ -546,13 +546,13 @@ export const RecruitmentProvider: React.FC<{ children: React.ReactNode }> = ({ c
       details: `Assigned to ${recruiter}`,
       performedBy: 'Hiring Manager'
     });
-    recruitmentApi.updateCandidateRecruiter(id, recruiter).catch(() => {});
+    recruitmentApi.updateCandidateRecruiter(id, recruiter).catch(() => { });
     showToast('info', 'Recruiter Assigned', `Assigned to ${recruiter}.`);
   };
 
   const updateCandidateRating = (id: string, rating: number) => {
     updateCandidateState(id, { rating });
-    recruitmentApi.updateCandidateRating(id, rating).catch(() => {});
+    recruitmentApi.updateCandidateRating(id, rating).catch(() => { });
   };
 
   const updateCandidateDetails = async (id: string, updates: Partial<Candidate>, activityDetail?: string) => {
@@ -579,7 +579,7 @@ export const RecruitmentProvider: React.FC<{ children: React.ReactNode }> = ({ c
       const updated = prev.filter((c) => c.id !== id && (c as any)._id !== id);
       try {
         localStorage.setItem(STORAGE_KEYS.candidates, JSON.stringify(updated));
-      } catch (e) {}
+      } catch (e) { }
       return updated;
     });
 
@@ -593,7 +593,7 @@ export const RecruitmentProvider: React.FC<{ children: React.ReactNode }> = ({ c
         );
         try {
           localStorage.setItem(STORAGE_KEYS.jobs, JSON.stringify(updatedJobs));
-        } catch (e) {}
+        } catch (e) { }
         return updatedJobs;
       });
     }
@@ -639,7 +639,7 @@ export const RecruitmentProvider: React.FC<{ children: React.ReactNode }> = ({ c
     setCandidates((prev) =>
       prev.map((c) => (candidateIds.includes(c.id) ? { ...c, status, lastUpdatedDate: new Date().toISOString() } : c))
     );
-    candidateIds.forEach((id) => recruitmentApi.updateCandidateStatus(id, status).catch(() => {}));
+    candidateIds.forEach((id) => recruitmentApi.updateCandidateStatus(id, status).catch(() => { }));
     showToast('success', 'Batch Updated', `${candidateIds.length} candidates updated to ${status}.`);
   };
 
@@ -739,21 +739,21 @@ export const RecruitmentProvider: React.FC<{ children: React.ReactNode }> = ({ c
       const cvDate = formatTrackerDate(cand.appliedDate || cand.lastUpdatedDate);
 
       const activities = cand.activityHistory || [];
-      const r1Act = activities.find(a => 
+      const r1Act = activities.find(a =>
         (a.action && a.action.toUpperCase().includes('ROUND 1')) ||
         (a.details && a.details.toUpperCase().includes('ROUND 1'))
       );
       let r1Date = r1Act ? formatTrackerDate(r1Act.timestamp) : (cand.status === 'interview_r1' ? formatTrackerDate(cand.callingDetails?.nextFollowUpDate || cand.lastUpdatedDate) : '');
       let r1Status = r1Act ? (r1Act.action.toUpperCase().includes('CLEARED') ? 'Cleared' : (r1Act.action.toUpperCase().includes('REJECTED') ? 'Rejected' : 'Pending')) : '';
 
-      const r2Act = activities.find(a => 
+      const r2Act = activities.find(a =>
         (a.action && a.action.toUpperCase().includes('ROUND 2')) ||
         (a.details && a.details.toUpperCase().includes('ROUND 2'))
       );
       let r2Date = r2Act ? formatTrackerDate(r2Act.timestamp) : (cand.status === 'interview_r2' ? formatTrackerDate(cand.callingDetails?.nextFollowUpDate || cand.lastUpdatedDate) : '');
       let r2Status = r2Act ? (r2Act.action.toUpperCase().includes('CLEARED') ? 'Cleared' : (r2Act.action.toUpperCase().includes('REJECTED') ? 'Rejected' : 'Pending')) : '';
 
-      const offerAct = activities.find(a => 
+      const offerAct = activities.find(a =>
         (a.action && (a.action.toUpperCase().includes('OFFER') || a.action.toUpperCase().includes('JOINED')))
       );
       const offerDate = offerAct ? formatTrackerDate(offerAct.timestamp) : '';
@@ -866,7 +866,7 @@ export const RecruitmentProvider: React.FC<{ children: React.ReactNode }> = ({ c
     };
 
     setCandidates((prev) => [newCandidate, ...prev]);
-    recruitmentApi.createCandidate(newCandidate).catch(() => {});
+    recruitmentApi.createCandidate(newCandidate).catch(() => { });
     setJobs((prev) => prev.map((j) => (j.id === targetJob.id ? { ...j, applicantsCount: j.applicantsCount + 1 } : j)));
     showToast('success', `⚡ Live Ingestion: ${newCandidate.name}`, `Application received from ${src.toUpperCase()} for ${targetJob.title}!`);
   };
@@ -897,7 +897,7 @@ export const RecruitmentProvider: React.FC<{ children: React.ReactNode }> = ({ c
       showToast('success', `🚀 ${unique.length} Resumes Added!`, 'Profiles extracted and added to dashboard.');
 
       const updated = [...unique, ...prev];
-      try { localStorage.setItem(STORAGE_KEYS.candidates, JSON.stringify(updated)); } catch (e) {}
+      try { localStorage.setItem(STORAGE_KEYS.candidates, JSON.stringify(updated)); } catch (e) { }
       return updated;
     });
   };
@@ -941,7 +941,7 @@ export const RecruitmentProvider: React.FC<{ children: React.ReactNode }> = ({ c
 
     setInterviews((prev) => [newInterview, ...prev]);
     const nextStatus: CandidateStatus = data.round.includes('Round 2') ? 'interview_r2' : 'interview_r1';
-    
+
     updateCandidateState(data.candidateId, { status: nextStatus }, {
       action: 'Interview Scheduled',
       details: `${data.round} on ${data.date} at ${data.startTime} with ${data.interviewerName}`,
@@ -949,15 +949,15 @@ export const RecruitmentProvider: React.FC<{ children: React.ReactNode }> = ({ c
       type: 'interview'
     });
 
-    recruitmentApi.createInterview(newInterview).catch(() => {});
-    recruitmentApi.updateCandidateStatus(data.candidateId, nextStatus, `${data.round} scheduled`).catch(() => {});
+    recruitmentApi.createInterview(newInterview).catch(() => { });
+    recruitmentApi.updateCandidateStatus(data.candidateId, nextStatus, `${data.round} scheduled`).catch(() => { });
     showToast('success', 'Interview Scheduled', `${data.round} set for ${data.candidateName}.`);
     return newInterview;
   };
 
   const updateInterview = (id: string, updates: Partial<InterviewSchedule>) => {
     setInterviews((prev) => prev.map((item) => (item.id === id ? { ...item, ...updates, updatedAt: new Date().toISOString() } : item)));
-    recruitmentApi.updateInterview(id, updates).catch(() => {});
+    recruitmentApi.updateInterview(id, updates).catch(() => { });
     showToast('info', 'Updated', 'Interview details updated.');
   };
 
@@ -977,7 +977,7 @@ export const RecruitmentProvider: React.FC<{ children: React.ReactNode }> = ({ c
       type: 'interview'
     });
 
-    recruitmentApi.updateInterview(id, { date: newDate, startTime: newStartTime, endTime: newEndTime, status: 'rescheduled', notes }).catch(() => {});
+    recruitmentApi.updateInterview(id, { date: newDate, startTime: newStartTime, endTime: newEndTime, status: 'rescheduled', notes }).catch(() => { });
     showToast('info', 'Rescheduled', `${target.round} moved to ${newDate} at ${newStartTime}.`);
   };
 
@@ -987,19 +987,19 @@ export const RecruitmentProvider: React.FC<{ children: React.ReactNode }> = ({ c
 
     setInterviews((prev) => prev.map((i) => (i.id === id ? { ...i, status: 'cancelled', notes: reason || i.notes, updatedAt: new Date().toISOString() } : i)));
     updateCandidateState(target.candidateId, {}, { action: 'Interview Cancelled', details: reason || 'Cancelled by recruiter', type: 'interview' });
-    recruitmentApi.updateInterview(id, { status: 'cancelled', notes: reason }).catch(() => {});
+    recruitmentApi.updateInterview(id, { status: 'cancelled', notes: reason }).catch(() => { });
     showToast('warning', 'Cancelled', `Interview for ${target.candidateName} cancelled.`);
   };
 
   const markInterviewCompleted = (id: string) => {
     setInterviews((prev) => prev.map((i) => (i.id === id ? { ...i, status: 'completed', feedbackStatus: 'submitted', updatedAt: new Date().toISOString() } : i)));
-    recruitmentApi.updateInterview(id, { status: 'completed', feedbackStatus: 'submitted' }).catch(() => {});
+    recruitmentApi.updateInterview(id, { status: 'completed', feedbackStatus: 'submitted' }).catch(() => { });
     showToast('success', 'Completed', 'Interview marked as completed.');
   };
 
   const deleteInterview = (id: string) => {
     setInterviews((prev) => prev.filter((i) => i.id !== id));
-    recruitmentApi.deleteInterview(id).catch(() => {});
+    recruitmentApi.deleteInterview(id).catch(() => { });
     showToast('info', 'Deleted', 'Interview record deleted.');
   };
 
@@ -1094,14 +1094,14 @@ export const RecruitmentProvider: React.FC<{ children: React.ReactNode }> = ({ c
       });
     }
 
-    recruitmentApi.createCall(newRecord).catch(() => {});
+    recruitmentApi.createCall(newRecord).catch(() => { });
     showToast('success', 'Call Synced', `Screening logged for ${data.candidateName}.`);
     return newRecord;
   };
 
   const deleteCallRecord = (callId: string) => {
     setCallRecords((prev) => prev.filter((r) => r.id !== callId));
-    recruitmentApi.deleteCall(callId).catch(() => {});
+    recruitmentApi.deleteCall(callId).catch(() => { });
     showToast('info', 'Deleted', 'Call record deleted.');
   };
 
@@ -1124,7 +1124,7 @@ export const RecruitmentProvider: React.FC<{ children: React.ReactNode }> = ({ c
       { action: 'Follow-up Call Scheduled', details: `Scheduled on ${date} at ${time}. ${note || ''}`, type: 'call' }
     );
 
-    recruitmentApi.updateCandidateCalling(candidateId, { callingDetails: { nextFollowUpDate: date, nextFollowUpTime: time, callStatus: 'follow_up' } }).catch(() => {});
+    recruitmentApi.updateCandidateCalling(candidateId, { callingDetails: { nextFollowUpDate: date, nextFollowUpTime: time, callStatus: 'follow_up' } }).catch(() => { });
     showToast('info', 'Follow-up Scheduled', `Follow-up set for ${date} at ${time}.`);
   };
 
@@ -1134,7 +1134,7 @@ export const RecruitmentProvider: React.FC<{ children: React.ReactNode }> = ({ c
       { isCallingQueued: true },
       { action: 'Shifted to Calling Desk', details: 'Candidate queued for telephonic evaluation.', type: 'call' }
     );
-    recruitmentApi.updateCandidateCalling(candidate.id, { isCallingQueued: true }).catch(() => {});
+    recruitmentApi.updateCandidateCalling(candidate.id, { isCallingQueued: true }).catch(() => { });
     setActiveDialerCandidate(candidate);
     setActiveView('calling');
     showToast('success', 'Calling Desk', `${candidate.name} is now queued for calling.`);

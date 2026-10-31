@@ -1,13 +1,13 @@
 import React, { useState, useMemo, useEffect } from 'react';
-import { 
-  Mail, 
-  Send, 
-  MessageSquare, 
-  Calendar, 
-  CheckCircle2, 
-  ExternalLink, 
-  Copy, 
-  Clock, 
+import {
+  Mail,
+  Send,
+  MessageSquare,
+  Calendar,
+  CheckCircle2,
+  ExternalLink,
+  Copy,
+  Clock,
   Sparkles,
   Phone,
   AlertCircle,
@@ -33,7 +33,7 @@ export function getSavedZoomMeetingLink(): string {
   try {
     const saved = localStorage.getItem('urbangaon_default_zoom_meeting');
     if (saved && saved.startsWith('http')) return saved;
-  } catch {}
+  } catch { }
   return 'https://zoom.us/start/videomeeting';
 }
 
@@ -458,7 +458,7 @@ export const CandidateCommunicationsTab: React.FC<CandidateCommunicationsTabProp
     };
     updateCandidateDetails(candidate.id, {
       activityHistory: [newActivity, ...(candidate.activityHistory || [])]
-    }).catch(() => {});
+    }).catch(() => { });
 
     showToast(
       'success',
@@ -474,7 +474,7 @@ export const CandidateCommunicationsTab: React.FC<CandidateCommunicationsTabProp
 
   return (
     <div className="space-y-6">
-      
+
       {/* Top Banner: Real-time Outreach Hub */}
       <div className="p-4 sm:p-5 rounded-2xl bg-white border border-slate-200 shadow-2xs flex flex-wrap items-center justify-between gap-4">
         <div>
@@ -566,7 +566,7 @@ export const CandidateCommunicationsTab: React.FC<CandidateCommunicationsTabProp
 
         {/* Live Controls Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 text-xs">
-          
+
           {/* Round Selector */}
           <div className="space-y-1">
             <div className="flex items-center justify-between">
@@ -666,492 +666,486 @@ export const CandidateCommunicationsTab: React.FC<CandidateCommunicationsTabProp
             <select
               value={interviewerName}
               onChange={(e) => setInterviewerName(e.target.value)}
-              className="w-full p-2 rounded-xl bg-slate-50 border border-slate-200 text-slate-800 font-bold focus:border-blue-500 outline-none"
+            className="w-full p-2 rounded-xl bg-slate-50 border border-slate-200 text-slate-800 font-bold focus:border-blue-500 outline-none"
             >
-              <optgroup label="Round 1 Lead">
-                <option value="Satyaveer Singh">Satyaveer Singh (R1 Screening & Technical)</option>
-              </optgroup>
-              <optgroup label="Round 2 & Final Panel">
-                <option value="Dr Sharmila Yadav">Dr Sharmila Yadav (Director HR / R2)</option>
-                <option value="CEO (Urban Gaon)">CEO (Urban Gaon / Leadership Round)</option>
-              </optgroup>
-            </select>
-          </div>
-
+            <optgroup label="Round 1 Lead">
+              <option value="Satyaveer Singh">Satyaveer Singh (R1 Screening & Technical)</option>
+            </optgroup>
+            <optgroup label="Round 2 & Final Panel">
+              <option value="Dr Sharmila Yadav">Dr Sharmila Yadav (Director HR / R2)</option>
+              <option value="CEO (Urban Gaon)">CEO (Urban Gaon / Leadership Round)</option>
+            </optgroup>
+          </select>
         </div>
 
-        {/* Live Zoom Meetings Video Room Engine */}
-        <div className="p-4 rounded-xl bg-sky-50/70 border border-sky-200/90 space-y-3">
-          <div className="flex flex-wrap items-center justify-between gap-2">
-            <div className="flex items-center gap-2">
-              <div className="w-6 h-6 rounded-lg bg-sky-600 text-white flex items-center justify-center shadow-xs">
-                <Video size={13} />
-              </div>
-              <span className="font-bold text-slate-900 text-xs">Zoom Meetings Official Video Room:</span>
-              <span className="text-[10px] font-black uppercase tracking-wider text-sky-700 bg-sky-100 px-2 py-0.5 rounded-full border border-sky-300">
-                Zoom Active
-              </span>
+      </div>
+
+      {/* Live Zoom Meetings Video Room Engine */}
+      <div className="p-4 rounded-xl bg-sky-50/70 border border-sky-200/90 space-y-3">
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <div className="flex items-center gap-2">
+            <div className="w-6 h-6 rounded-lg bg-sky-600 text-white flex items-center justify-center shadow-xs">
+              <Video size={13} />
             </div>
-
-            <div className="flex flex-wrap items-center gap-1.5">
-              <button
-                type="button"
-                onClick={() => {
-                  const fresh = generateFreshZoomLink();
-                  setInterviewMeetingLink(fresh.meetingLink);
-                  localStorage.setItem('urbangaon_default_zoom_meeting', fresh.meetingLink);
-                  showToast('success', '⚡ Zoom Meeting Generated', `Meeting ID: ${fresh.meetingId} | Passcode: ${fresh.meetingPasscode}`);
-                }}
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-sky-600 hover:bg-sky-700 text-white font-bold text-[11px] shadow-xs cursor-pointer transition active:scale-95"
-                title="Generates a unique authentic Zoom room with Meeting ID and Passcode"
-              >
-                <Sparkles size={12} />
-                <span>⚡ Generate Zoom Meeting</span>
-              </button>
-
-              <a
-                href="https://zoom.us/start/videomeeting"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-white border border-sky-200 hover:bg-sky-50 text-sky-700 font-bold text-[11px] shadow-2xs cursor-pointer transition active:scale-95"
-                title="Opens Zoom to start or verify your live host room"
-              >
-                <ExternalLink size={12} />
-                <span>1-Click Launch Zoom</span>
-              </a>
-
-              <button
-                type="button"
-                onClick={async () => {
-                  try {
-                    const text = await navigator.clipboard.readText();
-                    if (text && text.trim().startsWith('http')) {
-                      const clean = text.trim();
-                      setInterviewMeetingLink(clean);
-                      localStorage.setItem('urbangaon_default_zoom_meeting', clean);
-                      showToast('success', 'Zoom Link Pasted', `Active room updated: ${clean}`);
-                    } else {
-                      showToast('warning', 'Clipboard Empty', 'Please copy a valid Zoom link first.');
-                    }
-                  } catch {
-                    showToast('info', 'Paste Manually', 'Please paste your Zoom link directly into the box.');
-                  }
-                }}
-                className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-white border border-slate-200 hover:bg-slate-100 text-slate-700 font-semibold text-[11px] shadow-2xs cursor-pointer transition active:scale-95"
-                title="Paste copied Zoom link directly into the input"
-              >
-                <Copy size={11} />
-                <span>Paste</span>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => {
-                  if (interviewMeetingLink && interviewMeetingLink.startsWith('http')) {
-                    localStorage.setItem('urbangaon_default_zoom_meeting', interviewMeetingLink);
-                    showToast('success', 'Saved as Default Room', 'This Zoom link will be auto-used for all upcoming candidate invites.');
-                  }
-                }}
-                className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-white border border-slate-200 hover:bg-slate-100 text-slate-700 font-semibold text-[11px] shadow-2xs cursor-pointer transition"
-                title="Save this link as your permanent Zoom room for future candidate invites"
-              >
-                <span>Save as Permanent</span>
-              </button>
-            </div>
+            <span className="font-bold text-slate-900 text-xs">Zoom Meetings Official Video Room:</span>
+            <span className="text-[10px] font-black uppercase tracking-wider text-sky-700 bg-sky-100 px-2 py-0.5 rounded-full border border-sky-300">
+              Zoom Active
+            </span>
           </div>
 
-          <div className="flex flex-wrap sm:flex-nowrap items-center gap-2">
-            <div className="relative flex-1 min-w-[200px]">
-              <input
-                type="text"
-                value={interviewMeetingLink}
-                onChange={(e) => setInterviewMeetingLink(e.target.value)}
-                placeholder="https://zoom.us/j/84920391192?pwd=ug2026"
-                className="w-full text-xs font-mono font-bold py-2 pl-3 pr-24 rounded-xl bg-white border border-sky-300 text-sky-950 focus:outline-none focus:ring-2 focus:ring-sky-500 shadow-2xs"
-              />
-              <span className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[10px] font-bold text-sky-800 bg-sky-100 px-2 py-0.5 rounded border border-sky-300">
-                Zoom Meeting
-              </span>
-            </div>
+          <div className="flex flex-wrap items-center gap-1.5">
+            <button
+              type="button"
+              onClick={() => {
+                const fresh = generateFreshZoomLink();
+                setInterviewMeetingLink(fresh.meetingLink);
+                localStorage.setItem('urbangaon_default_zoom_meeting', fresh.meetingLink);
+                showToast('success', '⚡ Zoom Meeting Generated', `Meeting ID: ${fresh.meetingId} | Passcode: ${fresh.meetingPasscode}`);
+              }}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-sky-600 hover:bg-sky-700 text-white font-bold text-[11px] shadow-xs cursor-pointer transition active:scale-95"
+              title="Generates a unique authentic Zoom room with Meeting ID and Passcode"
+            >
+              <Sparkles size={12} />
+              <span>⚡ Generate Zoom Meeting</span>
+            </button>
+
+            <a
+              href="https://zoom.us/start/videomeeting"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-white border border-sky-200 hover:bg-sky-50 text-sky-700 font-bold text-[11px] shadow-2xs cursor-pointer transition active:scale-95"
+              title="Opens Zoom to start or verify your live host room"
+            >
+              <ExternalLink size={12} />
+              <span>1-Click Launch Zoom</span>
+            </a>
 
             <button
               type="button"
-              onClick={() => handleCopy(interviewMeetingLink, 'meet_link', 'Zoom Meeting Link')}
-              className="px-3 py-2 rounded-xl bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 text-xs font-bold flex items-center gap-1.5 shadow-2xs cursor-pointer active:scale-95 transition"
-              title="Copy Zoom meeting link"
+              onClick={async () => {
+                try {
+                  const text = await navigator.clipboard.readText();
+                  if (text && text.trim().startsWith('http')) {
+                    const clean = text.trim();
+                    setInterviewMeetingLink(clean);
+                    localStorage.setItem('urbangaon_default_zoom_meeting', clean);
+                    showToast('success', 'Zoom Link Pasted', `Active room updated: ${clean}`);
+                  } else {
+                    showToast('warning', 'Clipboard Empty', 'Please copy a valid Zoom link first.');
+                  }
+                } catch {
+                  showToast('info', 'Paste Manually', 'Please paste your Zoom link directly into the box.');
+                }
+              }}
+              className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-white border border-slate-200 hover:bg-slate-100 text-slate-700 font-semibold text-[11px] shadow-2xs cursor-pointer transition active:scale-95"
+              title="Paste copied Zoom link directly into the input"
             >
-              {copiedKey === 'meet_link' ? <Check size={13} className="text-emerald-600" /> : <Copy size={13} />}
-              <span>Copy</span>
+              <Copy size={11} />
+              <span>Paste</span>
             </button>
 
+            <button
+              type="button"
+              onClick={() => {
+                if (interviewMeetingLink && interviewMeetingLink.startsWith('http')) {
+                  localStorage.setItem('urbangaon_default_zoom_meeting', interviewMeetingLink);
+                  showToast('success', 'Saved as Default Room', 'This Zoom link will be auto-used for all upcoming candidate invites.');
+                }
+              }}
+              className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-white border border-slate-200 hover:bg-slate-100 text-slate-700 font-semibold text-[11px] shadow-2xs cursor-pointer transition"
+              title="Save this link as your permanent Zoom room for future candidate invites"
+            >
+              <span>Save as Permanent</span>
+            </button>
+          </div>
+        </div>
+
+        <div className="flex flex-wrap sm:flex-nowrap items-center gap-2">
+          <div className="relative flex-1 min-w-[200px]">
+            <input
+              type="text"
+              value={interviewMeetingLink}
+              onChange={(e) => setInterviewMeetingLink(e.target.value)}
+              placeholder="https://zoom.us/j/84920391192?pwd=ug2026"
+              className="w-full text-xs font-mono font-bold py-2 pl-3 pr-24 rounded-xl bg-white border border-sky-300 text-sky-950 focus:outline-none focus:ring-2 focus:ring-sky-500 shadow-2xs"
+            />
+            <span className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[10px] font-bold text-sky-800 bg-sky-100 px-2 py-0.5 rounded border border-sky-300">
+              Zoom Meeting
+            </span>
+          </div>
+
+          <button
+            type="button"
+            onClick={() => handleCopy(interviewMeetingLink, 'meet_link', 'Zoom Meeting Link')}
+            className="px-3 py-2 rounded-xl bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 text-xs font-bold flex items-center gap-1.5 shadow-2xs cursor-pointer active:scale-95 transition"
+            title="Copy Zoom meeting link"
+          >
+            {copiedKey === 'meet_link' ? <Check size={13} className="text-emerald-600" /> : <Copy size={13} />}
+            <span>Copy</span>
+          </button>
+
+          <a
+            href={interviewMeetingLink}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="px-3 py-2 rounded-xl bg-sky-600 hover:bg-sky-700 text-white text-xs font-bold flex items-center gap-1.5 shadow-xs cursor-pointer active:scale-95 transition"
+            title="Test open Zoom meeting room in new tab"
+          >
+            <ExternalLink size={13} />
+            <span>Test Zoom</span>
+          </a>
+
+          <a
+            href={googleCalendarLink}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="px-3 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold flex items-center gap-1.5 shadow-xs cursor-pointer active:scale-95 transition"
+            title="Open Calendar to add this event directly"
+          >
+            <CalendarDays size={13} />
+            <span>Calendar</span>
+          </a>
+        </div>
+
+        <p className="text-[11px] text-slate-600 leading-relaxed flex items-center gap-1.5">
+          <span className="font-bold text-sky-900">⚡ Zoom Real-Time Workflow:</span>
+          <span>
+            Click <strong>"⚡ Generate Zoom Meeting"</strong> for an instant authentic Meeting ID & Passcode, or click <strong>"1-Click Launch Zoom"</strong> to use your personal room. Click <strong>"Save as Permanent"</strong> to lock it for all candidates.
+          </span>
+        </p>
+      </div>
+
+    </div>
+
+      {/* Two Column Layout: Email Dispatcher & WhatsApp Direct Outreach */ }
+  <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+
+    {/* CHANNEL 1: TRANSACTIONAL EMAIL PIPELINE */}
+    <div className="p-5 rounded-2xl bg-white border border-slate-200 shadow-2xs space-y-4">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <div className="w-8 h-8 rounded-xl bg-blue-100 text-blue-600 flex items-center justify-center">
+            <Mail size={16} />
+          </div>
+          <div>
+            <h4 className="text-xs font-bold text-slate-900 uppercase tracking-wider">
+              1. Transactional Email Pipeline
+            </h4>
+            <p className="text-[11px] text-slate-500">
+              Branded UrbanGaon HTML email with Zoom Meeting & .ics calendar file
+            </p>
+          </div>
+        </div>
+        <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-blue-50 text-blue-700 border border-blue-200">
+          Zero-AWS / Active
+        </span>
+      </div>
+
+      {/* Email Type Selection */}
+      <div className="grid grid-cols-3 gap-2 p-1 bg-slate-100 rounded-xl text-xs font-bold">
+        <button
+          type="button"
+          onClick={() => setEmailType('interview')}
+          className={`py-1.5 px-2 rounded-lg transition text-center cursor-pointer ${emailType === 'interview' ? 'bg-white text-blue-700 shadow-2xs' : 'text-slate-600 hover:text-slate-900'
+            }`}
+        >
+          Interview Invite
+        </button>
+        <button
+          type="button"
+          onClick={() => setEmailType('status')}
+          className={`py-1.5 px-2 rounded-lg transition text-center cursor-pointer ${emailType === 'status' ? 'bg-white text-blue-700 shadow-2xs' : 'text-slate-600 hover:text-slate-900'
+            }`}
+        >
+          Status Update
+        </button>
+        <button
+          type="button"
+          onClick={() => setEmailType('rejection')}
+          className={`py-1.5 px-2 rounded-lg transition text-center cursor-pointer ${emailType === 'rejection' ? 'bg-white text-rose-700 shadow-2xs' : 'text-slate-600 hover:text-slate-900'
+            }`}
+        >
+          Rejection / Pool
+        </button>
+      </div>
+
+      {/* Dynamic Configuration Summary based on Email Type */}
+      {emailType === 'interview' && (
+        <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-200 text-xs space-y-2">
+          <div className="flex justify-between items-center text-[11px]">
+            <span className="text-slate-500 font-medium">Position & Round:</span>
+            <span className="font-bold text-slate-800">{interviewRound}</span>
+          </div>
+          <div className="flex justify-between items-center text-[11px]">
+            <span className="text-slate-500 font-medium">Scheduled Timing:</span>
+            <span className="font-bold text-slate-800">📅 {interviewDate} • ⏰ {interviewTime} - {interviewEndTime}</span>
+          </div>
+          <div className="flex justify-between items-center text-[11px]">
+            <span className="text-slate-500 font-medium">Zoom Meeting Link:</span>
             <a
               href={interviewMeetingLink}
               target="_blank"
               rel="noopener noreferrer"
-              className="px-3 py-2 rounded-xl bg-sky-600 hover:bg-sky-700 text-white text-xs font-bold flex items-center gap-1.5 shadow-xs cursor-pointer active:scale-95 transition"
-              title="Test open Zoom meeting room in new tab"
+              className="font-mono font-bold text-sky-600 hover:underline flex items-center gap-1"
             >
-              <ExternalLink size={13} />
-              <span>Test Zoom</span>
-            </a>
-
-            <a
-              href={googleCalendarLink}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="px-3 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold flex items-center gap-1.5 shadow-xs cursor-pointer active:scale-95 transition"
-              title="Open Calendar to add this event directly"
-            >
-              <CalendarDays size={13} />
-              <span>Calendar</span>
+              <span>{interviewMeetingLink.slice(0, 32)}...</span>
+              <ExternalLink size={10} />
             </a>
           </div>
+          <div className="flex justify-between items-center text-[11px]">
+            <span className="text-slate-500 font-medium">Calendar Attachment:</span>
+            <span className="font-bold text-emerald-700">✓ .ics File + 1-Click Google Calendar</span>
+          </div>
+        </div>
+      )}
 
-          <p className="text-[11px] text-slate-600 leading-relaxed flex items-center gap-1.5">
-            <span className="font-bold text-sky-900">⚡ Zoom Real-Time Workflow:</span>
-            <span>
-              Click <strong>"⚡ Generate Zoom Meeting"</strong> for an instant authentic Meeting ID & Passcode, or click <strong>"1-Click Launch Zoom"</strong> to use your personal room. Click <strong>"Save as Permanent"</strong> to lock it for all candidates.
-            </span>
+      {emailType === 'status' && (
+        <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-200 space-y-2">
+          <label className="text-[11px] font-bold text-slate-700 block">
+            Target Pipeline Stage:
+          </label>
+          <select
+            value={emailStatusTarget}
+            onChange={(e) => setEmailStatusTarget(e.target.value)}
+            className="w-full text-xs p-2 rounded-lg bg-white border border-slate-200 font-bold text-slate-800"
+          >
+            <option value="shortlisted">Shortlisted (Congratulations & Next Steps)</option>
+            <option value="screening">Screening Stage</option>
+            <option value="interview_r1">Interview Round 1</option>
+            <option value="interview_r2">Interview Round 2</option>
+            <option value="offered">Formal Offer Extended</option>
+            <option value="joined">Welcome to UrbanGaon</option>
+          </select>
+        </div>
+      )}
+
+      {emailType === 'rejection' && (
+        <div className="p-3.5 rounded-xl bg-rose-50/60 border border-rose-100 space-y-1.5 text-xs text-rose-900">
+          <p className="font-bold">Polite Rejection & Priority Talent Pool Retention</p>
+          <p className="text-[11px] text-rose-700 leading-relaxed">
+            Sends a respectful, encouraging email acknowledging their time, providing constructive closure, and retaining their resume in the active candidate pool.
           </p>
         </div>
+      )}
 
+      {/* Optional Recruiter Notes */}
+      <div>
+        <label className="text-[11px] font-semibold text-slate-600 block mb-1">
+          Custom Recruiter Notes / Instructions (Optional):
+        </label>
+        <textarea
+          rows={2}
+          value={emailNotes}
+          onChange={(e) => setEmailNotes(e.target.value)}
+          placeholder="e.g. Please bring an identity card or prepare a 5-minute project overview..."
+          className="w-full text-xs p-2.5 rounded-xl bg-slate-50 border border-slate-200 text-slate-800 outline-none focus:border-blue-500"
+        />
       </div>
 
-      {/* Two Column Layout: Email Dispatcher & WhatsApp Direct Outreach */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      {/* Send Email Action Button */}
+      <button
+        type="button"
+        onClick={handleSendEmail}
+        disabled={isSendingEmail || !candidate.email}
+        className="w-full py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 disabled:bg-slate-300 text-white text-xs font-bold transition flex items-center justify-center gap-2 shadow-xs cursor-pointer active:scale-98"
+      >
+        <Send size={13} className={isSendingEmail ? 'animate-spin' : ''} />
+        <span>
+          {isSendingEmail
+            ? 'Dispatching Email with Real-Time Meet Link...'
+            : `Send ${emailType === 'interview' ? 'Interview Invite (.ics + Meet)' : emailType === 'status' ? 'Status Update' : 'Rejection & Talent Pool'} Email`}
+        </span>
+      </button>
 
-        {/* CHANNEL 1: TRANSACTIONAL EMAIL PIPELINE */}
-        <div className="p-5 rounded-2xl bg-white border border-slate-200 shadow-2xs space-y-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-xl bg-blue-100 text-blue-600 flex items-center justify-center">
-                <Mail size={16} />
-              </div>
-              <div>
-                <h4 className="text-xs font-bold text-slate-900 uppercase tracking-wider">
-                  1. Transactional Email Pipeline
-                </h4>
-                <p className="text-[11px] text-slate-500">
-                  Branded UrbanGaon HTML email with Zoom Meeting & .ics calendar file
-                </p>
-              </div>
-            </div>
-            <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-blue-50 text-blue-700 border border-blue-200">
-              Zero-AWS / Active
-            </span>
+      {/* Delivery Result Confirmation */}
+      {emailSentResult && (
+        <div className="p-3 rounded-xl bg-emerald-50 border border-emerald-200 text-xs text-emerald-900 space-y-1 animate-fade-in">
+          <div className="flex items-center gap-1.5 font-bold">
+            <CheckCircle2 size={14} className="text-emerald-600" />
+            <span>Email Successfully Delivered</span>
           </div>
-
-          {/* Email Type Selection */}
-          <div className="grid grid-cols-3 gap-2 p-1 bg-slate-100 rounded-xl text-xs font-bold">
-            <button
-              type="button"
-              onClick={() => setEmailType('interview')}
-              className={`py-1.5 px-2 rounded-lg transition text-center cursor-pointer ${
-                emailType === 'interview' ? 'bg-white text-blue-700 shadow-2xs' : 'text-slate-600 hover:text-slate-900'
-              }`}
-            >
-              Interview Invite
-            </button>
-            <button
-              type="button"
-              onClick={() => setEmailType('status')}
-              className={`py-1.5 px-2 rounded-lg transition text-center cursor-pointer ${
-                emailType === 'status' ? 'bg-white text-blue-700 shadow-2xs' : 'text-slate-600 hover:text-slate-900'
-              }`}
-            >
-              Status Update
-            </button>
-            <button
-              type="button"
-              onClick={() => setEmailType('rejection')}
-              className={`py-1.5 px-2 rounded-lg transition text-center cursor-pointer ${
-                emailType === 'rejection' ? 'bg-white text-rose-700 shadow-2xs' : 'text-slate-600 hover:text-slate-900'
-              }`}
-            >
-              Rejection / Pool
-            </button>
-          </div>
-
-          {/* Dynamic Configuration Summary based on Email Type */}
-          {emailType === 'interview' && (
-            <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-200 text-xs space-y-2">
-              <div className="flex justify-between items-center text-[11px]">
-                <span className="text-slate-500 font-medium">Position & Round:</span>
-                <span className="font-bold text-slate-800">{interviewRound}</span>
-              </div>
-              <div className="flex justify-between items-center text-[11px]">
-                <span className="text-slate-500 font-medium">Scheduled Timing:</span>
-                <span className="font-bold text-slate-800">📅 {interviewDate} • ⏰ {interviewTime} - {interviewEndTime}</span>
-              </div>
-              <div className="flex justify-between items-center text-[11px]">
-                <span className="text-slate-500 font-medium">Zoom Meeting Link:</span>
-                <a
-                  href={interviewMeetingLink}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="font-mono font-bold text-sky-600 hover:underline flex items-center gap-1"
-                >
-                  <span>{interviewMeetingLink.slice(0, 32)}...</span>
-                  <ExternalLink size={10} />
-                </a>
-              </div>
-              <div className="flex justify-between items-center text-[11px]">
-                <span className="text-slate-500 font-medium">Calendar Attachment:</span>
-                <span className="font-bold text-emerald-700">✓ .ics File + 1-Click Google Calendar</span>
-              </div>
-            </div>
-          )}
-
-          {emailType === 'status' && (
-            <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-200 space-y-2">
-              <label className="text-[11px] font-bold text-slate-700 block">
-                Target Pipeline Stage:
-              </label>
-              <select
-                value={emailStatusTarget}
-                onChange={(e) => setEmailStatusTarget(e.target.value)}
-                className="w-full text-xs p-2 rounded-lg bg-white border border-slate-200 font-bold text-slate-800"
-              >
-                <option value="shortlisted">Shortlisted (Congratulations & Next Steps)</option>
-                <option value="screening">Screening Stage</option>
-                <option value="interview_r1">Interview Round 1</option>
-                <option value="interview_r2">Interview Round 2</option>
-                <option value="offered">Formal Offer Extended</option>
-                <option value="joined">Welcome to UrbanGaon</option>
-              </select>
-            </div>
-          )}
-
-          {emailType === 'rejection' && (
-            <div className="p-3.5 rounded-xl bg-rose-50/60 border border-rose-100 space-y-1.5 text-xs text-rose-900">
-              <p className="font-bold">Polite Rejection & Priority Talent Pool Retention</p>
-              <p className="text-[11px] text-rose-700 leading-relaxed">
-                Sends a respectful, encouraging email acknowledging their time, providing constructive closure, and retaining their resume in the active candidate pool.
-              </p>
-            </div>
-          )}
-
-          {/* Optional Recruiter Notes */}
-          <div>
-            <label className="text-[11px] font-semibold text-slate-600 block mb-1">
-              Custom Recruiter Notes / Instructions (Optional):
-            </label>
-            <textarea
-              rows={2}
-              value={emailNotes}
-              onChange={(e) => setEmailNotes(e.target.value)}
-              placeholder="e.g. Please bring an identity card or prepare a 5-minute project overview..."
-              className="w-full text-xs p-2.5 rounded-xl bg-slate-50 border border-slate-200 text-slate-800 outline-none focus:border-blue-500"
-            />
-          </div>
-
-          {/* Send Email Action Button */}
-          <button
-            type="button"
-            onClick={handleSendEmail}
-            disabled={isSendingEmail || !candidate.email}
-            className="w-full py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 disabled:bg-slate-300 text-white text-xs font-bold transition flex items-center justify-center gap-2 shadow-xs cursor-pointer active:scale-98"
-          >
-            <Send size={13} className={isSendingEmail ? 'animate-spin' : ''} />
-            <span>
-              {isSendingEmail
-                ? 'Dispatching Email with Real-Time Meet Link...'
-                : `Send ${emailType === 'interview' ? 'Interview Invite (.ics + Meet)' : emailType === 'status' ? 'Status Update' : 'Rejection & Talent Pool'} Email`}
-            </span>
-          </button>
-
-          {/* Delivery Result Confirmation */}
-          {emailSentResult && (
-            <div className="p-3 rounded-xl bg-emerald-50 border border-emerald-200 text-xs text-emerald-900 space-y-1 animate-fade-in">
-              <div className="flex items-center gap-1.5 font-bold">
-                <CheckCircle2 size={14} className="text-emerald-600" />
-                <span>Email Successfully Delivered</span>
-              </div>
-              <p className="text-[11px] text-emerald-700">{emailSentResult.message}</p>
-              {emailSentResult.previewUrl && (
-                <a
-                  href={emailSentResult.previewUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-[11px] text-blue-700 underline font-bold inline-flex items-center gap-1 mt-1"
-                >
-                  <span>View Delivered HTML Email Preview</span>
-                  <ExternalLink size={11} />
-                </a>
-              )}
-            </div>
-          )}
-        </div>
-
-        {/* CHANNEL 2: WHATSAPP STATUS ALERTS & DIRECT OUTREACH */}
-        <div className="p-5 rounded-2xl bg-white border border-slate-200 shadow-2xs space-y-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-xl bg-emerald-100 text-emerald-600 flex items-center justify-center">
-                <MessageSquare size={16} />
-              </div>
-              <div>
-                <h4 className="text-xs font-bold text-slate-900 uppercase tracking-wider">
-                  2. WhatsApp Status Alerts
-                </h4>
-                <p className="text-[11px] text-slate-500">
-                  Instant real-time click-to-chat & direct outreach
-                </p>
-              </div>
-            </div>
-            <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
-              100% Free / Instant
-            </span>
-          </div>
-
-          {/* WhatsApp Template Switcher */}
-          <div className="grid grid-cols-3 gap-2 p-1 bg-slate-100 rounded-xl text-xs font-bold">
-            <button
-              type="button"
-              onClick={() => setWhatsappTemplate('interview')}
-              className={`py-1.5 px-2 rounded-lg transition text-center cursor-pointer ${
-                whatsappTemplate === 'interview' ? 'bg-white text-emerald-800 shadow-2xs' : 'text-slate-600 hover:text-slate-900'
-              }`}
-            >
-              Interview Alert
-            </button>
-            <button
-              type="button"
-              onClick={() => setWhatsappTemplate('status')}
-              className={`py-1.5 px-2 rounded-lg transition text-center cursor-pointer ${
-                whatsappTemplate === 'status' ? 'bg-white text-emerald-800 shadow-2xs' : 'text-slate-600 hover:text-slate-900'
-              }`}
-            >
-              Status Alert
-            </button>
-            <button
-              type="button"
-              onClick={() => setWhatsappTemplate('rejection')}
-              className={`py-1.5 px-2 rounded-lg transition text-center cursor-pointer ${
-                whatsappTemplate === 'rejection' ? 'bg-white text-rose-700 shadow-2xs' : 'text-slate-600 hover:text-slate-900'
-              }`}
-            >
-              Talent Pool
-            </button>
-          </div>
-
-          {/* Live Message Preview Box */}
-          <div className="p-3.5 rounded-xl bg-emerald-50/60 border border-emerald-200/80 text-[11px] space-y-2">
-            <div className="flex items-center justify-between text-emerald-950 font-bold">
-              <span className="flex items-center gap-1.5">
-                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-                Live Real-Time Message Preview:
-              </span>
-              <button
-                type="button"
-                onClick={() => handleCopy(liveWhatsAppText, 'wa_text', 'WhatsApp message text')}
-                className="text-emerald-700 hover:text-emerald-900 font-bold flex items-center gap-1 cursor-pointer bg-white px-2 py-0.5 rounded-md border border-emerald-200 shadow-2xs"
-              >
-                {copiedKey === 'wa_text' ? <Check size={11} className="text-emerald-600" /> : <Copy size={11} />}
-                <span>Copy Full Message</span>
-              </button>
-            </div>
-            
-            <div className="p-3 rounded-xl bg-white border border-emerald-200 font-mono text-[11px] text-slate-800 whitespace-pre-line max-h-48 overflow-y-auto leading-relaxed shadow-inner">
-              {liveWhatsAppText}
-            </div>
-          </div>
-
-          {/* WhatsApp Direct Action Buttons */}
-          <div className="flex flex-col sm:flex-row items-center gap-2.5">
-            <button
-              type="button"
-              onClick={() => handleLaunchWhatsApp('web')}
-              disabled={!candidate.phone}
-              className="flex-1 w-full py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 disabled:bg-slate-300 text-white text-xs font-bold transition flex items-center justify-center gap-2 shadow-xs cursor-pointer active:scale-98"
-              title="Directly opens WhatsApp Web with the conversation pre-filled"
-            >
-              <MessageSquare size={14} />
-              <span>Launch WhatsApp Web</span>
-            </button>
-
-            <button
-              type="button"
-              onClick={() => handleLaunchWhatsApp('app')}
-              disabled={!candidate.phone}
-              className="w-full sm:w-auto px-4 py-2.5 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200 text-xs font-bold transition cursor-pointer"
-              title="Open native WhatsApp App on mobile or desktop"
-            >
-              <span>Open in App</span>
-            </button>
-          </div>
-
-          {/* Direct Quick Link Copy Bar */}
-          <div className="p-3 rounded-xl bg-slate-50 border border-slate-200 text-[11px] space-y-1.5">
-            <div className="flex items-center justify-between text-slate-700 font-bold">
-              <span>Direct WhatsApp Click-to-Chat Link:</span>
-              <button
-                type="button"
-                onClick={() => handleCopy(waWebLink, 'deep_link', 'Direct WhatsApp link')}
-                className="text-blue-600 hover:underline flex items-center gap-1 cursor-pointer"
-              >
-                {copiedKey === 'deep_link' ? <Check size={11} /> : <Copy size={11} />}
-                <span>Copy Link</span>
-              </button>
-            </div>
+          <p className="text-[11px] text-emerald-700">{emailSentResult.message}</p>
+          {emailSentResult.previewUrl && (
             <a
-              href={waWebLink}
+              href={emailSentResult.previewUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-emerald-700 font-mono font-semibold block truncate hover:underline text-[10px]"
+              className="text-[11px] text-blue-700 underline font-bold inline-flex items-center gap-1 mt-1"
             >
-              {waWebLink}
+              <span>View Delivered HTML Email Preview</span>
+              <ExternalLink size={11} />
             </a>
-          </div>
-
+          )}
         </div>
+      )}
+    </div>
 
+    {/* CHANNEL 2: WHATSAPP STATUS ALERTS & DIRECT OUTREACH */}
+    <div className="p-5 rounded-2xl bg-white border border-slate-200 shadow-2xs space-y-4">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <div className="w-8 h-8 rounded-xl bg-emerald-100 text-emerald-600 flex items-center justify-center">
+            <MessageSquare size={16} />
+          </div>
+          <div>
+            <h4 className="text-xs font-bold text-slate-900 uppercase tracking-wider">
+              2. WhatsApp Status Alerts
+            </h4>
+            <p className="text-[11px] text-slate-500">
+              Instant real-time click-to-chat & direct outreach
+            </p>
+          </div>
+        </div>
+        <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
+          100% Free / Instant
+        </span>
       </div>
 
-      {/* CHANNEL 3: COMMUNICATIONS AUDIT LOG */}
-      <div className="p-5 rounded-2xl bg-white border border-slate-200 shadow-2xs space-y-3">
-        <h4 className="text-xs font-bold text-slate-900 uppercase tracking-wider flex items-center gap-2">
-          <Clock size={14} className="text-blue-600" />
-          Communications Delivery History ({commHistory.length})
-        </h4>
+      {/* WhatsApp Template Switcher */}
+      <div className="grid grid-cols-3 gap-2 p-1 bg-slate-100 rounded-xl text-xs font-bold">
+        <button
+          type="button"
+          onClick={() => setWhatsappTemplate('interview')}
+          className={`py-1.5 px-2 rounded-lg transition text-center cursor-pointer ${whatsappTemplate === 'interview' ? 'bg-white text-emerald-800 shadow-2xs' : 'text-slate-600 hover:text-slate-900'
+            }`}
+        >
+          Interview Alert
+        </button>
+        <button
+          type="button"
+          onClick={() => setWhatsappTemplate('status')}
+          className={`py-1.5 px-2 rounded-lg transition text-center cursor-pointer ${whatsappTemplate === 'status' ? 'bg-white text-emerald-800 shadow-2xs' : 'text-slate-600 hover:text-slate-900'
+            }`}
+        >
+          Status Alert
+        </button>
+        <button
+          type="button"
+          onClick={() => setWhatsappTemplate('rejection')}
+          className={`py-1.5 px-2 rounded-lg transition text-center cursor-pointer ${whatsappTemplate === 'rejection' ? 'bg-white text-rose-700 shadow-2xs' : 'text-slate-600 hover:text-slate-900'
+            }`}
+        >
+          Talent Pool
+        </button>
+      </div>
 
-        {commHistory.length > 0 ? (
-          <div className="space-y-2">
-            {commHistory.map((act) => (
-              <div
-                key={act.id}
-                className="p-3 rounded-xl bg-slate-50 border border-slate-200 text-xs flex items-start justify-between gap-3"
-              >
-                <div className="space-y-0.5">
-                  <div className="flex items-center gap-2">
-                    <span className="font-bold text-slate-900">{act.action}</span>
-                    <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-blue-100 text-blue-800">
-                      Delivered
-                    </span>
-                  </div>
-                  <p className="text-slate-600 text-[11px]">{act.details}</p>
-                  <span className="text-[10px] text-slate-400 block font-medium">
-                    Triggered by: {act.performedBy}
-                  </span>
-                </div>
-                <span className="text-[11px] text-slate-400 shrink-0 font-medium">
-                  {new Date(act.timestamp).toLocaleDateString('en-IN', {
-                    day: 'numeric',
-                    month: 'short',
-                    hour: '2-digit',
-                    minute: '2-digit'
-                  })}
-                </span>
-              </div>
-            ))}
-          </div>
-        ) : (
-          <div className="p-6 text-center text-xs text-slate-400 bg-slate-50/50 rounded-xl border border-dashed border-slate-200">
-            No emails or WhatsApp alerts dispatched yet for this applicant. Use the controls above to trigger candidate communications.
-          </div>
-        )}
+      {/* Live Message Preview Box */}
+      <div className="p-3.5 rounded-xl bg-emerald-50/60 border border-emerald-200/80 text-[11px] space-y-2">
+        <div className="flex items-center justify-between text-emerald-950 font-bold">
+          <span className="flex items-center gap-1.5">
+            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+            Live Real-Time Message Preview:
+          </span>
+          <button
+            type="button"
+            onClick={() => handleCopy(liveWhatsAppText, 'wa_text', 'WhatsApp message text')}
+            className="text-emerald-700 hover:text-emerald-900 font-bold flex items-center gap-1 cursor-pointer bg-white px-2 py-0.5 rounded-md border border-emerald-200 shadow-2xs"
+          >
+            {copiedKey === 'wa_text' ? <Check size={11} className="text-emerald-600" /> : <Copy size={11} />}
+            <span>Copy Full Message</span>
+          </button>
+        </div>
+
+        <div className="p-3 rounded-xl bg-white border border-emerald-200 font-mono text-[11px] text-slate-800 whitespace-pre-line max-h-48 overflow-y-auto leading-relaxed shadow-inner">
+          {liveWhatsAppText}
+        </div>
+      </div>
+
+      {/* WhatsApp Direct Action Buttons */}
+      <div className="flex flex-col sm:flex-row items-center gap-2.5">
+        <button
+          type="button"
+          onClick={() => handleLaunchWhatsApp('web')}
+          disabled={!candidate.phone}
+          className="flex-1 w-full py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 disabled:bg-slate-300 text-white text-xs font-bold transition flex items-center justify-center gap-2 shadow-xs cursor-pointer active:scale-98"
+          title="Directly opens WhatsApp Web with the conversation pre-filled"
+        >
+          <MessageSquare size={14} />
+          <span>Launch WhatsApp Web</span>
+        </button>
+
+        <button
+          type="button"
+          onClick={() => handleLaunchWhatsApp('app')}
+          disabled={!candidate.phone}
+          className="w-full sm:w-auto px-4 py-2.5 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200 text-xs font-bold transition cursor-pointer"
+          title="Open native WhatsApp App on mobile or desktop"
+        >
+          <span>Open in App</span>
+        </button>
+      </div>
+
+      {/* Direct Quick Link Copy Bar */}
+      <div className="p-3 rounded-xl bg-slate-50 border border-slate-200 text-[11px] space-y-1.5">
+        <div className="flex items-center justify-between text-slate-700 font-bold">
+          <span>Direct WhatsApp Click-to-Chat Link:</span>
+          <button
+            type="button"
+            onClick={() => handleCopy(waWebLink, 'deep_link', 'Direct WhatsApp link')}
+            className="text-blue-600 hover:underline flex items-center gap-1 cursor-pointer"
+          >
+            {copiedKey === 'deep_link' ? <Check size={11} /> : <Copy size={11} />}
+            <span>Copy Link</span>
+          </button>
+        </div>
+        <a
+          href={waWebLink}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-emerald-700 font-mono font-semibold block truncate hover:underline text-[10px]"
+        >
+          {waWebLink}
+        </a>
       </div>
 
     </div>
+
+  </div>
+
+  {/* CHANNEL 3: COMMUNICATIONS AUDIT LOG */ }
+  <div className="p-5 rounded-2xl bg-white border border-slate-200 shadow-2xs space-y-3">
+    <h4 className="text-xs font-bold text-slate-900 uppercase tracking-wider flex items-center gap-2">
+      <Clock size={14} className="text-blue-600" />
+      Communications Delivery History ({commHistory.length})
+    </h4>
+
+    {commHistory.length > 0 ? (
+      <div className="space-y-2">
+        {commHistory.map((act) => (
+          <div
+            key={act.id}
+            className="p-3 rounded-xl bg-slate-50 border border-slate-200 text-xs flex items-start justify-between gap-3"
+          >
+            <div className="space-y-0.5">
+              <div className="flex items-center gap-2">
+                <span className="font-bold text-slate-900">{act.action}</span>
+                <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-blue-100 text-blue-800">
+                  Delivered
+                </span>
+              </div>
+              <p className="text-slate-600 text-[11px]">{act.details}</p>
+              <span className="text-[10px] text-slate-400 block font-medium">
+                Triggered by: {act.performedBy}
+              </span>
+            </div>
+            <span className="text-[11px] text-slate-400 shrink-0 font-medium">
+              {new Date(act.timestamp).toLocaleDateString('en-IN', {
+                day: 'numeric',
+                month: 'short',
+                hour: '2-digit',
+                minute: '2-digit'
+              })}
+            </span>
+          </div>
+        ))}
+      </div>
+    ) : (
+      <div className="p-6 text-center text-xs text-slate-400 bg-slate-50/50 rounded-xl border border-dashed border-slate-200">
+        No emails or WhatsApp alerts dispatched yet for this applicant. Use the controls above to trigger candidate communications.
+      </div>
+    )}
+  </div>
+
+    </div >
   );
 };

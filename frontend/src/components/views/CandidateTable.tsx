@@ -1,15 +1,15 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { 
-  Search, 
-  Download, 
-  Eye, 
-  User, 
-  Phone, 
-  PhoneCall, 
-  Mail, 
-  MapPin, 
-  RotateCcw, 
-  ArrowRight, 
+import {
+  Search,
+  Download,
+  Eye,
+  User,
+  Phone,
+  PhoneCall,
+  Mail,
+  MapPin,
+  RotateCcw,
+  ArrowRight,
   Filter,
   Trash2,
   ChevronLeft,
@@ -17,7 +17,7 @@ import {
   Edit2,
   Check,
   X,
-  Loader2 
+  Loader2
 } from 'lucide-react';
 import { useRecruitment } from '../../context/RecruitmentContext';
 import { useAuth } from '../../context/AuthContext';
@@ -26,18 +26,18 @@ import { PortalLogo, Pagination } from '../common';
 
 export const CandidateTable: React.FC = () => {
   const { can } = useAuth();
-  const { 
-    candidates, 
-    jobs, 
-    filters, 
-    setFilters, 
-    updateCandidateStatus, 
-    setSelectedCandidate, 
+  const {
+    candidates,
+    jobs,
+    filters,
+    setFilters,
+    updateCandidateStatus,
+    setSelectedCandidate,
     openCandidateModal,
-    setPreviewResumeCandidate, 
+    setPreviewResumeCandidate,
     setActiveDialerCandidate,
     shiftCandidateToCalling,
-    downloadResume, 
+    downloadResume,
     deleteCandidate,
     updateCandidateDetails,
     exportToCSV,
@@ -70,12 +70,12 @@ export const CandidateTable: React.FC = () => {
     try {
       const matched = jobs.find((j) => j.title.toLowerCase() === trimmed.toLowerCase());
       await updateCandidateDetails(
-        candId, 
+        candId,
         {
           jobAppliedFor: trimmed,
           jobId: matched?.id || 'custom',
           department: matched?.department || 'General / Custom'
-        }, 
+        },
         `Role updated to "${trimmed || 'Custom Role'}" directly from candidate table`
       );
       setEditingRoleId(null);
@@ -192,9 +192,9 @@ export const CandidateTable: React.FC = () => {
   ];
 
   // Effective source: if activeView is 'referral', always filter by referral
-  const activeSource: CandidateSource | 'all' = 
-    activeView === 'referral' 
-      ? 'referral' 
+  const activeSource: CandidateSource | 'all' =
+    activeView === 'referral'
+      ? 'referral'
       : (filters.source !== 'all' ? filters.source : 'all');
 
   // Auto-reset page when filters change
@@ -269,7 +269,7 @@ export const CandidateTable: React.FC = () => {
 
   return (
     <div className="space-y-6 animate-fade-in pb-12 font-sans">
-      
+
       {/* Portal Header Title if specific portal is selected */}
       {activeSource !== 'all' && (
         <div className="bg-white border border-slate-200/90 p-4 rounded-2xl shadow-2xs space-y-3">
@@ -298,7 +298,7 @@ export const CandidateTable: React.FC = () => {
 
       {/* 4 Simple Top HR Metric Cards in Light Mode */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 sm:gap-3">
-        <div 
+        <div
           onClick={() => setFilters((prev) => ({ ...prev, status: 'all' }))}
           className="p-3 sm:p-4 rounded-xl bg-white border border-slate-200 hover:border-blue-500 cursor-pointer transition shadow-2xs"
         >
@@ -309,7 +309,7 @@ export const CandidateTable: React.FC = () => {
           </span>
         </div>
 
-        <div 
+        <div
           onClick={() => setFilters((prev) => ({ ...prev, status: 'screening' }))}
           className="p-3 sm:p-4 rounded-xl bg-white border border-slate-200 hover:border-blue-500 cursor-pointer transition shadow-2xs"
         >
@@ -318,7 +318,7 @@ export const CandidateTable: React.FC = () => {
           <span className="text-[10px] sm:text-[11px] text-slate-400 font-medium mt-0.5 block truncate">Screening / Shortlisted</span>
         </div>
 
-        <div 
+        <div
           onClick={() => setFilters((prev) => ({ ...prev, status: 'interview_r1' }))}
           className="p-3 sm:p-4 rounded-xl bg-white border border-slate-200 hover:border-purple-500 cursor-pointer transition shadow-2xs"
         >
@@ -327,7 +327,7 @@ export const CandidateTable: React.FC = () => {
           <span className="text-[10px] sm:text-[11px] text-slate-400 font-medium mt-0.5 block truncate">Round 1 & Round 2</span>
         </div>
 
-        <div 
+        <div
           onClick={() => setFilters((prev) => ({ ...prev, status: 'joined' }))}
           className="p-3 sm:p-4 rounded-xl bg-white border border-slate-200 hover:border-emerald-500 cursor-pointer transition shadow-2xs"
         >
@@ -454,7 +454,7 @@ export const CandidateTable: React.FC = () => {
 
       {/* Main Candidate Table in Light Mode */}
       <div className="rounded-2xl bg-white border border-slate-200 overflow-hidden shadow-2xs relative group">
-        
+
         {/* Left Hover Scroll Guide Badge */}
         {canScrollLeft && (
           <div
@@ -485,7 +485,7 @@ export const CandidateTable: React.FC = () => {
           </div>
         )}
 
-        <div 
+        <div
           ref={tableScrollRef}
           onMouseMove={handleTableMouseMove}
           onMouseLeave={stopAutoScroll}
@@ -494,7 +494,7 @@ export const CandidateTable: React.FC = () => {
           <table className="w-full text-left border-collapse min-w-[1100px]">
             <thead>
               <tr className="bg-slate-50 border-b border-slate-200 text-[11px] font-semibold text-slate-500 uppercase tracking-wider select-none">
-                <th 
+                <th
                   onMouseEnter={() => startAutoScroll('left', 10)}
                   className="py-3 px-5 min-w-[280px]"
                 >
@@ -504,7 +504,7 @@ export const CandidateTable: React.FC = () => {
                 <th className="py-3 px-4 min-w-[160px]">Sourcing Channel</th>
                 <th className="py-3 px-4 min-w-[160px]">Assigned HR</th>
                 <th className="py-3 px-4 whitespace-nowrap min-w-[140px]">Hiring Stage</th>
-                <th 
+                <th
                   onMouseEnter={() => startAutoScroll('right', 10)}
                   className="py-3 px-4 text-left whitespace-nowrap min-w-[220px]"
                 >
@@ -533,8 +533,8 @@ export const CandidateTable: React.FC = () => {
                   const currentStatus = statusOptions.find((s) => s.value === cand.status) || statusOptions[0];
 
                   return (
-                    <tr 
-                      key={cand.id} 
+                    <tr
+                      key={cand.id}
                       className="hover:bg-blue-50/30 transition-colors group"
                     >
                       {/* Candidate Name & Contact */}
@@ -658,7 +658,7 @@ export const CandidateTable: React.FC = () => {
                           </span>
                         </div>
                       </td>
-
+//
                       {/* Stage Selector Dropdown */}
                       <td className="py-3.5 px-4">
                         <select
@@ -680,11 +680,10 @@ export const CandidateTable: React.FC = () => {
                           <button
                             onClick={() => shiftCandidateToCalling(cand)}
                             title={`Select & Shift ${cand.name} to Calling Desk`}
-                            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition shadow-xs cursor-pointer active:scale-95 ${
-                              cand.isCallingQueued
+                            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition shadow-xs cursor-pointer active:scale-95 ${cand.isCallingQueued
                                 ? 'bg-emerald-100 text-emerald-800 border border-emerald-300 hover:bg-emerald-200'
                                 : 'bg-emerald-600 hover:bg-emerald-700 text-white shadow-emerald-600/20'
-                            }`}
+                              }`}
                           >
                             <PhoneCall size={12} />
                             <span>{cand.isCallingQueued ? 'Shifted to Calling' : 'Select for Calling'}</span>

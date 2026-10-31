@@ -60,10 +60,10 @@ export const InterviewScheduler: React.FC = () => {
   const [viewMode, setViewMode] = useState<'month' | 'week' | 'day' | 'list'>('month');
   const [currentDate, setCurrentDate] = useState<Date>(new Date(2026, 7, 29)); // Default to Aug 29, 2026 matching app context
   const [selectedDate, setSelectedDate] = useState<string>('2026-08-29');
-  
+
   // Real-time ticking clock
   const [currentTime, setCurrentTime] = useState<string>(new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit' }));
-  
+
   useEffect(() => {
     const timer = setInterval(() => {
       setCurrentTime(new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit' }));
@@ -576,7 +576,7 @@ export const InterviewScheduler: React.FC = () => {
 
   return (
     <div className="space-y-6 animate-fade-in font-sans">
-      
+
       {/* Top Banner & Live Status Header */}
       <div className="bg-gradient-to-r from-slate-900 via-blue-950 to-slate-900 text-white rounded-3xl p-6 sm:p-7 shadow-xl border border-slate-800 relative overflow-hidden">
         {/* Ambient glow backgrounds */}
@@ -713,41 +713,37 @@ export const InterviewScheduler: React.FC = () => {
 
       {/* Main Controls & Filters Bar */}
       <div className="bg-white p-4 rounded-2xl border border-slate-200/80 shadow-xs flex flex-col lg:flex-row lg:items-center justify-between gap-4">
-        
+
         {/* Left: View Switcher & Month Navigation */}
         <div className="flex flex-wrap items-center gap-2 sm:gap-3">
-          
+
           {/* View Mode Buttons */}
           <div className="flex items-center bg-slate-100 p-1 rounded-xl border border-slate-200 text-xs font-medium overflow-x-auto no-scrollbar whitespace-nowrap max-w-full">
             <button
               onClick={() => setViewMode('month')}
-              className={`px-2.5 sm:px-3 py-1.5 rounded-lg transition ${
-                viewMode === 'month' ? 'bg-white text-blue-700 font-bold shadow-xs' : 'text-slate-600 hover:text-slate-900'
-              }`}
+              className={`px-2.5 sm:px-3 py-1.5 rounded-lg transition ${viewMode === 'month' ? 'bg-white text-blue-700 font-bold shadow-xs' : 'text-slate-600 hover:text-slate-900'
+                }`}
             >
               Month View
             </button>
             <button
               onClick={() => setViewMode('week')}
-              className={`px-2.5 sm:px-3 py-1.5 rounded-lg transition ${
-                viewMode === 'week' ? 'bg-white text-blue-700 font-bold shadow-xs' : 'text-slate-600 hover:text-slate-900'
-              }`}
+              className={`px-2.5 sm:px-3 py-1.5 rounded-lg transition ${viewMode === 'week' ? 'bg-white text-blue-700 font-bold shadow-xs' : 'text-slate-600 hover:text-slate-900'
+                }`}
             >
               Week View
             </button>
             <button
               onClick={() => setViewMode('day')}
-              className={`px-2.5 sm:px-3 py-1.5 rounded-lg transition ${
-                viewMode === 'day' ? 'bg-white text-blue-700 font-bold shadow-xs' : 'text-slate-600 hover:text-slate-900'
-              }`}
+              className={`px-2.5 sm:px-3 py-1.5 rounded-lg transition ${viewMode === 'day' ? 'bg-white text-blue-700 font-bold shadow-xs' : 'text-slate-600 hover:text-slate-900'
+                }`}
             >
               Day Agenda
             </button>
             <button
               onClick={() => setViewMode('list')}
-              className={`px-2.5 sm:px-3 py-1.5 rounded-lg transition ${
-                viewMode === 'list' ? 'bg-white text-blue-700 font-bold shadow-xs' : 'text-slate-600 hover:text-slate-900'
-              }`}
+              className={`px-2.5 sm:px-3 py-1.5 rounded-lg transition ${viewMode === 'list' ? 'bg-white text-blue-700 font-bold shadow-xs' : 'text-slate-600 hover:text-slate-900'
+                }`}
             >
               List View
             </button>
@@ -783,7 +779,7 @@ export const InterviewScheduler: React.FC = () => {
 
         {/* Right: Search, Filters & Action Button */}
         <div className="flex flex-wrap items-center gap-2 sm:gap-2.5 w-full lg:w-auto">
-          
+
           {/* Quick Search */}
           <div className="relative flex-1 sm:flex-initial min-w-[150px] sm:min-w-[210px]">
             <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
@@ -857,105 +853,102 @@ export const InterviewScheduler: React.FC = () => {
 
             {/* Days Matrix */}
             <div className="grid grid-cols-7 auto-rows-fr divide-x divide-y divide-slate-100">
-            {calendarGridDays.map((cell, idx) => {
-              const cellInterviews = filteredInterviews.filter((i) => i.date === cell.dateStr);
-              const isSelected = selectedDate === cell.dateStr;
+              {calendarGridDays.map((cell, idx) => {
+                const cellInterviews = filteredInterviews.filter((i) => i.date === cell.dateStr);
+                const isSelected = selectedDate === cell.dateStr;
 
-              return (
-                <div
-                  key={`${cell.dateStr}-${idx}`}
-                  onClick={() => setSelectedDate(cell.dateStr)}
-                  className={`min-h-[120px] sm:min-h-[140px] p-2 transition-all flex flex-col justify-between group cursor-pointer ${
-                    !cell.isCurrentMonth
-                      ? 'bg-slate-50/40 text-slate-300'
-                      : isSelected
-                      ? 'bg-blue-50/40 ring-2 ring-blue-500/20 ring-inset'
-                      : 'bg-white hover:bg-slate-50/80'
-                  }`}
-                >
-                  {/* Top Day Number Row */}
-                  <div className="flex items-center justify-between mb-1.5">
-                    <span
-                      className={`text-xs font-extrabold w-6 h-6 rounded-full flex items-center justify-center ${
-                        cell.isToday
-                          ? 'bg-blue-600 text-white shadow-sm ring-2 ring-blue-300'
-                          : cell.isCurrentMonth
-                          ? 'text-slate-800'
-                          : 'text-slate-400'
+                return (
+                  <div
+                    key={`${cell.dateStr}-${idx}`}
+                    onClick={() => setSelectedDate(cell.dateStr)}
+                    className={`min-h-[120px] sm:min-h-[140px] p-2 transition-all flex flex-col justify-between group cursor-pointer ${!cell.isCurrentMonth
+                        ? 'bg-slate-50/40 text-slate-300'
+                        : isSelected
+                          ? 'bg-blue-50/40 ring-2 ring-blue-500/20 ring-inset'
+                          : 'bg-white hover:bg-slate-50/80'
                       }`}
-                    >
-                      {cell.dayNumber}
-                    </span>
-
-                    {cellInterviews.length > 0 && (
-                      <span className="text-[10px] font-bold text-blue-700 bg-blue-100/80 px-1.5 py-0.2 rounded-full">
-                        {cellInterviews.length} {cellInterviews.length === 1 ? 'call' : 'calls'}
-                      </span>
-                    )}
-                  </div>
-
-                  {/* Interview Event Chips */}
-                  <div className="space-y-1 overflow-y-auto max-h-[85px] sm:max-h-[95px] pr-0.5">
-                    {cellInterviews.slice(0, 3).map((item) => (
-                      <div
-                        key={item.id}
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setActiveInterviewForDetails(item);
-                        }}
-                        className={`px-2 py-1 rounded-lg text-[11px] font-semibold border transition shadow-2xs hover:scale-[1.02] flex items-center justify-between gap-1.5 ${
-                          item.status === 'in_progress'
-                            ? 'bg-amber-50 text-amber-800 border-amber-200'
-                            : item.status === 'completed'
-                            ? 'bg-slate-100 text-slate-600 border-slate-200'
-                            : item.status === 'cancelled'
-                            ? 'bg-rose-50 text-rose-700 border-rose-200 line-through opacity-70'
-                            : 'bg-blue-50 text-blue-800 border-blue-200'
-                        }`}
+                  >
+                    {/* Top Day Number Row */}
+                    <div className="flex items-center justify-between mb-1.5">
+                      <span
+                        className={`text-xs font-extrabold w-6 h-6 rounded-full flex items-center justify-center ${cell.isToday
+                            ? 'bg-blue-600 text-white shadow-sm ring-2 ring-blue-300'
+                            : cell.isCurrentMonth
+                              ? 'text-slate-800'
+                              : 'text-slate-400'
+                          }`}
                       >
-                        <div className="min-w-0 flex-1 truncate">
-                          <span className="font-bold">{item.startTime.split(' ')[0]}</span>{' '}
-                          <span className="truncate">{item.candidateName}</span>
-                        </div>
-                        <div className="shrink-0 flex items-center gap-1">
-                          {item.platform === 'google_meet' && <Video size={10} className="text-emerald-600" />}
-                          {item.platform === 'zoom' && <Video size={10} className="text-blue-600" />}
-                          {item.platform === 'onsite' && <MapPin size={10} className="text-rose-600" />}
-                        </div>
-                      </div>
-                    ))}
+                        {cell.dayNumber}
+                      </span>
 
-                    {cellInterviews.length > 3 && (
+                      {cellInterviews.length > 0 && (
+                        <span className="text-[10px] font-bold text-blue-700 bg-blue-100/80 px-1.5 py-0.2 rounded-full">
+                          {cellInterviews.length} {cellInterviews.length === 1 ? 'call' : 'calls'}
+                        </span>
+                      )}
+                    </div>
+
+                    {/* Interview Event Chips */}
+                    <div className="space-y-1 overflow-y-auto max-h-[85px] sm:max-h-[95px] pr-0.5">
+                      {cellInterviews.slice(0, 3).map((item) => (
+                        <div
+                          key={item.id}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setActiveInterviewForDetails(item);
+                          }}
+                          className={`px-2 py-1 rounded-lg text-[11px] font-semibold border transition shadow-2xs hover:scale-[1.02] flex items-center justify-between gap-1.5 ${item.status === 'in_progress'
+                              ? 'bg-amber-50 text-amber-800 border-amber-200'
+                              : item.status === 'completed'
+                                ? 'bg-slate-100 text-slate-600 border-slate-200'
+                                : item.status === 'cancelled'
+                                  ? 'bg-rose-50 text-rose-700 border-rose-200 line-through opacity-70'
+                                  : 'bg-blue-50 text-blue-800 border-blue-200'
+                            }`}
+                        >
+                          <div className="min-w-0 flex-1 truncate">
+                            <span className="font-bold">{item.startTime.split(' ')[0]}</span>{' '}
+                            <span className="truncate">{item.candidateName}</span>
+                          </div>
+                          <div className="shrink-0 flex items-center gap-1">
+                            {item.platform === 'google_meet' && <Video size={10} className="text-emerald-600" />}
+                            {item.platform === 'zoom' && <Video size={10} className="text-blue-600" />}
+                            {item.platform === 'onsite' && <MapPin size={10} className="text-rose-600" />}
+                          </div>
+                        </div>
+                      ))}
+
+                      {cellInterviews.length > 3 && (
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setSelectedDate(cell.dateStr);
+                            setViewMode('day');
+                          }}
+                          className="w-full text-center text-[10px] font-bold text-blue-600 hover:text-blue-800 py-0.5 bg-blue-50/60 rounded"
+                        >
+                          +{cellInterviews.length - 3} more interviews
+                        </button>
+                      )}
+                    </div>
+
+                    {/* Empty state hover indicator */}
+                    {cellInterviews.length === 0 && cell.isCurrentMonth && (
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
-                          setSelectedDate(cell.dateStr);
-                          setViewMode('day');
+                          setFormData((prev) => ({ ...prev, date: cell.dateStr }));
+                          if (candidates.length > 0) handleSelectCandidate(candidates[0].id);
+                          setIsScheduleModalOpen(true);
                         }}
-                        className="w-full text-center text-[10px] font-bold text-blue-600 hover:text-blue-800 py-0.5 bg-blue-50/60 rounded"
+                        className="opacity-0 group-hover:opacity-100 transition text-[10px] font-bold text-slate-400 hover:text-blue-600 flex items-center gap-1 justify-center py-1 mt-auto"
                       >
-                        +{cellInterviews.length - 3} more interviews
+                        <Plus size={11} /> Schedule
                       </button>
                     )}
                   </div>
-
-                  {/* Empty state hover indicator */}
-                  {cellInterviews.length === 0 && cell.isCurrentMonth && (
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setFormData((prev) => ({ ...prev, date: cell.dateStr }));
-                        if (candidates.length > 0) handleSelectCandidate(candidates[0].id);
-                        setIsScheduleModalOpen(true);
-                      }}
-                      className="opacity-0 group-hover:opacity-100 transition text-[10px] font-bold text-slate-400 hover:text-blue-600 flex items-center gap-1 justify-center py-1 mt-auto"
-                    >
-                      <Plus size={11} /> Schedule
-                    </button>
-                  )}
-                </div>
-              );
-            })}
+                );
+              })}
             </div>
           </div>
         </div>
@@ -965,93 +958,91 @@ export const InterviewScheduler: React.FC = () => {
       {viewMode === 'week' && (
         <div className="bg-white rounded-2xl border border-slate-200/80 shadow-xs overflow-x-auto touch-pan-x">
           <div className="min-w-[640px] sm:min-w-0">
-          {/* Week Columns Header */}
-          <div className="grid grid-cols-7 border-b border-slate-200 bg-slate-50/80">
-            {weekDays.map((w) => (
-              <div
-                key={w.dateStr}
-                onClick={() => setSelectedDate(w.dateStr)}
-                className={`py-3 px-2 text-center cursor-pointer transition border-r last:border-r-0 ${
-                  w.isSelected ? 'bg-blue-100/50' : 'hover:bg-slate-100/60'
-                }`}
-              >
-                <div className="text-[11px] font-bold text-slate-500 uppercase">{w.dayName}</div>
+            {/* Week Columns Header */}
+            <div className="grid grid-cols-7 border-b border-slate-200 bg-slate-50/80">
+              {weekDays.map((w) => (
                 <div
-                  className={`inline-flex items-center justify-center w-7 h-7 rounded-full text-sm font-extrabold mt-1 ${
-                    w.isToday ? 'bg-blue-600 text-white shadow-sm' : 'text-slate-800'
-                  }`}
+                  key={w.dateStr}
+                  onClick={() => setSelectedDate(w.dateStr)}
+                  className={`py-3 px-2 text-center cursor-pointer transition border-r last:border-r-0 ${w.isSelected ? 'bg-blue-100/50' : 'hover:bg-slate-100/60'
+                    }`}
                 >
-                  {w.dayNumber}
+                  <div className="text-[11px] font-bold text-slate-500 uppercase">{w.dayName}</div>
+                  <div
+                    className={`inline-flex items-center justify-center w-7 h-7 rounded-full text-sm font-extrabold mt-1 ${w.isToday ? 'bg-blue-600 text-white shadow-sm' : 'text-slate-800'
+                      }`}
+                  >
+                    {w.dayNumber}
+                  </div>
                 </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
 
-          {/* Hourly Timeline Container */}
-          <div className="grid grid-cols-7 divide-x divide-slate-100 min-h-[520px] p-2">
-            {weekDays.map((w) => {
-              const dayItems = filteredInterviews.filter((i) => i.date === w.dateStr);
+            {/* Hourly Timeline Container */}
+            <div className="grid grid-cols-7 divide-x divide-slate-100 min-h-[520px] p-2">
+              {weekDays.map((w) => {
+                const dayItems = filteredInterviews.filter((i) => i.date === w.dateStr);
 
-              return (
-                <div key={w.dateStr} className="p-1 space-y-2">
-                  {dayItems.length === 0 ? (
-                    <div className="h-full flex flex-col items-center justify-center p-3 text-center text-slate-300">
-                      <Clock size={20} className="mb-1 opacity-40" />
-                      <span className="text-[11px]">No interviews</span>
-                      <button
-                        onClick={() => {
-                          setFormData((prev) => ({ ...prev, date: w.dateStr }));
-                          if (candidates.length > 0) handleSelectCandidate(candidates[0].id);
-                          setIsScheduleModalOpen(true);
-                        }}
-                        className="mt-2 text-[10px] font-bold text-blue-600 hover:underline"
-                      >
-                        + Add Slot
-                      </button>
-                    </div>
-                  ) : (
-                    dayItems.map((item) => (
-                      <div
-                        key={item.id}
-                        onClick={() => setActiveInterviewForDetails(item)}
-                        className="bg-slate-50 hover:bg-blue-50 border border-slate-200 hover:border-blue-300 rounded-xl p-2.5 transition shadow-2xs cursor-pointer group"
-                      >
-                        <div className="flex items-center justify-between gap-1 mb-1">
-                          <span className="text-[10px] font-mono font-bold text-blue-700 bg-blue-100/70 px-1.5 py-0.2 rounded">
-                            {item.startTime}
-                          </span>
-                          {getStatusBadge(item.status)}
-                        </div>
-
-                        <h4 className="text-xs font-bold text-slate-900 truncate mt-1">{item.candidateName}</h4>
-                        <p className="text-[10px] text-slate-500 truncate">{item.jobTitle}</p>
-
-                        <div className="mt-2 pt-1.5 border-t border-slate-200 flex items-center justify-between text-[10px] text-slate-500">
-                          <span className="truncate flex items-center gap-1">
-                            <User size={10} /> {item.interviewerName.split(' ')[0]}
-                          </span>
-                          {item.meetingLink && (
-                            <a
-                              href={item.meetingLink}
-                              target="_blank"
-                              rel="noreferrer"
-                              onClick={(e) => e.stopPropagation()}
-                              className="text-blue-600 hover:text-blue-800 font-bold flex items-center gap-0.5"
-                            >
-                              <Video size={11} /> Join
-                            </a>
-                          )}
-                        </div>
+                return (
+                  <div key={w.dateStr} className="p-1 space-y-2">
+                    {dayItems.length === 0 ? (
+                      <div className="h-full flex flex-col items-center justify-center p-3 text-center text-slate-300">
+                        <Clock size={20} className="mb-1 opacity-40" />
+                        <span className="text-[11px]">No interviews</span>
+                        <button
+                          onClick={() => {
+                            setFormData((prev) => ({ ...prev, date: w.dateStr }));
+                            if (candidates.length > 0) handleSelectCandidate(candidates[0].id);
+                            setIsScheduleModalOpen(true);
+                          }}
+                          className="mt-2 text-[10px] font-bold text-blue-600 hover:underline"
+                        >
+                          + Add Slot
+                        </button>
                       </div>
-                    ))
-                  )}
-                </div>
-              );
-            })}
+                    ) : (
+                      dayItems.map((item) => (
+                        <div
+                          key={item.id}
+                          onClick={() => setActiveInterviewForDetails(item)}
+                          className="bg-slate-50 hover:bg-blue-50 border border-slate-200 hover:border-blue-300 rounded-xl p-2.5 transition shadow-2xs cursor-pointer group"
+                        >
+                          <div className="flex items-center justify-between gap-1 mb-1">
+                            <span className="text-[10px] font-mono font-bold text-blue-700 bg-blue-100/70 px-1.5 py-0.2 rounded">
+                              {item.startTime}
+                            </span>
+                            {getStatusBadge(item.status)}
+                          </div>
+
+                          <h4 className="text-xs font-bold text-slate-900 truncate mt-1">{item.candidateName}</h4>
+                          <p className="text-[10px] text-slate-500 truncate">{item.jobTitle}</p>
+
+                          <div className="mt-2 pt-1.5 border-t border-slate-200 flex items-center justify-between text-[10px] text-slate-500">
+                            <span className="truncate flex items-center gap-1">
+                              <User size={10} /> {item.interviewerName.split(' ')[0]}
+                            </span>
+                            {item.meetingLink && (
+                              <a
+                                href={item.meetingLink}
+                                target="_blank"
+                                rel="noreferrer"
+                                onClick={(e) => e.stopPropagation()}
+                                className="text-blue-600 hover:text-blue-800 font-bold flex items-center gap-0.5"
+                              >
+                                <Video size={11} /> Join
+                              </a>
+                            )}
+                          </div>
+                        </div>
+                      ))
+                    )}
+                  </div>
+                );
+              })}
+            </div>
           </div>
         </div>
-      </div>
-    )}
+      )}
 
       {/* VIEW 3: DAY / AGENDA VIEW */}
       {viewMode === 'day' && (
@@ -1337,7 +1328,7 @@ export const InterviewScheduler: React.FC = () => {
       {isScheduleModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs animate-fade-in">
           <div className="bg-white border border-slate-200 rounded-3xl w-full max-w-2xl max-h-[92vh] flex flex-col shadow-2xl overflow-hidden animate-slide-up text-slate-900">
-            
+
             {/* Header */}
             <div className="p-6 bg-slate-50 border-b border-slate-200 flex items-center justify-between">
               <div className="flex items-center gap-3">
@@ -1359,7 +1350,7 @@ export const InterviewScheduler: React.FC = () => {
 
             {/* Form Body */}
             <form onSubmit={handleSubmitSchedule} className="p-6 overflow-y-auto space-y-4 text-xs">
-              
+
               {/* Select Candidate */}
               <div>
                 <label className="block font-bold text-slate-700 mb-1">Select Candidate *</label>
@@ -1506,18 +1497,19 @@ export const InterviewScheduler: React.FC = () => {
                       const val = e.target.value;
                       let role = 'HR Recruiter';
                       let email = 'hr@urbangaon.com';
-                      if (val === 'Satyaveer Singh') {
-                        role = 'HR Recruiter / Screening Lead';
-                        email = 'satyaveer.singh@urbangaon.com';
-                      } else if (val === 'Dr Sharmila Yadav') {
-                        role = 'Director HR / Final Evaluation';
-                        email = 'sharmila.yadav@urbangaon.com';
-                      } else if (val === 'CEO (Urban Gaon)' || val === 'CEO') {
-                        role = 'Chief Executive Officer';
-                        email = 'jobs@urbangaon.com';
+                        if (val === 'Satyaveer Singh') {
+                          role = 'HR Recruiter / Screening Lead';
+                          email = 'satyaveer.singh@urbangaon.com';
+                        } else if (val === 'Dr Sharmila Yadav') {
+                          role = 'Director HR / Final Evaluation';
+                          email = 'sharmila.yadav@urbangaon.com';
+                        } else if (val === 'CEO (Urban Gaon)' || val === 'CEO') {
+                          role = 'Chief Executive Officer';
+                          email = 'jobs@urbangaon.com';
+                        }
+                        setFormData({ ...formData, interviewerName: val, interviewerRole: role, interviewerEmail: email });
                       }
-                      setFormData({ ...formData, interviewerName: val, interviewerRole: role, interviewerEmail: email });
-                    }}
+                    }
                     className="w-full px-3 py-2 rounded-xl bg-slate-50 border border-slate-200 text-slate-800 font-bold focus:bg-white focus:border-blue-500 outline-none transition"
                   >
                     <optgroup label="Round 1 Screening & Technical">
@@ -1605,7 +1597,7 @@ export const InterviewScheduler: React.FC = () => {
       {isRescheduleModalOpen && selectedInterview && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs animate-fade-in">
           <div className="bg-white border border-slate-200 rounded-3xl w-full max-w-md shadow-2xl overflow-hidden animate-slide-up text-slate-900">
-            
+
             <div className="p-5 bg-slate-50 border-b border-slate-200 flex items-center justify-between">
               <div>
                 <h3 className="text-base font-extrabold text-slate-900">Reschedule Interview</h3>
@@ -1689,7 +1681,7 @@ export const InterviewScheduler: React.FC = () => {
       {activeInterviewForDetails && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs animate-fade-in">
           <div className="bg-white border border-slate-200 rounded-3xl w-full max-w-xl max-h-[90vh] flex flex-col shadow-2xl overflow-hidden animate-slide-up text-slate-900">
-            
+
             {/* Header */}
             <div className="p-6 bg-slate-50 border-b border-slate-200 flex items-start justify-between gap-4">
               <div className="flex items-start gap-4">
@@ -1716,7 +1708,7 @@ export const InterviewScheduler: React.FC = () => {
 
             {/* Details Content */}
             <div className="p-6 overflow-y-auto space-y-5 text-xs">
-              
+
               {/* Timing & Round Block */}
               <div className="grid grid-cols-2 gap-4 bg-slate-50 p-4 rounded-2xl border border-slate-200">
                 <div>
@@ -1781,7 +1773,7 @@ export const InterviewScheduler: React.FC = () => {
               {/* Core Actions Matrix */}
               <div className="space-y-2 pt-2 border-t border-slate-200">
                 <span className="font-bold text-slate-700 block">Actions & Feedback:</span>
-                
+
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                   <button
                     onClick={() => {

@@ -1,22 +1,22 @@
 import React, { useState, useEffect } from 'react';
-import { 
-  PhoneCall, 
-  Phone, 
-  PhoneForwarded, 
-  PhoneMissed, 
-  PhoneOff, 
-  PauseCircle, 
-  Clock, 
-  Calendar, 
-  CheckCircle2, 
-  XCircle, 
-  Sparkles, 
-  MessageSquare, 
-  ThumbsUp, 
-  ThumbsDown, 
-  Star, 
-  ShieldCheck, 
-  RotateCcw, 
+import {
+  PhoneCall,
+  Phone,
+  PhoneForwarded,
+  PhoneMissed,
+  PhoneOff,
+  PauseCircle,
+  Clock,
+  Calendar,
+  CheckCircle2,
+  XCircle,
+  Sparkles,
+  MessageSquare,
+  ThumbsUp,
+  ThumbsDown,
+  Star,
+  ShieldCheck,
+  RotateCcw,
   Trash2,
   Send,
   Check,
@@ -32,11 +32,11 @@ interface CandidateCallTabProps {
 }
 
 export const CandidateCallTab: React.FC<CandidateCallTabProps> = ({ candidate, onCallLogged }) => {
-  const { 
-    callRecords, 
-    logCallRecord, 
-    deleteCallRecord, 
-    showToast 
+  const {
+    callRecords,
+    logCallRecord,
+    deleteCallRecord,
+    showToast
   } = useRecruitment();
 
   // Call Tracker / Live Timer state
@@ -215,16 +215,15 @@ export const CandidateCallTab: React.FC<CandidateCallTabProps> = ({ candidate, o
       {/* TOP TELEPHONY COMMAND BAR */}
       <div className="p-5 rounded-2xl bg-gradient-to-r from-slate-900 via-blue-950 to-slate-900 text-white shadow-lg border border-slate-800">
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
-          
+
           <div className="flex items-center gap-4">
-            <div className={`w-14 h-14 rounded-2xl flex items-center justify-center font-bold text-2xl shadow-inner transition-all ${
-              isCallActive 
-                ? 'bg-rose-600 text-white animate-pulse shadow-rose-500/50' 
+            <div className={`w-14 h-14 rounded-2xl flex items-center justify-center font-bold text-2xl shadow-inner transition-all ${isCallActive
+                ? 'bg-rose-600 text-white animate-pulse shadow-rose-500/50'
                 : 'bg-blue-600 text-white'
-            }`}>
+              }`}>
               <PhoneCall size={26} className={isCallActive ? 'animate-bounce' : ''} />
             </div>
-            
+
             <div>
               <div className="flex flex-wrap items-center gap-2">
                 <h3 className="font-extrabold text-lg text-white tracking-tight">{candidate.name}</h3>
@@ -301,7 +300,7 @@ export const CandidateCallTab: React.FC<CandidateCallTabProps> = ({ candidate, o
 
       {/* CALL LOGGING FORM & DISPOSITION CONTROLLER */}
       <div className="p-6 rounded-2xl bg-white border border-slate-200 shadow-sm space-y-6">
-        
+
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-4">
           <div>
             <h4 className="text-sm font-extrabold text-slate-900 flex items-center gap-2">
@@ -337,7 +336,7 @@ export const CandidateCallTab: React.FC<CandidateCallTabProps> = ({ candidate, o
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-            
+
             {/* OPTION 1: INTERESTED */}
             <button
               type="button"
@@ -345,15 +344,13 @@ export const CandidateCallTab: React.FC<CandidateCallTabProps> = ({ candidate, o
                 setDisposition('connected_interested');
                 setScheduleR1(false);
               }}
-              className={`p-3.5 rounded-xl border text-left transition cursor-pointer flex items-start gap-3 ${
-                disposition === 'connected_interested'
+              className={`p-3.5 rounded-xl border text-left transition cursor-pointer flex items-start gap-3 ${disposition === 'connected_interested'
                   ? 'bg-emerald-50/80 border-emerald-500 text-emerald-900 ring-2 ring-emerald-500/20 shadow-xs'
                   : 'bg-white border-slate-200 hover:bg-slate-50 text-slate-700 hover:border-slate-300'
-              }`}
+                }`}
             >
-              <div className={`p-2 rounded-lg shrink-0 ${
-                disposition === 'connected_interested' ? 'bg-emerald-600 text-white' : 'bg-emerald-100 text-emerald-700'
-              }`}>
+              <div className={`p-2 rounded-lg shrink-0 ${disposition === 'connected_interested' ? 'bg-emerald-600 text-white' : 'bg-emerald-100 text-emerald-700'
+                }`}>
                 <ThumbsUp size={18} />
               </div>
               <div className="flex-1 min-w-0">
@@ -371,15 +368,13 @@ export const CandidateCallTab: React.FC<CandidateCallTabProps> = ({ candidate, o
             <button
               type="button"
               onClick={() => setDisposition('connected_hold')}
-              className={`p-3.5 rounded-xl border text-left transition cursor-pointer flex items-start gap-3 ${
-                disposition === 'connected_hold'
+              className={`p-3.5 rounded-xl border text-left transition cursor-pointer flex items-start gap-3 ${disposition === 'connected_hold'
                   ? 'bg-amber-50/80 border-amber-500 text-amber-900 ring-2 ring-amber-500/20 shadow-xs'
                   : 'bg-white border-slate-200 hover:bg-slate-50 text-slate-700 hover:border-slate-300'
-              }`}
+                }`}
             >
-              <div className={`p-2 rounded-lg shrink-0 ${
-                disposition === 'connected_hold' ? 'bg-amber-500 text-white' : 'bg-amber-100 text-amber-700'
-              }`}>
+              <div className={`p-2 rounded-lg shrink-0 ${disposition === 'connected_hold' ? 'bg-amber-500 text-white' : 'bg-amber-100 text-amber-700'
+                }`}>
                 <PauseCircle size={18} />
               </div>
               <div className="flex-1 min-w-0">
@@ -400,15 +395,13 @@ export const CandidateCallTab: React.FC<CandidateCallTabProps> = ({ candidate, o
                 setDisposition('connected_not_interested');
                 setScheduleR1(false);
               }}
-              className={`p-3.5 rounded-xl border text-left transition cursor-pointer flex items-start gap-3 ${
-                disposition === 'connected_not_interested'
+              className={`p-3.5 rounded-xl border text-left transition cursor-pointer flex items-start gap-3 ${disposition === 'connected_not_interested'
                   ? 'bg-rose-50/80 border-rose-500 text-rose-900 ring-2 ring-rose-500/20 shadow-xs'
                   : 'bg-white border-slate-200 hover:bg-slate-50 text-slate-700 hover:border-slate-300'
-              }`}
+                }`}
             >
-              <div className={`p-2 rounded-lg shrink-0 ${
-                disposition === 'connected_not_interested' ? 'bg-rose-600 text-white' : 'bg-rose-100 text-rose-700'
-              }`}>
+              <div className={`p-2 rounded-lg shrink-0 ${disposition === 'connected_not_interested' ? 'bg-rose-600 text-white' : 'bg-rose-100 text-rose-700'
+                }`}>
                 <ThumbsDown size={18} />
               </div>
               <div className="flex-1 min-w-0">
@@ -429,15 +422,13 @@ export const CandidateCallTab: React.FC<CandidateCallTabProps> = ({ candidate, o
                 setDisposition('connected_screening_passed');
                 setScheduleR1(true);
               }}
-              className={`p-3.5 rounded-xl border text-left transition cursor-pointer flex items-start gap-3 ${
-                disposition === 'connected_screening_passed'
+              className={`p-3.5 rounded-xl border text-left transition cursor-pointer flex items-start gap-3 ${disposition === 'connected_screening_passed'
                   ? 'bg-blue-50/80 border-blue-500 text-blue-900 ring-2 ring-blue-500/20 shadow-xs'
                   : 'bg-white border-slate-200 hover:bg-slate-50 text-slate-700 hover:border-slate-300'
-              }`}
+                }`}
             >
-              <div className={`p-2 rounded-lg shrink-0 ${
-                disposition === 'connected_screening_passed' ? 'bg-blue-600 text-white' : 'bg-blue-100 text-blue-700'
-              }`}>
+              <div className={`p-2 rounded-lg shrink-0 ${disposition === 'connected_screening_passed' ? 'bg-blue-600 text-white' : 'bg-blue-100 text-blue-700'
+                }`}>
                 <ShieldCheck size={18} />
               </div>
               <div className="flex-1 min-w-0">
@@ -458,15 +449,13 @@ export const CandidateCallTab: React.FC<CandidateCallTabProps> = ({ candidate, o
                 setDisposition('connected_callback_requested');
                 setScheduleR1(false);
               }}
-              className={`p-3.5 rounded-xl border text-left transition cursor-pointer flex items-start gap-3 ${
-                disposition === 'connected_callback_requested'
+              className={`p-3.5 rounded-xl border text-left transition cursor-pointer flex items-start gap-3 ${disposition === 'connected_callback_requested'
                   ? 'bg-purple-50/80 border-purple-500 text-purple-900 ring-2 ring-purple-500/20 shadow-xs'
                   : 'bg-white border-slate-200 hover:bg-slate-50 text-slate-700 hover:border-slate-300'
-              }`}
+                }`}
             >
-              <div className={`p-2 rounded-lg shrink-0 ${
-                disposition === 'connected_callback_requested' ? 'bg-purple-600 text-white' : 'bg-purple-100 text-purple-700'
-              }`}>
+              <div className={`p-2 rounded-lg shrink-0 ${disposition === 'connected_callback_requested' ? 'bg-purple-600 text-white' : 'bg-purple-100 text-purple-700'
+                }`}>
                 <PhoneForwarded size={18} />
               </div>
               <div className="flex-1 min-w-0">
@@ -487,15 +476,13 @@ export const CandidateCallTab: React.FC<CandidateCallTabProps> = ({ candidate, o
                 setDisposition('ringing_no_answer');
                 setScheduleR1(false);
               }}
-              className={`p-3.5 rounded-xl border text-left transition cursor-pointer flex items-start gap-3 ${
-                disposition === 'ringing_no_answer' || disposition === 'busy'
+              className={`p-3.5 rounded-xl border text-left transition cursor-pointer flex items-start gap-3 ${disposition === 'ringing_no_answer' || disposition === 'busy'
                   ? 'bg-slate-100 border-slate-400 text-slate-900 ring-2 ring-slate-400/20 shadow-xs'
                   : 'bg-white border-slate-200 hover:bg-slate-50 text-slate-700 hover:border-slate-300'
-              }`}
+                }`}
             >
-              <div className={`p-2 rounded-lg shrink-0 ${
-                disposition === 'ringing_no_answer' || disposition === 'busy' ? 'bg-slate-700 text-white' : 'bg-slate-100 text-slate-600'
-              }`}>
+              <div className={`p-2 rounded-lg shrink-0 ${disposition === 'ringing_no_answer' || disposition === 'busy' ? 'bg-slate-700 text-white' : 'bg-slate-100 text-slate-600'
+                }`}>
                 <PhoneMissed size={18} />
               </div>
               <div className="flex-1 min-w-0">
@@ -539,11 +526,10 @@ export const CandidateCallTab: React.FC<CandidateCallTabProps> = ({ candidate, o
                       key={r}
                       type="button"
                       onClick={() => setHoldReason(r)}
-                      className={`px-2.5 py-1 rounded-md text-[11px] font-medium border transition cursor-pointer ${
-                        holdReason === r
+                      className={`px-2.5 py-1 rounded-md text-[11px] font-medium border transition cursor-pointer ${holdReason === r
                           ? 'bg-amber-600 text-white border-amber-600 shadow-2xs'
                           : 'bg-white text-amber-900 border-amber-200 hover:bg-amber-100'
-                      }`}
+                        }`}
                     >
                       {r}
                     </button>
@@ -622,11 +608,10 @@ export const CandidateCallTab: React.FC<CandidateCallTabProps> = ({ candidate, o
                   key={dr}
                   type="button"
                   onClick={() => setDeclineReason(dr)}
-                  className={`px-2.5 py-1 rounded-md text-[11px] font-medium border transition cursor-pointer ${
-                    declineReason === dr
+                  className={`px-2.5 py-1 rounded-md text-[11px] font-medium border transition cursor-pointer ${declineReason === dr
                       ? 'bg-rose-600 text-white border-rose-600 shadow-2xs'
                       : 'bg-white text-rose-900 border-rose-200 hover:bg-rose-100'
-                  }`}
+                    }`}
                 >
                   {dr}
                 </button>
@@ -695,9 +680,8 @@ export const CandidateCallTab: React.FC<CandidateCallTabProps> = ({ candidate, o
                       key={s}
                       size={16}
                       onClick={() => setCommRating(s)}
-                      className={`cursor-pointer transition ${
-                        s <= commRating ? 'text-amber-500 fill-amber-500 scale-110' : 'text-slate-300 hover:text-amber-400'
-                      }`}
+                      className={`cursor-pointer transition ${s <= commRating ? 'text-amber-500 fill-amber-500 scale-110' : 'text-slate-300 hover:text-amber-400'
+                        }`}
                     />
                   ))}
                   <span className="text-xs font-bold text-slate-600 ml-1.5">{commRating}/5</span>
@@ -712,9 +696,8 @@ export const CandidateCallTab: React.FC<CandidateCallTabProps> = ({ candidate, o
                       key={s}
                       size={16}
                       onClick={() => setTechRating(s)}
-                      className={`cursor-pointer transition ${
-                        s <= techRating ? 'text-blue-500 fill-blue-500 scale-110' : 'text-slate-300 hover:text-blue-400'
-                      }`}
+                      className={`cursor-pointer transition ${s <= techRating ? 'text-blue-500 fill-blue-500 scale-110' : 'text-slate-300 hover:text-blue-400'
+                        }`}
                     />
                   ))}
                   <span className="text-xs font-bold text-slate-600 ml-1.5">{techRating}/5</span>
@@ -766,214 +749,214 @@ export const CandidateCallTab: React.FC<CandidateCallTabProps> = ({ candidate, o
                   <select
                     value={interviewerName}
                     onChange={(e) => setInterviewerName(e.target.value)}
-                    className="w-full text-xs p-2 rounded-lg bg-white border border-blue-300 font-semibold focus:border-blue-500 outline-none"
+                  className="w-full text-xs p-2 rounded-lg bg-white border border-blue-300 font-semibold focus:border-blue-500 outline-none"
                   >
-                    <option value="Satyaveer Singh">Satyaveer Singh (R1 Screening Lead)</option>
-                    <option value="Dr Sharmila Yadav">Dr Sharmila Yadav (Director HR / R2)</option>
-                    <option value="CEO (Urban Gaon)">CEO (Urban Gaon / Leadership)</option>
-                  </select>
-                </div>
+                  <option value="Satyaveer Singh">Satyaveer Singh (R1 Screening Lead)</option>
+                  <option value="Dr Sharmila Yadav">Dr Sharmila Yadav (Director HR / R2)</option>
+                  <option value="CEO (Urban Gaon)">CEO (Urban Gaon / Leadership)</option>
+                </select>
               </div>
-            )}
-          </div>
+              </div>
+        )}
+      </div>
         )}
 
-        {/* 5. CALL NOTES & QUICK TAGS */}
-        <div className="space-y-2">
-          <div className="flex flex-wrap items-center justify-between gap-2">
-            <label className="text-xs font-bold text-slate-700 uppercase tracking-wider flex items-center gap-1.5">
-              <MessageSquare size={13} className="text-blue-600" />
-              Detailed Call Remarks & Screening Notes
-            </label>
-            <div className="flex flex-wrap items-center gap-1 text-[11px]">
-              <span className="text-slate-400 font-medium">Quick tags:</span>
-              {[
-                'Immediate Joiner',
-                'Strong Tech Fit',
-                'Clear English',
-                'Salary Negotiable',
-                'Notice Negotiable',
-                'Needs Relocation'
-              ].map((tag) => (
-                <button
-                  key={tag}
-                  type="button"
-                  onClick={() => handleAddTag(tag)}
-                  className="px-2 py-0.5 rounded bg-slate-100 hover:bg-blue-50 text-slate-600 hover:text-blue-700 text-[10px] font-semibold border border-slate-200 transition cursor-pointer"
-                >
-                  +{tag}
-                </button>
-              ))}
-            </div>
+      {/* 5. CALL NOTES & QUICK TAGS */}
+      <div className="space-y-2">
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <label className="text-xs font-bold text-slate-700 uppercase tracking-wider flex items-center gap-1.5">
+            <MessageSquare size={13} className="text-blue-600" />
+            Detailed Call Remarks & Screening Notes
+          </label>
+          <div className="flex flex-wrap items-center gap-1 text-[11px]">
+            <span className="text-slate-400 font-medium">Quick tags:</span>
+            {[
+              'Immediate Joiner',
+              'Strong Tech Fit',
+              'Clear English',
+              'Salary Negotiable',
+              'Notice Negotiable',
+              'Needs Relocation'
+            ].map((tag) => (
+              <button
+                key={tag}
+                type="button"
+                onClick={() => handleAddTag(tag)}
+                className="px-2 py-0.5 rounded bg-slate-100 hover:bg-blue-50 text-slate-600 hover:text-blue-700 text-[10px] font-semibold border border-slate-200 transition cursor-pointer"
+              >
+                +{tag}
+              </button>
+            ))}
           </div>
-
-          <textarea
-            rows={3}
-            value={callNotes}
-            onChange={(e) => setCallNotes(e.target.value)}
-            placeholder={`Log conversation notes with ${candidate.name} (e.g. Discussed experience, confirmed willingness to relocate to Gurgaon, notice period is buyable...)`}
-            className="w-full p-3 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:border-blue-500 focus:bg-white transition"
-          />
         </div>
 
-        {/* 6. SUBMIT BUTTON */}
-        <div className="flex items-center justify-between pt-2 border-t border-slate-100">
-          <div className="text-xs text-slate-500">
-            {callDuration > 0 ? (
-              <span>Duration recorded: <strong className="text-slate-900">{formatTimer(callDuration)}</strong></span>
-            ) : (
-              <span>Standard call duration (3 mins) will be logged.</span>
-            )}
-          </div>
-
-          <button
-            type="button"
-            disabled={isSubmitting}
-            onClick={handleSaveCall}
-            className="flex items-center gap-2 px-6 py-2.5 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-extrabold text-xs shadow-md transition active:scale-95 cursor-pointer disabled:opacity-50"
-          >
-            <Send size={14} />
-            <span>Save & Log Call Record</span>
-          </button>
-        </div>
-
+        <textarea
+          rows={3}
+          value={callNotes}
+          onChange={(e) => setCallNotes(e.target.value)}
+          placeholder={`Log conversation notes with ${candidate.name} (e.g. Discussed experience, confirmed willingness to relocate to Gurgaon, notice period is buyable...)`}
+          className="w-full p-3 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:border-blue-500 focus:bg-white transition"
+        />
       </div>
 
-      {/* 7. CANDIDATE CALL LOG HISTORY (TIMELINE) */}
-      <div className="p-6 rounded-2xl bg-white border border-slate-200 shadow-sm space-y-4">
-        
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-100 pb-3">
-          <div>
-            <h4 className="text-sm font-extrabold text-slate-900 flex items-center gap-2">
-              <Clock size={16} className="text-blue-600" />
-              Telephonic Call Log Dossier ({candidateCallHistory.length})
-            </h4>
-            <p className="text-xs text-slate-500">
-              Chronological log of all outbound calls and tele-screenings with {candidate.name}.
-            </p>
-          </div>
-
-          <span className="text-xs font-bold px-3 py-1 rounded-full bg-slate-100 text-slate-700 border border-slate-200 self-start sm:self-auto">
-            {candidateCallHistory.length} Recorded Call{candidateCallHistory.length === 1 ? '' : 's'}
-          </span>
+      {/* 6. SUBMIT BUTTON */}
+      <div className="flex items-center justify-between pt-2 border-t border-slate-100">
+        <div className="text-xs text-slate-500">
+          {callDuration > 0 ? (
+            <span>Duration recorded: <strong className="text-slate-900">{formatTimer(callDuration)}</strong></span>
+          ) : (
+            <span>Standard call duration (3 mins) will be logged.</span>
+          )}
         </div>
 
-        {candidateCallHistory.length === 0 ? (
-          <div className="text-center py-10 text-slate-400 text-xs space-y-2 bg-slate-50 rounded-xl border border-dashed border-slate-200">
-            <PhoneCall size={28} className="mx-auto text-slate-300" />
-            <p className="font-semibold text-slate-600">No telephonic calls logged for this candidate yet.</p>
-            <p className="text-[11px] text-slate-400 max-w-sm mx-auto">
-              Use the form above to record your first conversation outcome (Interested, Hold, Not Interested, etc.).
-            </p>
-          </div>
-        ) : (
-          <div className="space-y-3">
-            {candidateCallHistory.map((call) => {
-              const mins = Math.floor(call.durationSeconds / 60);
-              const secs = call.durationSeconds % 60;
-
-              const isHold = call.disposition === 'connected_hold';
-              const isInterested = call.disposition === 'connected_interested';
-              const isPassed = call.disposition === 'connected_screening_passed';
-              const isDecline = call.disposition === 'connected_not_interested' || call.disposition === 'connected_screening_failed';
-              const isCallback = call.disposition === 'connected_callback_requested';
-
-              const badgeColor = isPassed
-                ? 'bg-blue-50 text-blue-700 border-blue-200'
-                : isInterested
-                ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
-                : isHold
-                ? 'bg-amber-50 text-amber-800 border-amber-200'
-                : isCallback
-                ? 'bg-purple-50 text-purple-700 border-purple-200'
-                : isDecline
-                ? 'bg-rose-50 text-rose-700 border-rose-200'
-                : 'bg-slate-100 text-slate-700 border-slate-200';
-
-              const dispIcon = isPassed ? (
-                <ShieldCheck size={13} />
-              ) : isInterested ? (
-                <ThumbsUp size={13} />
-              ) : isHold ? (
-                <PauseCircle size={13} />
-              ) : isCallback ? (
-                <PhoneForwarded size={13} />
-              ) : isDecline ? (
-                <ThumbsDown size={13} />
-              ) : (
-                <PhoneMissed size={13} />
-              );
-
-              return (
-                <div 
-                  key={call.id} 
-                  className="p-4 rounded-xl bg-slate-50 border border-slate-200 text-xs space-y-2.5 hover:bg-slate-50/80 transition"
-                >
-                  <div className="flex flex-wrap items-center justify-between gap-2">
-                    <div className="flex items-center gap-2">
-                      <span className={`px-2.5 py-1 rounded-md text-[11px] font-extrabold border inline-flex items-center gap-1.5 ${badgeColor}`}>
-                        {dispIcon}
-                        <span>{call.disposition.replace(/_/g, ' ').toUpperCase()}</span>
-                      </span>
-
-                      <span className="text-[11px] font-semibold text-slate-600 bg-white px-2 py-0.5 rounded border border-slate-200">
-                        ⏱ {mins}m {secs}s
-                      </span>
-
-                      {call.followUpDate && (
-                        <span className="text-[11px] font-bold text-purple-700 bg-purple-50 px-2 py-0.5 rounded border border-purple-200 flex items-center gap-1">
-                          <Calendar size={11} /> Follow-up: {call.followUpDate} {call.followUpTime}
-                        </span>
-                      )}
-                    </div>
-
-                    <div className="flex items-center gap-2">
-                      <span className="text-slate-400 font-medium text-[11px]">
-                        {new Date(call.callTime).toLocaleDateString('en-IN', {
-                          day: 'numeric',
-                          month: 'short',
-                          year: 'numeric',
-                          hour: '2-digit',
-                          minute: '2-digit'
-                        })}
-                      </span>
-
-                      <button
-                        type="button"
-                        onClick={() => deleteCallRecord(call.id)}
-                        title="Delete this call entry"
-                        className="text-slate-400 hover:text-rose-600 p-1 rounded transition"
-                      >
-                        <Trash2 size={13} />
-                      </button>
-                    </div>
-                  </div>
-
-                  <p className="text-slate-800 font-medium leading-relaxed bg-white p-3 rounded-lg border border-slate-200/70">
-                    "{call.notes}"
-                  </p>
-
-                  <div className="flex flex-wrap items-center justify-between gap-2 text-[11px] text-slate-500 pt-1">
-                    <div className="flex flex-wrap items-center gap-3">
-                      <span>Logged by: <strong className="text-slate-700">{call.recruiterName}</strong></span>
-                      {call.confirmedCurrentCtc && <span>• Current CTC: <strong>{call.confirmedCurrentCtc}</strong></span>}
-                      {call.confirmedExpectedCtc && <span>• Expected CTC: <strong className="text-blue-700">{call.confirmedExpectedCtc}</strong></span>}
-                      {call.confirmedNoticePeriod && <span>• Notice: <strong className="text-emerald-700">{call.confirmedNoticePeriod}</strong></span>}
-                    </div>
-
-                    <div className="flex items-center gap-3">
-                      {call.communicationRating && <span>Comm: <strong>{call.communicationRating}/5 ⭐</strong></span>}
-                      {call.technicalFitRating && <span>Tech: <strong>{call.technicalFitRating}/5 ⭐</strong></span>}
-                    </div>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        )}
-
+        <button
+          type="button"
+          disabled={isSubmitting}
+          onClick={handleSaveCall}
+          className="flex items-center gap-2 px-6 py-2.5 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-extrabold text-xs shadow-md transition active:scale-95 cursor-pointer disabled:opacity-50"
+        >
+          <Send size={14} />
+          <span>Save & Log Call Record</span>
+        </button>
       </div>
 
     </div>
+
+      {/* 7. CANDIDATE CALL LOG HISTORY (TIMELINE) */ }
+  <div className="p-6 rounded-2xl bg-white border border-slate-200 shadow-sm space-y-4">
+
+    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-100 pb-3">
+      <div>
+        <h4 className="text-sm font-extrabold text-slate-900 flex items-center gap-2">
+          <Clock size={16} className="text-blue-600" />
+          Telephonic Call Log Dossier ({candidateCallHistory.length})
+        </h4>
+        <p className="text-xs text-slate-500">
+          Chronological log of all outbound calls and tele-screenings with {candidate.name}.
+        </p>
+      </div>
+
+      <span className="text-xs font-bold px-3 py-1 rounded-full bg-slate-100 text-slate-700 border border-slate-200 self-start sm:self-auto">
+        {candidateCallHistory.length} Recorded Call{candidateCallHistory.length === 1 ? '' : 's'}
+      </span>
+    </div>
+
+    {candidateCallHistory.length === 0 ? (
+      <div className="text-center py-10 text-slate-400 text-xs space-y-2 bg-slate-50 rounded-xl border border-dashed border-slate-200">
+        <PhoneCall size={28} className="mx-auto text-slate-300" />
+        <p className="font-semibold text-slate-600">No telephonic calls logged for this candidate yet.</p>
+        <p className="text-[11px] text-slate-400 max-w-sm mx-auto">
+          Use the form above to record your first conversation outcome (Interested, Hold, Not Interested, etc.).
+        </p>
+      </div>
+    ) : (
+      <div className="space-y-3">
+        {candidateCallHistory.map((call) => {
+          const mins = Math.floor(call.durationSeconds / 60);
+          const secs = call.durationSeconds % 60;
+
+          const isHold = call.disposition === 'connected_hold';
+          const isInterested = call.disposition === 'connected_interested';
+          const isPassed = call.disposition === 'connected_screening_passed';
+          const isDecline = call.disposition === 'connected_not_interested' || call.disposition === 'connected_screening_failed';
+          const isCallback = call.disposition === 'connected_callback_requested';
+
+          const badgeColor = isPassed
+            ? 'bg-blue-50 text-blue-700 border-blue-200'
+            : isInterested
+              ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
+              : isHold
+                ? 'bg-amber-50 text-amber-800 border-amber-200'
+                : isCallback
+                  ? 'bg-purple-50 text-purple-700 border-purple-200'
+                  : isDecline
+                    ? 'bg-rose-50 text-rose-700 border-rose-200'
+                    : 'bg-slate-100 text-slate-700 border-slate-200';
+
+          const dispIcon = isPassed ? (
+            <ShieldCheck size={13} />
+          ) : isInterested ? (
+            <ThumbsUp size={13} />
+          ) : isHold ? (
+            <PauseCircle size={13} />
+          ) : isCallback ? (
+            <PhoneForwarded size={13} />
+          ) : isDecline ? (
+            <ThumbsDown size={13} />
+          ) : (
+            <PhoneMissed size={13} />
+          );
+
+          return (
+            <div
+              key={call.id}
+              className="p-4 rounded-xl bg-slate-50 border border-slate-200 text-xs space-y-2.5 hover:bg-slate-50/80 transition"
+            >
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <div className="flex items-center gap-2">
+                  <span className={`px-2.5 py-1 rounded-md text-[11px] font-extrabold border inline-flex items-center gap-1.5 ${badgeColor}`}>
+                    {dispIcon}
+                    <span>{call.disposition.replace(/_/g, ' ').toUpperCase()}</span>
+                  </span>
+
+                  <span className="text-[11px] font-semibold text-slate-600 bg-white px-2 py-0.5 rounded border border-slate-200">
+                    ⏱ {mins}m {secs}s
+                  </span>
+
+                  {call.followUpDate && (
+                    <span className="text-[11px] font-bold text-purple-700 bg-purple-50 px-2 py-0.5 rounded border border-purple-200 flex items-center gap-1">
+                      <Calendar size={11} /> Follow-up: {call.followUpDate} {call.followUpTime}
+                    </span>
+                  )}
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <span className="text-slate-400 font-medium text-[11px]">
+                    {new Date(call.callTime).toLocaleDateString('en-IN', {
+                      day: 'numeric',
+                      month: 'short',
+                      year: 'numeric',
+                      hour: '2-digit',
+                      minute: '2-digit'
+                    })}
+                  </span>
+
+                  <button
+                    type="button"
+                    onClick={() => deleteCallRecord(call.id)}
+                    title="Delete this call entry"
+                    className="text-slate-400 hover:text-rose-600 p-1 rounded transition"
+                  >
+                    <Trash2 size={13} />
+                  </button>
+                </div>
+              </div>
+
+              <p className="text-slate-800 font-medium leading-relaxed bg-white p-3 rounded-lg border border-slate-200/70">
+                "{call.notes}"
+              </p>
+
+              <div className="flex flex-wrap items-center justify-between gap-2 text-[11px] text-slate-500 pt-1">
+                <div className="flex flex-wrap items-center gap-3">
+                  <span>Logged by: <strong className="text-slate-700">{call.recruiterName}</strong></span>
+                  {call.confirmedCurrentCtc && <span>• Current CTC: <strong>{call.confirmedCurrentCtc}</strong></span>}
+                  {call.confirmedExpectedCtc && <span>• Expected CTC: <strong className="text-blue-700">{call.confirmedExpectedCtc}</strong></span>}
+                  {call.confirmedNoticePeriod && <span>• Notice: <strong className="text-emerald-700">{call.confirmedNoticePeriod}</strong></span>}
+                </div>
+
+                <div className="flex items-center gap-3">
+                  {call.communicationRating && <span>Comm: <strong>{call.communicationRating}/5 ⭐</strong></span>}
+                  {call.technicalFitRating && <span>Tech: <strong>{call.technicalFitRating}/5 ⭐</strong></span>}
+                </div>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    )}
+
+  </div>
+
+    </div >
   );
 };

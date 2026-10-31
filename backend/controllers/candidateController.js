@@ -1,11 +1,11 @@
 import { Candidate } from '../models/Candidate.js';
 import { ensureDBConnected, getMongoConnectionStatus } from '../config/database.js';
 import { getAllCandidatesFromStore, persistCandidate, deleteCandidateFromStore } from '../services/candidateStore.js';
-import { 
-  broadcastStatusUpdate, 
-  broadcastNewCandidate, 
-  broadcastCandidateUpdated, 
-  broadcastCandidateDeleted 
+import {
+  broadcastStatusUpdate,
+  broadcastNewCandidate,
+  broadcastCandidateUpdated,
+  broadcastCandidateDeleted
 } from '../sockets/socketHandler.js';
 
 // Helper to update candidate fields in MongoDB
@@ -77,23 +77,37 @@ export async function updateCandidateStatus(req, res) {
   const { id } = req.params;
   const { status, details, performedBy } = req.body;
 
+  let recruiterAssigned = req.body.recruiterAssigned;
+  if (!recruiterAssigned) {
+    if (status === 'interview_r1') {
+      recruiterAssigned = 'Satyaveer Singh';
+    } else if (status === 'interview_r2') {
+      recruiterAssigned = 'Dr Sharmila Yadav';
+    }
+  }
+
   const activityItem = {
     id: `act-${Date.now()}`,
     action: `Status updated to ${status.toUpperCase()}`,
-    details: details || `Moved to ${status}`,
-    performedBy: performedBy || 'Lead Recruiter',
+    details: details || `Moved to ${status}${recruiterAssigned ? ` (Assigned: ${recruiterAssigned})` : ''}`,
+    performedBy: performedBy || recruiterAssigned || 'Lead Recruiter',
     timestamp: new Date().toISOString(),
     type: 'status'
   };
 
+  const updateFields = { status };
+  if (recruiterAssigned) {
+    updateFields.recruiterAssigned = recruiterAssigned;
+  }
+
   const updated = await updateCandidateField(
     id,
-    { status },
+    updateFields,
     { activityHistory: { $each: [activityItem], $position: 0 } }
   );
 
-  broadcastStatusUpdate({ id, status, activityItem });
-  res.json({ success: true, id, status, candidate: updated || undefined });
+  broadcastStatusUpdate({ id, status, recruiterAssigned, activityItem });
+  res.json({ success: true, id, status, recruiterAssigned, candidate: updated || undefined });
 }
 
 // PATCH recruiter notes

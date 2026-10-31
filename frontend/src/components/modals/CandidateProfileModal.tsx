@@ -1,18 +1,18 @@
 import React, { useState, useEffect } from 'react';
 import clsx from 'clsx';
-import { 
-  X, 
-  Download, 
-  Star, 
-  Briefcase, 
-  MapPin, 
-  Mail, 
-  Phone, 
+import {
+  X,
+  Download,
+  Star,
+  Briefcase,
+  MapPin,
+  Mail,
+  Phone,
   PhoneCall,
-  Calendar, 
-  Award, 
-  MessageSquare, 
-  Clock, 
+  Calendar,
+  Award,
+  MessageSquare,
+  Clock,
   UserCheck,
   FileText,
   Edit3,
@@ -34,16 +34,16 @@ import { CandidateCallTab } from '../candidate/CandidateCallTab';
 import { CandidateCommunicationsTab } from '../candidate/CandidateCommunicationsTab';
 
 export const CandidateProfileModal: React.FC = () => {
-  const { 
-    selectedCandidate, 
-    setSelectedCandidate, 
+  const {
+    selectedCandidate,
+    setSelectedCandidate,
     candidateModalTab,
     setCandidateModalTab,
     callRecords,
     jobs,
-    updateCandidateStatus, 
-    updateCandidateNotes, 
-    updateCandidateScorecard, 
+    updateCandidateStatus,
+    updateCandidateNotes,
+    updateCandidateScorecard,
     assignRecruiter,
     updateCandidateRating,
     updateCandidateDetails,
@@ -320,7 +320,7 @@ export const CandidateProfileModal: React.FC = () => {
   return (
     <div className={clsx('fixed', 'inset-0', 'z-50', 'flex', 'items-center', 'justify-center', 'p-2', 'sm:p-4', 'bg-slate-900/60', 'backdrop-blur-xs', 'animate-fade-in')}>
       <div className={clsx('bg-white', 'border', 'border-slate-200', 'rounded-3xl', 'w-[96vw]', 'max-w-[1420px]', 'h-[94vh]', 'max-h-[96vh]', 'flex', 'flex-col', 'shadow-2xl', 'overflow-hidden', 'animate-slide-up', 'text-slate-900', 'relative')}>
-        
+
         {/* Dedicated Top-Right Close Button */}
         <button
           onClick={() => setSelectedCandidate(null)}
@@ -419,22 +419,20 @@ export const CandidateProfileModal: React.FC = () => {
                 setActiveTab('calling');
                 setCandidateModalTab('calling');
               }}
-              className={`flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold transition active:scale-95 cursor-pointer border ${
-                activeTab === 'calling'
+              className={`flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold transition active:scale-95 cursor-pointer border ${activeTab === 'calling'
                   ? 'bg-emerald-50 text-emerald-800 border-emerald-300 ring-2 ring-emerald-300'
                   : 'bg-slate-100 hover:bg-slate-200 text-slate-700 border-slate-200'
-              }`}
+                }`}
             >
               <span>Screening Log</span>
             </button>
 
             <button
               onClick={() => setActiveTab('communications')}
-              className={`flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold transition active:scale-95 cursor-pointer border ${
-                activeTab === 'communications'
+              className={`flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold transition active:scale-95 cursor-pointer border ${activeTab === 'communications'
                   ? 'bg-blue-50 text-blue-800 border-blue-300 ring-2 ring-blue-300'
                   : 'bg-slate-100 hover:bg-slate-200 text-slate-700 border-slate-200'
-              }`}
+                }`}
               title="Send candidate email with Zoom Meeting & calendar invite, or WhatsApp status alert"
             >
               <Mail size={14} className="text-blue-600" />
@@ -497,14 +495,19 @@ export const CandidateProfileModal: React.FC = () => {
             </div>
 
             <div className={clsx('flex', 'items-center', 'gap-2')}>
-              <span className={clsx('text-slate-600', 'font-semibold')}>Assigned HR:</span>
+              <span className={clsx('text-slate-600', 'font-semibold')}>Assigned HR / Interviewer:</span>
               <select
-                value={cand.recruiterAssigned || ''}
+                value={cand.recruiterAssigned || (cand.status === 'interview_r1' ? 'Satyaveer Singh' : cand.status === 'interview_r2' ? 'Dr Sharmila Yadav' : 'Satyaveer Singh')}
                 onChange={(e) => assignRecruiter(cand.id, e.target.value)}
-                className={clsx('px-3', 'py-1.5', 'rounded-lg', 'bg-white', 'border', 'border-slate-300', 'text-slate-800', 'font-medium', 'focus:outline-none', 'focus:border-blue-500')}
+                className={clsx('px-3', 'py-1.5', 'rounded-lg', 'bg-white', 'border', 'border-slate-300', 'text-slate-800', 'font-semibold', 'text-xs', 'focus:outline-none', 'focus:border-blue-500')}
               >
-                <option value="Dr Sharmila Yadav">Dr Sharmila Yadav</option>
-                <option value="Satyaveer Singh">Satyaveer Singh</option>
+                <optgroup label="Round 1 (Screening Lead)">
+                  <option value="Satyaveer Singh">Satyaveer Singh</option>
+                </optgroup>
+                <optgroup label="Round 2 & Final Leadership">
+                  <option value="Dr Sharmila Yadav">Dr Sharmila Yadav</option>
+                  <option value="CEO (Urban Gaon)">CEO (Urban Gaon)</option>
+                </optgroup>
               </select>
             </div>
           </div>
@@ -517,9 +520,8 @@ export const CandidateProfileModal: React.FC = () => {
                   key={star}
                   size={16}
                   onClick={() => updateCandidateRating(cand.id, star)}
-                  className={`cursor-pointer ${
-                    star <= cand.rating ? 'text-amber-500 fill-amber-500' : 'text-slate-300 hover:text-amber-400'
-                  }`}
+                  className={`cursor-pointer ${star <= cand.rating ? 'text-amber-500 fill-amber-500' : 'text-slate-300 hover:text-amber-400'
+                    }`}
                 />
               ))}
             </div>
@@ -530,11 +532,10 @@ export const CandidateProfileModal: React.FC = () => {
         <div className={clsx('px-3', 'sm:px-6', 'border-b', 'border-slate-200', 'bg-white', 'flex', 'items-center', 'gap-1', 'sm:gap-2', 'overflow-x-auto', 'no-scrollbar', 'whitespace-nowrap')}>
           <button
             onClick={() => setActiveTab('profile')}
-            className={`px-4 py-3 text-xs font-bold border-b-2 transition ${
-              activeTab === 'profile'
+            className={`px-4 py-3 text-xs font-bold border-b-2 transition ${activeTab === 'profile'
                 ? 'border-blue-600 text-blue-600'
                 : 'border-transparent text-slate-500 hover:text-slate-800'
-            }`}
+              }`}
           >
             Candidate Profile
           </button>
@@ -543,55 +544,50 @@ export const CandidateProfileModal: React.FC = () => {
               setActiveTab('calling');
               setCandidateModalTab('calling');
             }}
-            className={`px-4 py-3 text-xs font-bold border-b-2 transition flex items-center gap-1.5 ${
-              activeTab === 'calling'
+            className={`px-4 py-3 text-xs font-bold border-b-2 transition flex items-center gap-1.5 ${activeTab === 'calling'
                 ? 'border-blue-600 text-blue-600'
                 : 'border-transparent text-slate-500 hover:text-slate-800'
-            }`}
+              }`}
           >
             <PhoneCall size={13} />
             Calling & Screening ({candidateTotalCalls})
           </button>
           <button
             onClick={() => setActiveTab('resume')}
-            className={`px-4 py-3 text-xs font-bold border-b-2 transition flex items-center gap-1.5 ${
-              activeTab === 'resume'
+            className={`px-4 py-3 text-xs font-bold border-b-2 transition flex items-center gap-1.5 ${activeTab === 'resume'
                 ? 'border-blue-600 text-blue-600'
                 : 'border-transparent text-slate-500 hover:text-slate-800'
-            }`}
+              }`}
           >
             <FileText size={13} />
             Resume Details
           </button>
           <button
             onClick={() => setActiveTab('scorecard')}
-            className={`px-4 py-3 text-xs font-bold border-b-2 transition flex items-center gap-1.5 ${
-              activeTab === 'scorecard'
+            className={`px-4 py-3 text-xs font-bold border-b-2 transition flex items-center gap-1.5 ${activeTab === 'scorecard'
                 ? 'border-blue-600 text-blue-600'
                 : 'border-transparent text-slate-500 hover:text-slate-800'
-            }`}
+              }`}
           >
             <Award size={13} />
             Interview Evaluation
           </button>
           <button
             onClick={() => setActiveTab('timeline')}
-            className={`px-4 py-3 text-xs font-bold border-b-2 transition flex items-center gap-1.5 ${
-              activeTab === 'timeline'
+            className={`px-4 py-3 text-xs font-bold border-b-2 transition flex items-center gap-1.5 ${activeTab === 'timeline'
                 ? 'border-blue-600 text-blue-600'
                 : 'border-transparent text-slate-500 hover:text-slate-800'
-            }`}
+              }`}
           >
             <Clock size={13} />
             Activity History ({cand.activityHistory?.length || 0})
           </button>
           <button
             onClick={() => setActiveTab('communications')}
-            className={`px-4 py-3 text-xs font-bold border-b-2 transition flex items-center gap-1.5 ${
-              activeTab === 'communications'
+            className={`px-4 py-3 text-xs font-bold border-b-2 transition flex items-center gap-1.5 ${activeTab === 'communications'
                 ? 'border-blue-600 text-blue-600'
                 : 'border-transparent text-slate-500 hover:text-slate-800'
-            }`}
+              }`}
           >
             <Mail size={13} />
             Outreach (Email & WhatsApp)
@@ -600,7 +596,7 @@ export const CandidateProfileModal: React.FC = () => {
 
         {/* Modal Body / Tab Contents */}
         <div className={clsx('flex-1', 'overflow-y-auto', 'p-3.5', 'sm:p-6', 'space-y-4', 'sm:space-y-6', 'bg-slate-50/50')}>
-          
+
           {/* TAB 1: PROFILE DOSSIER */}
           {activeTab === 'profile' && (
             <div className="space-y-6">
@@ -613,8 +609,8 @@ export const CandidateProfileModal: React.FC = () => {
                     Candidate Profile & Compensation Dossier
                   </h3>
                   <p className="text-xs text-slate-500 font-normal mt-0.5">
-                    {isEditingProfile 
-                      ? 'Modify candidate personal information, applied requisition, notice period and compensation' 
+                    {isEditingProfile
+                      ? 'Modify candidate personal information, applied requisition, notice period and compensation'
                       : 'Comprehensive candidate credentials, employment terms, and compensation data'}
                   </p>
                 </div>
@@ -760,7 +756,7 @@ export const CandidateProfileModal: React.FC = () => {
               {/* EDIT MODE: CANDIDATE PROFILE FORM */}
               {isEditingProfile && (
                 <div className="space-y-5 animate-fade-in">
-                  
+
                   {/* Card 1: Personal & Contact Information */}
                   <div className="p-5 rounded-2xl bg-white border border-slate-200 shadow-2xs space-y-4">
                     <h4 className="text-xs font-bold text-slate-800 uppercase tracking-wider flex items-center gap-1.5 border-b border-slate-100 pb-2">
@@ -856,14 +852,19 @@ export const CandidateProfileModal: React.FC = () => {
                       </div>
 
                       <div>
-                        <label className="text-[11px] font-semibold text-slate-600 block mb-1">Assigned HR Recruiter</label>
+                        <label className="text-[11px] font-semibold text-slate-600 block mb-1">Assigned HR / Interviewer</label>
                         <select
-                          value={profileForm.recruiterAssigned}
+                          value={profileForm.recruiterAssigned || 'Satyaveer Singh'}
                           onChange={(e) => setProfileForm((p) => ({ ...p, recruiterAssigned: e.target.value }))}
                           className="w-full text-xs p-2.5 rounded-xl bg-slate-50 border border-slate-200 focus:bg-white focus:border-blue-500 font-semibold text-slate-800 outline-none transition"
                         >
-                          <option value="Dr Sharmila Yadav">Dr Sharmila Yadav</option>
-                          <option value="Satyaveer Singh">Satyaveer Singh</option>
+                          <optgroup label="Round 1 (Screening Lead)">
+                            <option value="Satyaveer Singh">Satyaveer Singh</option>
+                          </optgroup>
+                          <optgroup label="Round 2 & Final Leadership">
+                            <option value="Dr Sharmila Yadav">Dr Sharmila Yadav</option>
+                            <option value="CEO (Urban Gaon)">CEO (Urban Gaon)</option>
+                          </optgroup>
                         </select>
                       </div>
                     </div>
@@ -971,7 +972,7 @@ export const CandidateProfileModal: React.FC = () => {
                     <label className="text-xs font-bold text-slate-800 uppercase tracking-wider block">
                       Skills & Technical Competencies
                     </label>
-                    
+
                     <div className="flex flex-wrap gap-2 pt-1">
                       {profileForm.skills.map((skill, i) => (
                         <span
@@ -1228,7 +1229,7 @@ export const CandidateProfileModal: React.FC = () => {
               {/* EDIT MODE: RESUME */}
               {isEditingResume && (
                 <div className="space-y-6 animate-fade-in">
-                  
+
                   {/* Resume Summary */}
                   <div className="p-5 rounded-2xl bg-white border border-slate-200 shadow-2xs space-y-3">
                     <label className="text-xs font-bold text-slate-800 uppercase tracking-wider block">
@@ -1248,7 +1249,7 @@ export const CandidateProfileModal: React.FC = () => {
                     <label className="text-xs font-bold text-slate-800 uppercase tracking-wider block">
                       Resume Skills & Competencies
                     </label>
-                    
+
                     <div className="flex flex-wrap gap-2 pt-1">
                       {resumeForm.skills.map((skill, i) => (
                         <span

@@ -2985,7 +2985,7 @@ export const INITIAL_CANDIDATES: Candidate[] = [
     "currentSalary": "₹8,50,000 P.A.",
     "expectedSalary": "₹12,00,000 - ₹18,00,000 P.A.",
     "noticePeriod": "30 Days",
-    "recruiterAssigned": "Satyaveer Singh",
+    "recruiterAssigned": "Dr Sharmila Yadav",
     "tags": [
       "naukri",
       "DPM",
@@ -3211,7 +3211,7 @@ export const INITIAL_CANDIDATES: Candidate[] = [
     "currentSalary": "₹8,50,000 P.A.",
     "expectedSalary": "₹12,00,000 - ₹18,00,000 P.A.",
     "noticePeriod": "30 Days",
-    "recruiterAssigned": "Satyaveer Singh",
+    "recruiterAssigned": "Dr Sharmila Yadav",
     "tags": [
       "apna",
       "DPM",
@@ -3663,7 +3663,7 @@ export const INITIAL_CANDIDATES: Candidate[] = [
     "currentSalary": "₹8,50,000 P.A.",
     "expectedSalary": "₹12,00,000 - ₹18,00,000 P.A.",
     "noticePeriod": "30 Days",
-    "recruiterAssigned": "Satyaveer Singh",
+    "recruiterAssigned": "Dr Sharmila Yadav",
     "tags": [
       "apna",
       "DPM",
@@ -4596,7 +4596,7 @@ export const INITIAL_CANDIDATES: Candidate[] = [
     "currentSalary": "₹8,50,000 P.A.",
     "expectedSalary": "₹12,00,000 - ₹18,00,000 P.A.",
     "noticePeriod": "30 Days",
-    "recruiterAssigned": "Satyaveer Singh",
+    "recruiterAssigned": "Dr Sharmila Yadav",
     "tags": [
       "apna",
       "DPM",
@@ -5256,7 +5256,7 @@ export const INITIAL_CANDIDATES: Candidate[] = [
     "currentSalary": "₹8,50,000 P.A.",
     "expectedSalary": "₹8,00,000 - ₹14,00,000 P.A.",
     "noticePeriod": "30 Days",
-    "recruiterAssigned": "Satyaveer Singh",
+    "recruiterAssigned": "Dr Sharmila Yadav",
     "tags": [
       "naukri",
       "Sales& Marketing",
@@ -5706,7 +5706,7 @@ export const INITIAL_CANDIDATES: Candidate[] = [
     "currentSalary": "₹8,50,000 P.A.",
     "expectedSalary": "₹18,00,000 - ₹25,00,000 P.A.",
     "noticePeriod": "30 Days",
-    "recruiterAssigned": "Satyaveer Singh",
+    "recruiterAssigned": "Dr Sharmila Yadav",
     "tags": [
       "referral",
       "Project Manager",

@@ -32,6 +32,7 @@ export const CandidateTable: React.FC = () => {
     filters,
     setFilters,
     updateCandidateStatus,
+    assignRecruiter,
     setSelectedCandidate,
     openCandidateModal,
     setPreviewResumeCandidate,
@@ -649,16 +650,29 @@ export const CandidateTable: React.FC = () => {
 
                       {/* Assigned HR Column */}
                       <td className="py-3.5 px-4 whitespace-nowrap">
-                        <div className="inline-flex items-center gap-2 py-1 px-2.5 rounded-xl bg-slate-50 border border-slate-200 text-xs font-medium text-slate-800">
-                          <div className="w-5 h-5 rounded-full bg-blue-100 text-blue-700 font-bold text-[10px] flex items-center justify-center shrink-0">
-                            {(cand.recruiterAssigned || 'HR').charAt(0)}
-                          </div>
-                          <span className="font-semibold text-slate-800 text-xs">
-                            {cand.recruiterAssigned || 'Dr Sharmila Yadav'}
-                          </span>
-                        </div>
+                        <select
+                          value={
+                            cand.recruiterAssigned ||
+                            (cand.status === 'interview_r1'
+                              ? 'Satyaveer Singh'
+                              : cand.status === 'interview_r2'
+                                ? 'Dr Sharmila Yadav'
+                                : 'Satyaveer Singh')
+                          }
+                          onChange={(e) => assignRecruiter(cand.id, e.target.value)}
+                          className="py-1 px-2.5 rounded-xl bg-slate-50 hover:bg-slate-100 border border-slate-200 text-xs font-semibold text-slate-800 focus:outline-none focus:ring-1 focus:ring-blue-500 cursor-pointer shadow-2xs transition"
+                          title="Assign HR / Interview Lead"
+                        >
+                          <optgroup label="Round 1 (Screening Lead)">
+                            <option value="Satyaveer Singh">Satyaveer Singh</option>
+                          </optgroup>
+                          <optgroup label="Round 2 & Final Leadership">
+                            <option value="Dr Sharmila Yadav">Dr Sharmila Yadav</option>
+                            <option value="CEO (Urban Gaon)">CEO (Urban Gaon)</option>
+                          </optgroup>
+                        </select>
                       </td>
-//
+
                       {/* Stage Selector Dropdown */}
                       <td className="py-3.5 px-4">
                         <select
@@ -681,8 +695,8 @@ export const CandidateTable: React.FC = () => {
                             onClick={() => shiftCandidateToCalling(cand)}
                             title={`Select & Shift ${cand.name} to Calling Desk`}
                             className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition shadow-xs cursor-pointer active:scale-95 ${cand.isCallingQueued
-                                ? 'bg-emerald-100 text-emerald-800 border border-emerald-300 hover:bg-emerald-200'
-                                : 'bg-emerald-600 hover:bg-emerald-700 text-white shadow-emerald-600/20'
+                              ? 'bg-emerald-100 text-emerald-800 border border-emerald-300 hover:bg-emerald-200'
+                              : 'bg-emerald-600 hover:bg-emerald-700 text-white shadow-emerald-600/20'
                               }`}
                           >
                             <PhoneCall size={12} />

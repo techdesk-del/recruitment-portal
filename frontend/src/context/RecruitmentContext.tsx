@@ -904,8 +904,36 @@ export const RecruitmentProvider: React.FC<{ children: React.ReactNode }> = ({ c
 
   // --- Interview Scheduler Actions ---
   const scheduleInterview = (data: Omit<InterviewSchedule, 'id' | 'createdAt' | 'updatedAt'>): InterviewSchedule => {
+    // Auto-sync interviewers: Round 1 -> Satyaveer Singh, Round 2 -> Dr Sharmila Yadav or CEO (Urban Gaon)
+    let interviewerName = data.interviewerName;
+    let interviewerRole = data.interviewerRole;
+    let interviewerEmail = data.interviewerEmail;
+
+    const isRound1 = data.round.includes('Round 1') || data.round.toLowerCase().includes('screening');
+    const isRound2 = data.round.includes('Round 2') || data.round.toLowerCase().includes('leadership') || data.round.toLowerCase().includes('final');
+
+    if (!interviewerName || interviewerName === 'Engineering Lead' || interviewerName === 'Interviewer' || interviewerName === 'Lead Recruiter & Panel Member') {
+      if (isRound2) {
+        interviewerName = 'Dr Sharmila Yadav';
+        interviewerRole = 'Director HR / Final Evaluation';
+        interviewerEmail = 'sharmila.yadav@urbangaon.com';
+      } else {
+        interviewerName = 'Satyaveer Singh';
+        interviewerRole = 'HR Recruiter / Screening Lead';
+        interviewerEmail = 'satyaveer.singh@urbangaon.com';
+      }
+    } else if (isRound1 && (interviewerName === 'Dr Sharmila Yadav' || interviewerName.includes('Executive'))) {
+      // Round 1 strictly synced to Satyaveer Singh
+      interviewerName = 'Satyaveer Singh';
+      interviewerRole = 'HR Recruiter / Screening Lead';
+      interviewerEmail = 'satyaveer.singh@urbangaon.com';
+    }
+
     const newInterview: InterviewSchedule = {
       ...data,
+      interviewerName,
+      interviewerRole,
+      interviewerEmail,
       id: `int-${Date.now().toString().slice(-6)}`,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString()
@@ -1055,9 +1083,9 @@ export const RecruitmentProvider: React.FC<{ children: React.ReactNode }> = ({ c
         date: data.interviewData.date || new Date().toISOString().slice(0, 10),
         startTime: data.interviewData.startTime || '14:00',
         endTime: data.interviewData.endTime || '15:00',
-        interviewerName: data.interviewData.interviewerName || 'Engineering Lead',
-        interviewerRole: data.interviewData.interviewerRole || 'Engineering Lead',
-        interviewerEmail: data.interviewData.interviewerEmail || 'lead@urbangaon.com',
+        interviewerName: data.interviewData.interviewerName || (data.interviewData.round?.includes('Round 2') ? 'Dr Sharmila Yadav' : 'Satyaveer Singh'),
+        interviewerRole: data.interviewData.interviewerRole || (data.interviewData.round?.includes('Round 2') ? 'Director HR / Final Evaluation' : 'HR Recruiter / Screening Lead'),
+        interviewerEmail: data.interviewData.interviewerEmail || (data.interviewData.round?.includes('Round 2') ? 'sharmila.yadav@urbangaon.com' : 'satyaveer.singh@urbangaon.com'),
         platform: data.interviewData.platform || 'zoom',
         meetingLink: data.interviewData.meetingLink || 'https://zoom.us/j/84920391192?pwd=ug2026',
         status: 'scheduled',

@@ -175,6 +175,8 @@ export const CandidateProfileModal: React.FC = () => {
   // --- Save Profile Changes ---
   const handleSaveProfile = async () => {
     if (!profileForm.name.trim()) return;
+    const cleanRole = profileForm.jobAppliedFor.trim();
+    const matched = jobs.find((j) => j.title.toLowerCase() === cleanRole.toLowerCase());
     await updateCandidateDetails(
       cand.id,
       {
@@ -182,7 +184,9 @@ export const CandidateProfileModal: React.FC = () => {
         email: profileForm.email.trim(),
         phone: profileForm.phone.trim(),
         location: profileForm.location.trim(),
-        jobAppliedFor: profileForm.jobAppliedFor.trim(),
+        jobAppliedFor: cleanRole,
+        jobId: matched?.id || 'custom',
+        department: matched?.department || cand.department || 'General / Custom',
         source: profileForm.source,
         recruiterAssigned: profileForm.recruiterAssigned,
         experienceYears: Number(profileForm.experienceYears) || 0,
@@ -349,7 +353,13 @@ export const CandidateProfileModal: React.FC = () => {
                   </span>
                 )}
               </div>
-              <p className={clsx('text-xs', 'text-blue-700', 'font-bold', 'mt-0.5')}>{cand.jobAppliedFor}</p>
+              <p className={clsx('text-xs', 'text-blue-700', 'font-bold', 'mt-0.5')}>
+                {cand.jobAppliedFor || (
+                  <span className="inline-flex items-center gap-1 text-amber-700 bg-amber-50 border border-amber-200 px-2 py-0.5 rounded-md font-semibold text-[11px]">
+                    ✏️ Custom / Blank Role (Edit Profile to assign)
+                  </span>
+                )}
+              </p>
               <div className={clsx('flex', 'flex-wrap', 'items-center', 'gap-3', 'text-xs', 'text-slate-500', 'mt-1')}>
                 <span className={clsx('flex', 'items-center', 'gap-1')}><MapPin size={12} /> {cand.location}</span>
                 <span>•</span>
@@ -493,7 +503,6 @@ export const CandidateProfileModal: React.FC = () => {
                 onChange={(e) => assignRecruiter(cand.id, e.target.value)}
                 className={clsx('px-3', 'py-1.5', 'rounded-lg', 'bg-white', 'border', 'border-slate-300', 'text-slate-800', 'font-medium', 'focus:outline-none', 'focus:border-blue-500')}
               >
-                <option value="Dr Rekha Pareek">Dr Rekha Pareek</option>
                 <option value="Dr Sharmila Yadav">Dr Sharmila Yadav</option>
                 <option value="Satyaveer Singh">Satyaveer Singh</option>
               </select>
@@ -854,7 +863,6 @@ export const CandidateProfileModal: React.FC = () => {
                           className="w-full text-xs p-2.5 rounded-xl bg-slate-50 border border-slate-200 focus:bg-white focus:border-blue-500 font-semibold text-slate-800 outline-none transition"
                         >
                           <option value="Dr Sharmila Yadav">Dr Sharmila Yadav</option>
-                          <option value="Dr Rekha Pareek">Dr Rekha Pareek</option>
                           <option value="Satyaveer Singh">Satyaveer Singh</option>
                         </select>
                       </div>

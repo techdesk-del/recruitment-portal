@@ -98,9 +98,9 @@ export const InterviewScheduler: React.FC = () => {
     startTime: '10:30 AM',
     endTime: '11:30 AM',
     durationMinutes: 60,
-    interviewerName: 'Dr Sharmila Yadav',
-    interviewerRole: 'HR Recruiter',
-    interviewerEmail: 'sharmila.yadav@urbangaon.com',
+    interviewerName: 'Satyaveer Singh',
+    interviewerRole: 'HR Recruiter / Screening Lead',
+    interviewerEmail: 'satyaveer.singh@urbangaon.com',
     platform: 'zoom' as InterviewPlatform,
     meetingLink: 'https://zoom.us/j/84920391192?pwd=ug2026',
     meetingId: '84920391192',
@@ -284,10 +284,29 @@ export const InterviewScheduler: React.FC = () => {
     if (!cand) return;
 
     // Suggest appropriate round based on candidate's current status
+    // Round 1 -> Satyaveer Singh
+    // Round 2 / Leadership -> Dr Sharmila Yadav or CEO
     let suggestedRound: InterviewRoundType = 'Round 1: Screening / Technical';
-    if (cand.status === 'interview_r1') suggestedRound = 'Round 2: System Design & Coding';
-    else if (cand.status === 'interview_r2') suggestedRound = 'Round 3: HR & Culture Fit';
-    else if (cand.status === 'shortlisted') suggestedRound = 'Round 1: Screening / Technical';
+    let suggestedInterviewer = 'Satyaveer Singh';
+    let suggestedRole = 'HR Recruiter / Screening Lead';
+    let suggestedEmail = 'satyaveer.singh@urbangaon.com';
+
+    if (cand.status === 'interview_r1') {
+      suggestedRound = 'Round 2: System Design & Coding';
+      suggestedInterviewer = 'Dr Sharmila Yadav';
+      suggestedRole = 'Director HR / Final Evaluation';
+      suggestedEmail = 'sharmila.yadav@urbangaon.com';
+    } else if (cand.status === 'interview_r2') {
+      suggestedRound = 'Round 4: CEO / Leadership Round';
+      suggestedInterviewer = 'CEO (Urban Gaon)';
+      suggestedRole = 'Chief Executive Officer';
+      suggestedEmail = 'jobs@urbangaon.com';
+    } else {
+      suggestedRound = 'Round 1: Screening / Technical';
+      suggestedInterviewer = 'Satyaveer Singh';
+      suggestedRole = 'HR Recruiter / Screening Lead';
+      suggestedEmail = 'satyaveer.singh@urbangaon.com';
+    }
 
     // Auto-generate realistic Zoom Meeting link & room ID
     const randomZoomId = Math.floor(8000000000 + Math.random() * 1999999999).toString();
@@ -310,7 +329,9 @@ export const InterviewScheduler: React.FC = () => {
       meetingId: randomZoomId,
       meetingPasscode: randomPasscode,
       atsMatchScore: cand.atsMatchScore,
-      interviewerName: cand.recruiterAssigned || 'Dr Sharmila Yadav'
+      interviewerName: suggestedInterviewer,
+      interviewerRole: suggestedRole,
+      interviewerEmail: suggestedEmail
     }));
   };
 
@@ -1380,18 +1401,51 @@ export const InterviewScheduler: React.FC = () => {
                 </div>
               </div>
 
-              {/* Interview Round */}
+              {/* Interview Round (with Automatic Interviewer Synchronization) */}
               <div>
-                <label className="block font-bold text-slate-700 mb-1">Interview Round *</label>
+                <label className="block font-bold text-slate-700 mb-1 flex items-center justify-between">
+                  <span>Interview Round *</span>
+                  <span className="text-[10px] font-bold text-blue-600 bg-blue-50 px-2 py-0.5 rounded-md border border-blue-200">
+                    Auto-syncs Assigned Interviewer
+                  </span>
+                </label>
                 <select
                   value={formData.round}
-                  onChange={(e) => setFormData({ ...formData, round: e.target.value as InterviewRoundType })}
-                  className="w-full px-3 py-2 rounded-xl bg-slate-50 border border-slate-200 text-slate-800 font-semibold"
+                  onChange={(e) => {
+                    const newRound = e.target.value as InterviewRoundType;
+                    let autoName = formData.interviewerName;
+                    let autoRole = formData.interviewerRole;
+                    let autoEmail = formData.interviewerEmail;
+
+                    if (newRound.includes('Round 1')) {
+                      autoName = 'Satyaveer Singh';
+                      autoRole = 'HR Recruiter / Screening Lead';
+                      autoEmail = 'satyaveer.singh@urbangaon.com';
+                    } else if (newRound.includes('CEO') || newRound.includes('Leadership') || newRound.includes('Round 4')) {
+                      autoName = 'CEO (Urban Gaon)';
+                      autoRole = 'Chief Executive Officer';
+                      autoEmail = 'jobs@urbangaon.com';
+                    } else if (newRound.includes('Round 2') || newRound.includes('Round 3')) {
+                      autoName = 'Dr Sharmila Yadav';
+                      autoRole = 'Director HR / Final Evaluation';
+                      autoEmail = 'sharmila.yadav@urbangaon.com';
+                    }
+
+                    setFormData({
+                      ...formData,
+                      round: newRound,
+                      interviewerName: autoName,
+                      interviewerRole: autoRole,
+                      interviewerEmail: autoEmail
+                    });
+                  }}
+                  className="w-full px-3 py-2 rounded-xl bg-slate-50 border border-slate-200 text-slate-800 font-semibold focus:border-blue-500 focus:bg-white outline-none transition"
                 >
-                  <option value="Round 1: Screening / Technical">Round 1: Screening / Technical</option>
-                  <option value="Round 2: System Design & Coding">Round 2: System Design & Coding</option>
-                  <option value="Round 3: HR & Culture Fit">Round 3: HR & Culture Fit</option>
-                  <option value="Round 4: CEO / Leadership Round">Round 4: CEO / Leadership Round</option>
+                  <option value="Round 1: Screening / Technical">Round 1: Screening / Technical (Satyaveer Singh)</option>
+                  <option value="Round 2: System Design & Coding">Round 2: Technical & Domain (Dr Sharmila Yadav)</option>
+                  <option value="Round 2: Leadership / Final Evaluation">Round 2: Final Evaluation (Dr Sharmila Yadav / CEO)</option>
+                  <option value="Round 3: HR & Culture Fit">Round 3: HR & Culture Fit (Dr Sharmila Yadav)</option>
+                  <option value="Round 4: CEO / Leadership Round">Round 4: CEO Leadership Round (CEO)</option>
                 </select>
               </div>
 
@@ -1434,30 +1488,45 @@ export const InterviewScheduler: React.FC = () => {
               {/* Interviewer Panel Selection */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="block font-bold text-slate-700 mb-1">Interviewer Name *</label>
+                  <label className="block font-bold text-slate-700 mb-1 flex items-center justify-between">
+                    <span>Interviewer Name *</span>
+                    {formData.round.includes('Round 1') ? (
+                      <span className="text-[10px] font-bold text-blue-700 bg-blue-50 px-2 py-0.5 rounded-full border border-blue-200">
+                        R1 Lead: Satya Singh
+                      </span>
+                    ) : (
+                      <span className="text-[10px] font-bold text-purple-700 bg-purple-50 px-2 py-0.5 rounded-full border border-purple-200">
+                        R2 Panel: CEO / Dr Sharmila
+                      </span>
+                    )}
+                  </label>
                   <select
                     value={formData.interviewerName}
                     onChange={(e) => {
                       const val = e.target.value;
-                      let role = 'Assigned HR Recruiter';
+                      let role = 'HR Recruiter';
                       let email = 'hr@urbangaon.com';
-                      if (val === 'Dr Sharmila Yadav') {
-                        role = 'HR Recruiter';
-                        email = 'sharmila.yadav@urbangaon.com';
-                      } else if (val === 'Dr Rekha Pareek') {
-                        role = 'HR Recruiter';
-                        email = 'rekha.pareek@urbangaon.com';
-                      } else if (val === 'Satyaveer Singh') {
-                        role = 'HR Recruiter';
+                      if (val === 'Satyaveer Singh') {
+                        role = 'HR Recruiter / Screening Lead';
                         email = 'satyaveer.singh@urbangaon.com';
+                      } else if (val === 'Dr Sharmila Yadav') {
+                        role = 'Director HR / Final Evaluation';
+                        email = 'sharmila.yadav@urbangaon.com';
+                      } else if (val === 'CEO (Urban Gaon)' || val === 'CEO') {
+                        role = 'Chief Executive Officer';
+                        email = 'jobs@urbangaon.com';
                       }
                       setFormData({ ...formData, interviewerName: val, interviewerRole: role, interviewerEmail: email });
                     }}
-                    className="w-full px-3 py-2 rounded-xl bg-slate-50 border border-slate-200 text-slate-800 font-bold"
+                    className="w-full px-3 py-2 rounded-xl bg-slate-50 border border-slate-200 text-slate-800 font-bold focus:bg-white focus:border-blue-500 outline-none transition"
                   >
-                    <option value="Dr Sharmila Yadav">Dr Sharmila Yadav</option>
-                    <option value="Dr Rekha Pareek">Dr Rekha Pareek</option>
-                    <option value="Satyaveer Singh">Satyaveer Singh</option>
+                    <optgroup label="Round 1 Screening & Technical">
+                      <option value="Satyaveer Singh">Satyaveer Singh (R1 Screening Lead)</option>
+                    </optgroup>
+                    <optgroup label="Round 2 & Final Leadership Evaluation">
+                      <option value="Dr Sharmila Yadav">Dr Sharmila Yadav (Director HR / R2)</option>
+                      <option value="CEO (Urban Gaon)">CEO (Urban Gaon / Leadership Round)</option>
+                    </optgroup>
                   </select>
                 </div>
                 <div>

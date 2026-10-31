@@ -72,15 +72,16 @@ export const BulkResumeUploadModal: React.FC = () => {
     email: '',
     phone: '',
     location: 'Jaipur, Rajasthan',
-    jobId: jobs[0]?.id || '',
-    jobTitle: jobs[0]?.title || '',
+    jobId: 'custom',
+    customRole: '',
+    jobTitle: '',
     source: 'referral' as CandidateSource,
     recruiterAssigned: 'Dr Sharmila Yadav',
     experienceYears: 3,
     currentSalary: '',
     expectedSalary: '',
     noticePeriod: '30 Days',
-    skills: 'Project Coordination, Communication, Operations',
+    skills: '',
     summary: '',
     notes: ''
   });
@@ -253,7 +254,13 @@ export const BulkResumeUploadModal: React.FC = () => {
       return;
     }
 
-    const matchedJob = jobs.find((j) => j.id === manualForm.jobId) || jobs[0];
+    const isCustom = manualForm.jobId === 'custom' || manualForm.jobId === 'blank';
+    const matchedJob = !isCustom ? jobs.find((j) => j.id === manualForm.jobId) : null;
+    const finalJobTitle = isCustom
+      ? (manualForm.jobId === 'blank' ? '' : manualForm.customRole.trim())
+      : (matchedJob?.title || manualForm.jobTitle || '');
+    const finalJobId = isCustom ? 'custom' : (matchedJob?.id || 'custom');
+    const finalDept = isCustom ? 'General / Custom' : (matchedJob?.department || 'Operations');
     const skillList = manualForm.skills.split(',').map((s) => s.trim()).filter(Boolean);
 
     const newCand: Candidate = {
@@ -264,20 +271,20 @@ export const BulkResumeUploadModal: React.FC = () => {
       location: manualForm.location.trim() || 'Jaipur, Rajasthan',
       source: manualForm.source,
       sourceId: `${manualForm.source.toUpperCase()}-${Math.floor(Math.random() * 90000 + 10000)}`,
-      jobAppliedFor: matchedJob?.title || manualForm.jobTitle,
-      jobId: matchedJob?.id || 'job-manual',
-      department: matchedJob?.department || 'Operations',
+      jobAppliedFor: finalJobTitle,
+      jobId: finalJobId,
+      department: finalDept,
       appliedDate: new Date().toISOString(),
       lastUpdatedDate: new Date().toISOString(),
       status: initialStatus,
-      atsMatchScore: 92,
+      atsMatchScore: 90,
       rating: 4,
       experienceYears: Number(manualForm.experienceYears) || 0,
       currentSalary: manualForm.currentSalary || '₹8,00,000 P.A.',
       expectedSalary: manualForm.expectedSalary || '₹12,00,000 P.A.',
       noticePeriod: manualForm.noticePeriod || '30 Days',
       recruiterAssigned: manualForm.recruiterAssigned || 'Dr Sharmila Yadav',
-      tags: skillList.length > 0 ? skillList : ['Management', 'Operations'],
+      tags: skillList.length > 0 ? skillList : (finalJobTitle ? [finalJobTitle] : ['Candidate']),
       notes: manualForm.notes || 'Candidate added via manual intake.',
       resumeData: {
         summary: manualForm.summary || `Qualified candidate with ${manualForm.experienceYears} years of professional experience.`,
@@ -285,10 +292,10 @@ export const BulkResumeUploadModal: React.FC = () => {
         experience: [
           {
             company: 'Previous Employer',
-            role: matchedJob?.title || 'Associate',
+            role: finalJobTitle || 'Professional',
             duration: '2021 - Present',
             location: manualForm.location || 'Jaipur',
-            highlights: ['Demonstrated strong performance, leadership, and execution capabilities.']
+            highlights: ['Demonstrated strong performance and execution capabilities.']
           }
         ],
         education: [
@@ -422,7 +429,8 @@ export const BulkResumeUploadModal: React.FC = () => {
                     onChange={(e) => setSelectedJobId(e.target.value)}
                     className="w-full px-3 py-1.5 rounded-xl bg-slate-50 border border-slate-200 text-xs font-medium text-slate-800 focus:outline-none focus:border-blue-500"
                   >
-                    <option value="auto">🤖 Auto-Detect from Resume</option>
+                    <option value="auto">🤖 Auto-Detect from Resume (Leave blank if not matched)</option>
+                    <option value="custom">✏️ Custom Role (Keep Blank / Enter Manually)</option>
                     {jobs.map((j) => (
                       <option key={j.id} value={j.id}>
                         {j.title}
@@ -464,7 +472,6 @@ export const BulkResumeUploadModal: React.FC = () => {
                     className="w-full px-3 py-1.5 rounded-xl bg-slate-50 border border-slate-200 text-xs font-medium text-slate-800 focus:outline-none focus:border-blue-500"
                   >
                     <option value="Dr Sharmila Yadav">Dr Sharmila Yadav</option>
-                    <option value="Dr Rekha Pareek">Dr Rekha Pareek</option>
                     <option value="Satyaveer Singh">Satyaveer Singh</option>
                   </select>
                 </div>
@@ -646,8 +653,28 @@ export const BulkResumeUploadModal: React.FC = () => {
                                 )}
                               </div>
 
-                              <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] text-slate-500 mt-1">
-                                <span className="font-semibold text-slate-800">{cand.jobAppliedFor}</span>
+                              <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5 text-[11px] text-slate-500 mt-1.5">
+                                <div className="flex items-center gap-1.5 bg-blue-50/70 border border-blue-200/80 px-2 py-0.5 rounded-lg">
+                                  <span className="text-[10px] font-bold text-blue-700">Role:</span>
+                                  <input
+                                    type="text"
+                                    placeholder="Click to set custom role..."
+                                    value={cand.jobAppliedFor || ''}
+                                    onChange={(e) => {
+                                      const newRole = e.target.value;
+                                      setStagedCandidates((prev) => prev.map((sc, sci) => sci === index ? {
+                                        ...sc,
+                                        candidate: {
+                                          ...sc.candidate,
+                                          jobAppliedFor: newRole,
+                                          jobId: jobs.find(j => j.title.toLowerCase() === newRole.toLowerCase())?.id || 'custom',
+                                          currentDesignation: newRole || sc.candidate.currentDesignation
+                                        }
+                                      } : sc));
+                                    }}
+                                    className="text-xs font-bold text-slate-900 bg-transparent focus:bg-white px-1.5 py-0.5 rounded border border-transparent focus:border-blue-400 outline-none w-44 transition placeholder:font-normal placeholder:text-slate-400"
+                                  />
+                                </div>
                                 <span>•</span>
                                 <span className="flex items-center gap-1 font-medium">
                                   <PortalLogo source={cand.source} size={13} />
@@ -821,17 +848,41 @@ export const BulkResumeUploadModal: React.FC = () => {
                     <select
                       value={manualForm.jobId}
                       onChange={(e) => {
-                        const j = jobs.find((x) => x.id === e.target.value);
-                        setManualForm((p) => ({ ...p, jobId: e.target.value, jobTitle: j?.title || '' }));
+                        const val = e.target.value;
+                        const j = jobs.find((x) => x.id === val);
+                        setManualForm((p) => ({
+                          ...p,
+                          jobId: val,
+                          jobTitle: j?.title || (val === 'custom' ? p.customRole : ''),
+                          customRole: val === 'custom' ? p.customRole : (val === 'blank' ? '' : p.customRole)
+                        }));
                       }}
                       className="w-full text-xs p-2.5 rounded-xl bg-slate-50 border border-slate-200 focus:bg-white focus:border-blue-500 font-bold text-blue-700 outline-none"
                     >
+                      <option value="custom">✏️ Custom Role (Enter Manually)</option>
+                      <option value="blank">⚪ Blank Role (Decide Later by HR)</option>
                       {jobs.map((j) => (
                         <option key={j.id} value={j.id}>
                           {j.title}
                         </option>
                       ))}
                     </select>
+
+                    {manualForm.jobId === 'custom' && (
+                      <div className="mt-2 animate-fadeIn">
+                        <label className="text-[10px] font-bold text-blue-700 block mb-1">
+                          Type Custom Role Name:
+                        </label>
+                        <input
+                          type="text"
+                          required
+                          placeholder="e.g. Driver, Chauffeur, Cook, Security"
+                          value={manualForm.customRole}
+                          onChange={(e) => setManualForm((p) => ({ ...p, customRole: e.target.value, jobTitle: e.target.value }))}
+                          className="w-full text-xs p-2 rounded-xl bg-blue-50/50 border border-blue-300 focus:bg-white focus:border-blue-600 font-semibold text-slate-900 outline-none transition placeholder:text-slate-400"
+                        />
+                      </div>
+                    )}
                   </div>
 
                   <div>
@@ -859,7 +910,6 @@ export const BulkResumeUploadModal: React.FC = () => {
                       className="w-full text-xs p-2.5 rounded-xl bg-slate-50 border border-slate-200 focus:bg-white focus:border-blue-500 font-semibold text-slate-800 outline-none"
                     >
                       <option value="Dr Sharmila Yadav">Dr Sharmila Yadav</option>
-                      <option value="Dr Rekha Pareek">Dr Rekha Pareek</option>
                       <option value="Satyaveer Singh">Satyaveer Singh</option>
                     </select>
                   </div>

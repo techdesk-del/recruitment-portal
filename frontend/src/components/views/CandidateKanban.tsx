@@ -136,10 +136,10 @@ export const CandidateKanban: React.FC = () => {
     if (filters.searchQuery) {
       const q = filters.searchQuery.toLowerCase();
       const match = 
-        cand.name.toLowerCase().includes(q) ||
-        cand.email.toLowerCase().includes(q) ||
-        cand.jobAppliedFor.toLowerCase().includes(q) ||
-        cand.tags.some(t => t.toLowerCase().includes(q));
+        (cand.name || '').toLowerCase().includes(q) ||
+        (cand.email || '').toLowerCase().includes(q) ||
+        (cand.jobAppliedFor || '').toLowerCase().includes(q) ||
+        (cand.tags || []).some(t => t.toLowerCase().includes(q));
       if (!match) return false;
     }
     return true;
@@ -335,7 +335,9 @@ export const CandidateKanban: React.FC = () => {
                           >
                             {cand.name}
                           </h4>
-                          <p className="text-[11px] text-slate-500 line-clamp-1 mt-0.5">{cand.jobAppliedFor}</p>
+                          <p className="text-[11px] text-slate-500 line-clamp-1 mt-0.5">
+                            {cand.jobAppliedFor || <span className="text-amber-700 font-semibold">✏️ Role Not Set</span>}
+                          </p>
 
                           {/* Quick Info Tags */}
                           <div className="mt-2 flex flex-wrap items-center gap-1.5 text-[10px] text-slate-600">

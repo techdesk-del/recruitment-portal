@@ -288,7 +288,6 @@ export const MainDashboard: React.FC = () => {
           <div className="flex flex-wrap items-center gap-2">
             {[
               { name: 'Dr Sharmila Yadav', count: candidates.filter(c => c.recruiterAssigned === 'Dr Sharmila Yadav').length },
-              { name: 'Dr Rekha Pareek', count: candidates.filter(c => c.recruiterAssigned === 'Dr Rekha Pareek').length },
               { name: 'Satyaveer Singh', count: candidates.filter(c => c.recruiterAssigned === 'Satyaveer Singh').length }
             ].map(hr => (
               <button

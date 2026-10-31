@@ -13,7 +13,11 @@ import {
   Filter,
   Trash2,
   ChevronLeft,
-  ChevronRight 
+  ChevronRight,
+  Edit2,
+  Check,
+  X,
+  Loader2 
 } from 'lucide-react';
 import { useRecruitment } from '../../context/RecruitmentContext';
 import { useAuth } from '../../context/AuthContext';
@@ -35,6 +39,7 @@ export const CandidateTable: React.FC = () => {
     shiftCandidateToCalling,
     downloadResume, 
     deleteCandidate,
+    updateCandidateDetails,
     exportToCSV,
     exportToExcel,
     activeView,
@@ -43,6 +48,43 @@ export const CandidateTable: React.FC = () => {
 
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
+
+  // --- Inline Role Editing State ---
+  const [editingRoleId, setEditingRoleId] = useState<string | null>(null);
+  const [editingRoleValue, setEditingRoleValue] = useState<string>('');
+  const [isSavingRole, setIsSavingRole] = useState(false);
+
+  const startEditingRole = (candId: string, currentRole: string) => {
+    setEditingRoleId(candId);
+    setEditingRoleValue(currentRole || '');
+  };
+
+  const cancelEditingRole = () => {
+    setEditingRoleId(null);
+    setEditingRoleValue('');
+  };
+
+  const saveRole = async (candId: string) => {
+    const trimmed = editingRoleValue.trim();
+    setIsSavingRole(true);
+    try {
+      const matched = jobs.find((j) => j.title.toLowerCase() === trimmed.toLowerCase());
+      await updateCandidateDetails(
+        candId, 
+        {
+          jobAppliedFor: trimmed,
+          jobId: matched?.id || 'custom',
+          department: matched?.department || 'General / Custom'
+        }, 
+        `Role updated to "${trimmed || 'Custom Role'}" directly from candidate table`
+      );
+      setEditingRoleId(null);
+    } catch (err) {
+      console.error('Failed to update role:', err);
+    } finally {
+      setIsSavingRole(false);
+    }
+  };
 
   // --- Horizontal Edge Hover Auto-Scroll ---
   const tableScrollRef = useRef<HTMLDivElement>(null);
@@ -181,13 +223,13 @@ export const CandidateTable: React.FC = () => {
     if (filters.searchQuery) {
       const q = filters.searchQuery.toLowerCase();
       const match =
-        cand.name.toLowerCase().includes(q) ||
-        cand.email.toLowerCase().includes(q) ||
-        cand.jobAppliedFor.toLowerCase().includes(q) ||
-        cand.location.toLowerCase().includes(q) ||
-        cand.phone.includes(q) ||
+        (cand.name || '').toLowerCase().includes(q) ||
+        (cand.email || '').toLowerCase().includes(q) ||
+        (cand.jobAppliedFor || '').toLowerCase().includes(q) ||
+        (cand.location || '').toLowerCase().includes(q) ||
+        (cand.phone || '').includes(q) ||
         (cand.recruiterAssigned && cand.recruiterAssigned.toLowerCase().includes(q)) ||
-        cand.tags.some((t) => t.toLowerCase().includes(q));
+        (cand.tags || []).some((t) => t.toLowerCase().includes(q));
       if (!match) return false;
     }
     return true;
@@ -395,7 +437,6 @@ export const CandidateTable: React.FC = () => {
             className="flex-1 sm:flex-initial min-w-[130px] px-3 py-1.5 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-700 focus:outline-none focus:border-blue-500 font-medium"
           >
             <option value="all">All Assigned HRs</option>
-            <option value="Dr Rekha Pareek">Dr Rekha Pareek</option>
             <option value="Dr Sharmila Yadav">Dr Sharmila Yadav</option>
             <option value="Satyaveer Singh">Satyaveer Singh</option>
           </select>
@@ -530,9 +571,69 @@ export const CandidateTable: React.FC = () => {
                         </div>
                       </td>
 
-                      {/* Applied Job Role */}
+                      {/* Applied Job Role (with Inline Quick Edit) */}
                       <td className="py-3.5 px-4">
-                        <span className="font-semibold text-slate-800 block text-sm">{cand.jobAppliedFor}</span>
+                        {editingRoleId === cand.id ? (
+                          <div className="flex items-center gap-1.5 min-w-[210px] animate-fadeIn">
+                            <input
+                              type="text"
+                              autoFocus
+                              value={editingRoleValue}
+                              onChange={(e) => setEditingRoleValue(e.target.value)}
+                              onKeyDown={(e) => {
+                                if (e.key === 'Enter') saveRole(cand.id);
+                                if (e.key === 'Escape') cancelEditingRole();
+                              }}
+                              placeholder="Type role (e.g. Driver, Sales...)"
+                              list={`table-role-list-${cand.id}`}
+                              className="text-xs font-bold text-slate-900 bg-white border border-blue-400 focus:border-blue-600 px-2 py-1 rounded-lg outline-none w-full shadow-2xs transition"
+                            />
+                            <datalist id={`table-role-list-${cand.id}`}>
+                              {jobs.map((j) => (
+                                <option key={j.id} value={j.title} />
+                              ))}
+                            </datalist>
+                            <button
+                              type="button"
+                              disabled={isSavingRole}
+                              onClick={() => saveRole(cand.id)}
+                              className="p-1 rounded-md bg-emerald-600 hover:bg-emerald-700 text-white shrink-0 transition cursor-pointer disabled:opacity-50"
+                              title="Save Role (Enter)"
+                            >
+                              {isSavingRole ? <Loader2 size={13} className="animate-spin" /> : <Check size={13} />}
+                            </button>
+                            <button
+                              type="button"
+                              onClick={cancelEditingRole}
+                              className="p-1 rounded-md bg-slate-200 hover:bg-slate-300 text-slate-700 shrink-0 transition cursor-pointer"
+                              title="Cancel (Esc)"
+                            >
+                              <X size={13} />
+                            </button>
+                          </div>
+                        ) : (
+                          <div className="group/role flex items-center gap-1.5">
+                            <span
+                              onClick={() => startEditingRole(cand.id, cand.jobAppliedFor)}
+                              className="font-semibold text-slate-800 text-sm hover:text-blue-600 cursor-pointer transition inline-flex items-center gap-1.5"
+                              title="Click to edit role directly"
+                            >
+                              {cand.jobAppliedFor || (
+                                <span className="inline-flex items-center gap-1 text-amber-700 bg-amber-50 border border-amber-200 px-1.5 py-0.5 rounded text-xs font-bold">
+                                  ✏️ Custom Role (Click to assign)
+                                </span>
+                              )}
+                            </span>
+                            <button
+                              type="button"
+                              onClick={() => startEditingRole(cand.id, cand.jobAppliedFor)}
+                              className="opacity-0 group-hover/role:opacity-100 p-1 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-md transition cursor-pointer"
+                              title="Edit applied role directly"
+                            >
+                              <Edit2 size={12} />
+                            </button>
+                          </div>
+                        )}
                         <span className="text-[11px] text-slate-400 flex items-center gap-1 mt-0.5 font-normal">
                           <MapPin size={11} className="text-slate-400" /> {cand.location}
                         </span>

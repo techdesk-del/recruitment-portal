@@ -82,7 +82,7 @@ export const CandidateCallTab: React.FC<CandidateCallTabProps> = ({ candidate, o
     return d.toISOString().split('T')[0];
   });
   const [interviewTime, setInterviewTime] = useState('11:30 AM');
-  const [interviewerName, setInterviewerName] = useState(candidate.recruiterAssigned || 'Dr Sharmila Yadav');
+  const [interviewerName, setInterviewerName] = useState('Satyaveer Singh');
 
   // Specific reason chips
   const [holdReason, setHoldReason] = useState<string>('Candidate reviewing offer options');
@@ -177,8 +177,8 @@ export const CandidateCallTab: React.FC<CandidateCallTabProps> = ({ candidate, o
           startTime: interviewTime,
           endTime: '12:30 PM',
           interviewerName,
-          interviewerRole: 'HR Recruiter',
-          interviewerEmail: interviewerName === 'Dr Rekha Pareek' ? 'rekha.pareek@urbangaon.com' : interviewerName === 'Satyaveer Singh' ? 'satyaveer.singh@urbangaon.com' : 'sharmila.yadav@urbangaon.com',
+          interviewerRole: interviewerName === 'Satyaveer Singh' ? 'HR Recruiter / Screening Lead' : (interviewerName.includes('CEO') ? 'Chief Executive Officer' : 'Director HR'),
+          interviewerEmail: interviewerName === 'Satyaveer Singh' ? 'satyaveer.singh@urbangaon.com' : (interviewerName.includes('CEO') ? 'jobs@urbangaon.com' : 'sharmila.yadav@urbangaon.com'),
           platform: 'zoom'
         } : undefined
       });
@@ -320,7 +320,6 @@ export const CandidateCallTab: React.FC<CandidateCallTabProps> = ({ candidate, o
               onChange={(e) => setRecruiterName(e.target.value)}
               className="text-xs px-2.5 py-1.5 rounded-lg bg-slate-50 border border-slate-300 font-semibold text-slate-800 focus:outline-none focus:border-blue-500"
             >
-              <option value="Dr Rekha Pareek">Dr Rekha Pareek</option>
               <option value="Dr Sharmila Yadav">Dr Sharmila Yadav</option>
               <option value="Satyaveer Singh">Satyaveer Singh</option>
             </select>
@@ -764,12 +763,15 @@ export const CandidateCallTab: React.FC<CandidateCallTabProps> = ({ candidate, o
                 </div>
                 <div>
                   <label className="text-[11px] font-semibold text-blue-900 block mb-1">Assigned HR Interviewer</label>
-                  <input
-                    type="text"
+                  <select
                     value={interviewerName}
                     onChange={(e) => setInterviewerName(e.target.value)}
-                    className="w-full text-xs p-2 rounded-lg bg-white border border-blue-300 font-semibold"
-                  />
+                    className="w-full text-xs p-2 rounded-lg bg-white border border-blue-300 font-semibold focus:border-blue-500 outline-none"
+                  >
+                    <option value="Satyaveer Singh">Satyaveer Singh (R1 Screening Lead)</option>
+                    <option value="Dr Sharmila Yadav">Dr Sharmila Yadav (Director HR / R2)</option>
+                    <option value="CEO (Urban Gaon)">CEO (Urban Gaon / Leadership)</option>
+                  </select>
                 </div>
               </div>
             )}

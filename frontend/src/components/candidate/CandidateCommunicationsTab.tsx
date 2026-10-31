@@ -222,8 +222,8 @@ export const CandidateCommunicationsTab: React.FC<CandidateCommunicationsTabProp
       endTime: interviewEndTime,
       durationMinutes: 60,
       interviewerName: interviewerName,
-      interviewerRole: 'Lead Technical Recruiter',
-      interviewerEmail: 'careers@urbangaon.com',
+      interviewerRole: interviewerName === 'Satyaveer Singh' ? 'HR Recruiter / Screening Lead' : (interviewerName.includes('CEO') ? 'Chief Executive Officer' : 'Director HR / Final Evaluation'),
+      interviewerEmail: interviewerName === 'Satyaveer Singh' ? 'satyaveer.singh@urbangaon.com' : (interviewerName.includes('CEO') ? 'jobs@urbangaon.com' : 'sharmila.yadav@urbangaon.com'),
       platform: interviewPlatform,
       meetingLink: interviewMeetingLink,
       meetingId: zoomMeetingId,
@@ -569,17 +569,32 @@ export const CandidateCommunicationsTab: React.FC<CandidateCommunicationsTabProp
           
           {/* Round Selector */}
           <div className="space-y-1">
-            <label className="font-bold text-slate-700 block text-[11px]">Interview Round:</label>
+            <div className="flex items-center justify-between">
+              <label className="font-bold text-slate-700 block text-[11px]">Interview Round:</label>
+              <span className="text-[10px] font-bold text-blue-600 bg-blue-50 px-1.5 py-0.2 rounded">
+                Auto-syncs Panel
+              </span>
+            </div>
             <select
               value={interviewRound}
-              onChange={(e) => setInterviewRound(e.target.value as InterviewRoundType)}
+              onChange={(e) => {
+                const val = e.target.value as InterviewRoundType;
+                setInterviewRound(val);
+                if (val.includes('Round 1')) {
+                  setInterviewerName('Satyaveer Singh');
+                } else if (val.includes('CEO') || val.includes('Round 4')) {
+                  setInterviewerName('CEO (Urban Gaon)');
+                } else if (val.includes('Round 2') || val.includes('Round 3')) {
+                  setInterviewerName('Dr Sharmila Yadav');
+                }
+              }}
               className="w-full p-2 rounded-xl bg-slate-50 border border-slate-200 text-slate-800 font-semibold focus:border-blue-500 outline-none"
             >
-              <option value="Round 1: Screening / Technical">Round 1: Screening / Technical</option>
-              <option value="Round 2: System Design & Coding">Round 2: Technical & Domain</option>
-              <option value="Round 2: Leadership / Final Evaluation">Round 2: Managerial Discussion</option>
-              <option value="Round 3: HR & Culture Fit">Round 3: HR & Culture Fit</option>
-              <option value="Round 4: CEO / Leadership Round">Round 4: CEO / Leadership Round</option>
+              <option value="Round 1: Screening / Technical">Round 1: Screening / Technical (Satya Singh)</option>
+              <option value="Round 2: System Design & Coding">Round 2: Technical & Domain (Dr Sharmila Yadav)</option>
+              <option value="Round 2: Leadership / Final Evaluation">Round 2: Final Evaluation (CEO / Dr Sharmila)</option>
+              <option value="Round 3: HR & Culture Fit">Round 3: HR & Culture Fit (Dr Sharmila Yadav)</option>
+              <option value="Round 4: CEO / Leadership Round">Round 4: CEO Leadership Round (CEO)</option>
             </select>
           </div>
 
@@ -634,16 +649,33 @@ export const CandidateCommunicationsTab: React.FC<CandidateCommunicationsTabProp
             </div>
           </div>
 
-          {/* Interviewer */}
+          {/* Interviewer Assigned */}
           <div className="space-y-1">
-            <label className="font-bold text-slate-700 block text-[11px]">Interviewer Assigned:</label>
-            <input
-              type="text"
+            <div className="flex items-center justify-between">
+              <label className="font-bold text-slate-700 block text-[11px]">Interviewer Assigned:</label>
+              {interviewRound.includes('Round 1') ? (
+                <span className="text-[10px] font-bold text-blue-700 bg-blue-50 px-1.5 py-0.2 rounded">
+                  R1: Satya Singh
+                </span>
+              ) : (
+                <span className="text-[10px] font-bold text-purple-700 bg-purple-50 px-1.5 py-0.2 rounded">
+                  R2: CEO / Dr Sharmila
+                </span>
+              )}
+            </div>
+            <select
               value={interviewerName}
               onChange={(e) => setInterviewerName(e.target.value)}
-              placeholder="Dr Sharmila Yadav"
-              className="w-full p-2 rounded-xl bg-slate-50 border border-slate-200 text-slate-800 font-semibold focus:border-blue-500 outline-none"
-            />
+              className="w-full p-2 rounded-xl bg-slate-50 border border-slate-200 text-slate-800 font-bold focus:border-blue-500 outline-none"
+            >
+              <optgroup label="Round 1 Lead">
+                <option value="Satyaveer Singh">Satyaveer Singh (R1 Screening & Technical)</option>
+              </optgroup>
+              <optgroup label="Round 2 & Final Panel">
+                <option value="Dr Sharmila Yadav">Dr Sharmila Yadav (Director HR / R2)</option>
+                <option value="CEO (Urban Gaon)">CEO (Urban Gaon / Leadership Round)</option>
+              </optgroup>
+            </select>
           </div>
 
         </div>

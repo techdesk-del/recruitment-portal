@@ -200,8 +200,8 @@ export const CallingDesk: React.FC = () => {
     return d.toISOString().split('T')[0];
   });
   const [interviewStartTime, setInterviewStartTime] = useState('11:00 AM');
-  const [interviewerName, setInterviewerName] = useState('Dr Sharmila Yadav');
-  const [interviewerRole, setInterviewerRole] = useState('HR Recruiter');
+  const [interviewerName, setInterviewerName] = useState('Satyaveer Singh');
+  const [interviewerRole, setInterviewerRole] = useState('HR Recruiter / Screening Lead');
 
   // Quick Follow-up Modal State for table item
   const [quickFollowUpCand, setQuickFollowUpCand] = useState<Candidate | null>(null);
@@ -345,7 +345,7 @@ export const CallingDesk: React.FC = () => {
         endTime: '12:00 PM',
         interviewerName,
         interviewerRole,
-        interviewerEmail: interviewerName === 'Dr Rekha Pareek' ? 'rekha.pareek@urbangaon.com' : interviewerName === 'Satyaveer Singh' ? 'satyaveer.singh@urbangaon.com' : 'sharmila.yadav@urbangaon.com',
+        interviewerEmail: interviewerName === 'Satyaveer Singh' ? 'satyaveer.singh@urbangaon.com' : (interviewerName.includes('CEO') ? 'jobs@urbangaon.com' : 'sharmila.yadav@urbangaon.com'),
         platform: 'zoom',
         meetingLink: 'https://zoom.us/j/84920391192?pwd=ug2026'
       }
@@ -804,7 +804,6 @@ export const CallingDesk: React.FC = () => {
             className="px-3 py-1.5 rounded-xl bg-slate-50 border border-slate-200 text-slate-700 font-medium focus:outline-none focus:border-blue-500"
           >
             <option value="all">All Assigned HRs</option>
-            <option value="Dr Rekha Pareek">Dr Rekha Pareek</option>
             <option value="Dr Sharmila Yadav">Dr Sharmila Yadav</option>
             <option value="Satyaveer Singh">Satyaveer Singh</option>
           </select>
@@ -1971,13 +1970,21 @@ export const CallingDesk: React.FC = () => {
                       </div>
                       <div>
                         <label className="text-[11px] font-semibold text-emerald-700 block mb-1">Assigned HR Interviewer</label>
-                        <input
-                          type="text"
+                        <select
                           value={interviewerName}
-                          onChange={(e) => setInterviewerName(e.target.value)}
-                          placeholder="Dr Sharmila Yadav"
-                          className="w-full p-2.5 rounded-xl bg-white border border-emerald-200 text-emerald-900 font-bold"
-                        />
+                          onChange={(e) => {
+                            const val = e.target.value;
+                            setInterviewerName(val);
+                            if (val === 'Satyaveer Singh') setInterviewerRole('HR Recruiter / Screening Lead');
+                            else if (val.includes('CEO')) setInterviewerRole('Chief Executive Officer');
+                            else setInterviewerRole('Director HR / Final Evaluation');
+                          }}
+                          className="w-full p-2.5 rounded-xl bg-white border border-emerald-200 text-emerald-900 font-bold outline-none"
+                        >
+                          <option value="Satyaveer Singh">Satyaveer Singh (R1 Screening Lead)</option>
+                          <option value="Dr Sharmila Yadav">Dr Sharmila Yadav (Director HR / R2)</option>
+                          <option value="CEO (Urban Gaon)">CEO (Urban Gaon / Leadership)</option>
+                        </select>
                       </div>
                     </div>
                   )}

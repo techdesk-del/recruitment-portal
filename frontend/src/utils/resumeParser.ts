@@ -111,6 +111,22 @@ export function extractExperienceYears(text: string, fileName: string = ''): num
   return 4.0;
 }
 
+const createCustomJob = (title: string = '', dept: string = 'General'): JobPosting => ({
+  id: 'custom',
+  title: title.trim(),
+  department: dept,
+  location: 'Jaipur, Rajasthan',
+  type: 'Full-time',
+  experienceRequired: '0-10+ Yrs',
+  salaryRange: 'Negotiable',
+  openPositions: 1,
+  postedDate: new Date().toISOString(),
+  status: 'active',
+  platforms: ['referral', 'naukri', 'apna'],
+  applicantsCount: 0,
+  hiredCount: 0
+});
+
 // Find best matching job requisition based on actual resume profile
 export function matchJobRequisition(
   skills: string[],
@@ -120,6 +136,10 @@ export function matchJobRequisition(
   rawResumeText: string = '',
   currentDesignation: string = ''
 ): JobPosting {
+  if (preferredJobId === 'custom' || preferredJobId === 'blank') {
+    return createCustomJob(preferredJobId === 'blank' ? '' : (currentDesignation || ''), 'General');
+  }
+
   if (preferredJobId && preferredJobId !== 'auto' && preferredJobId !== 'all') {
     const found = jobs.find((j) => j.id === preferredJobId);
     if (found) return found;
@@ -128,8 +148,15 @@ export function matchJobRequisition(
   const primaryText = (currentDesignation + ' ' + skills.join(' ')).toLowerCase();
   const bodyText = (rawResumeText || '').toLowerCase();
 
-  let bestJob = jobs[0];
-  let highestScore = -1;
+  // If candidate is a driver/chauffeur and no driver requisition exists in open jobs:
+  if (/driver|chauffeur|fleet|commercial driving|heavy vehicle|light motor/i.test(primaryText) || /driver|chauffeur/i.test(bodyText)) {
+    const driverJob = jobs.find((j) => /driver/i.test(j.title));
+    if (driverJob) return driverJob;
+    return createCustomJob(currentDesignation || 'Driver', 'Logistics / Operations');
+  }
+
+  let bestJob: JobPosting | null = null;
+  let highestScore = 0;
 
   for (const job of jobs) {
     let score = 0;
@@ -192,13 +219,23 @@ export function matchJobRequisition(
     }
   }
 
-  return bestJob;
+  // If score is above confidence threshold, return matched job
+  if (bestJob && highestScore >= 20) {
+    return bestJob;
+  }
+
+  // If AI cannot match reliably, leave role blank (or accurately extracted) so HR can fill manually
+  const fallbackTitle = (currentDesignation && !/sales officer/i.test(currentDesignation)) ? currentDesignation : '';
+  return createCustomJob(fallbackTitle, 'General');
 }
 
 // Calculate ATS match score based on true fit
 export function calculateAtsMatchScore(skills: string[], targetJob: JobPosting, experienceYears: number): number {
+  if (!targetJob || !targetJob.title || targetJob.id === 'custom') {
+    return 85;
+  }
   let score = 86;
-  const targetLower = targetJob.title.toLowerCase();
+  const targetLower = (targetJob.title || '').toLowerCase();
 
   const coreMatches = skills.filter((s) => targetLower.includes(s.toLowerCase()) || s.toLowerCase().includes('management') || s.toLowerCase().includes('sales')).length;
   score += Math.min(coreMatches * 3, 9);
@@ -575,8 +612,8 @@ function parseUniversalResumeText(rawText: string, rawLines: string[], fileName:
     expYears = Math.max(1, new Date().getFullYear() - earliest);
   }
 
-  const currentCompany = experiences[0]?.company || (headerLines[1] ? headerLines[1].split(/[|–—]/)[0].trim() : 'Nippon Paint India');
-  const currentDesignation = experiences[0]?.role || (headerLines[1] ? headerLines[1].split(/[|–—]/).pop()?.trim() : 'Sales Officer (Wood Art)');
+  const currentCompany = experiences[0]?.company || (headerLines[1] ? headerLines[1].split(/[|–—]/)[0].trim() : '');
+  const currentDesignation = experiences[0]?.role || (headerLines[1] ? headerLines[1].split(/[|–—]/).pop()?.trim() : '');
 
   return {
     name,
@@ -740,13 +777,13 @@ export async function parseResumeFile(
   const finalEmail = geminiResult?.email || parsedUniversal.email || `${finalName.toLowerCase().replace(/[^a-z]/g, '.')}@candidate.org`;
   const finalPhone = geminiResult?.phone || parsedUniversal.phone || '+91 98290 00000';
   const finalLocation = geminiResult?.location || parsedUniversal.location || 'Jaipur, Rajasthan';
-  const finalCompany = geminiResult?.currentCompany || parsedUniversal.currentCompany || 'Nippon Paint India';
-  const finalRole = geminiResult?.currentDesignation || parsedUniversal.currentDesignation || 'Sales Officer (Wood Art)';
-  const finalExpYears = geminiResult?.experienceYears || parsedUniversal.experienceYears || 5.0;
+  const finalCompany = geminiResult?.currentCompany || parsedUniversal.currentCompany || '';
+  const finalRole = geminiResult?.currentDesignation || parsedUniversal.currentDesignation || '';
+  const finalExpYears = geminiResult?.experienceYears || parsedUniversal.experienceYears || 3.0;
   const finalSkills = (geminiResult?.skills && geminiResult.skills.length > 0) ? geminiResult.skills : parsedUniversal.skills;
   const finalExp = (geminiResult?.workExperience && geminiResult.workExperience.length > 0) ? geminiResult.workExperience : parsedUniversal.workExperience;
   const finalEdu = (geminiResult?.education && geminiResult.education.length > 0) ? geminiResult.education : parsedUniversal.education;
-  const finalSummary = geminiResult?.summary || parsedUniversal.summary || `${finalName} brings ${finalExpYears} years of experience in ${finalRole}.`;
+  const finalSummary = geminiResult?.summary || parsedUniversal.summary || `${finalName} brings professional experience${finalRole ? ` as ${finalRole}` : ''}.`;
 
   const matchedJob = matchJobRequisition(
     finalSkills,
@@ -784,9 +821,9 @@ export async function parseResumeFile(
     source: options?.targetSource || 'urbangaon',
     sourceId: `ATS-${Math.floor(Math.random() * 900000 + 100000)}`,
     referralDetails: options?.referralInfo,
-    jobAppliedFor: matchedJob.title,
-    jobId: matchedJob.id,
-    department: matchedJob.department,
+    jobAppliedFor: matchedJob.title || '',
+    jobId: matchedJob.id || 'custom',
+    department: matchedJob.department || 'General',
     appliedDate: new Date().toISOString(),
     lastUpdatedDate: new Date().toISOString(),
     status: options?.initialStatus || 'applied',
@@ -800,8 +837,8 @@ export async function parseResumeFile(
     noticePeriod: '30 Days',
     recruiterAssigned: options?.recruiterAssigned || 'Dr Sharmila Yadav',
     profileUrl: parsedUniversal.linkedin || undefined,
-    tags: finalSkills.length > 0 ? finalSkills : ['Sales', 'Business Development', 'Management'],
-    notes: `Extracted via UrbanGaon Universal AI Resume Parser [Engine: ${parserUsed}] (${file.name}, ${(file.size / 1024).toFixed(1)} KB). Matched to ${matchedJob.title} with ATS score ${atsScore}%.`,
+    tags: finalSkills.length > 0 ? finalSkills : (finalRole ? [finalRole] : []),
+    notes: `Extracted via UrbanGaon Universal AI Resume Parser [Engine: ${parserUsed}] (${file.name}, ${(file.size / 1024).toFixed(1)} KB). ${matchedJob.title ? `Matched to ${matchedJob.title}` : 'Role left blank for custom HR assignment'}.`,
     resumeData: {
       summary: finalSummary,
       skills: finalSkills,

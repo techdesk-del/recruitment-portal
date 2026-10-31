@@ -149,7 +149,6 @@ export function mapCandidateToTrackerRow(cand, index) {
   if (cand.recruiterAssigned) {
     recruiter = cand.recruiterAssigned.replace(/^Dr\s+/i, '').trim();
     if (recruiter.includes('Sharmila')) recruiter = 'Sharmila Yadav';
-    else if (recruiter.includes('Rekha')) recruiter = 'Rekha Pareek';
     else if (recruiter.includes('Satyaveer')) recruiter = 'Satyaveer Singh';
   }
 

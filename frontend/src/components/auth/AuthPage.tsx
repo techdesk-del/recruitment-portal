@@ -21,13 +21,13 @@ export const AuthPage: React.FC = () => {
   const [localError, setLocalError] = useState<string | null>(null);
 
   // Single default urbangaon email & easy password
-  const [email, setEmail] = useState('admin@urbangaon.com');
-  const [password, setPassword] = useState('admin123');
+  const [email, setEmail] = useState('jobs@urbangaon.com');
+  const [password, setPassword] = useState('jobs123');
   const [name, setName] = useState('');
 
   const handleQuickFill = () => {
-    setEmail('admin@urbangaon.com');
-    setPassword('admin123');
+    setEmail('jobs@urbangaon.com');
+    setPassword('jobs123');
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -133,7 +133,7 @@ export const AuthPage: React.FC = () => {
                 <input
                   type="email"
                   required
-                  placeholder="admin@urbangaon.com"
+                  placeholder="jobs@urbangaon.com"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   className="w-full pl-10 pr-3.5 py-2.5 rounded-xl border border-slate-200 text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition"
@@ -177,8 +177,8 @@ export const AuthPage: React.FC = () => {
 
             {/* Quick credentials note */}
             <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-200/80 text-[11px] text-slate-600 flex items-center justify-between">
-              <span>Email: <strong>admin@urbangaon.com</strong></span>
-              <span>Pass: <strong>admin123</strong></span>
+              <span>Email: <strong>jobs@urbangaon.com</strong></span>
+              <span>Pass: <strong>jobs123</strong></span>
             </div>
 
             {/* Submit Button */}

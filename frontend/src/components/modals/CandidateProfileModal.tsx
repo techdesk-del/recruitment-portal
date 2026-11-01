@@ -486,8 +486,8 @@ export const CandidateProfileModal: React.FC = () => {
                 <option value="applied">Applied</option>
                 <option value="screening">Screening</option>
                 <option value="shortlisted">Shortlisted</option>
-                <option value="interview_r1">Interview Round 1</option>
-                <option value="interview_r2">Interview Round 2</option>
+                <option value="interview_r1">Interview Round 1 (Satya)</option>
+                <option value="interview_r2">Interview Round 2 (Dr Sharmila & CEO)</option>
                 <option value="offered">Offer Extended</option>
                 <option value="joined">Joined / Hired</option>
                 <option value="rejected">Rejected</option>
@@ -495,19 +495,14 @@ export const CandidateProfileModal: React.FC = () => {
             </div>
 
             <div className={clsx('flex', 'items-center', 'gap-2')}>
-              <span className={clsx('text-slate-600', 'font-semibold')}>Assigned HR / Interviewer:</span>
+              <span className={clsx('text-slate-600', 'font-semibold')}>Assigned HR:</span>
               <select
-                value={cand.recruiterAssigned || (cand.status === 'interview_r1' ? 'Satyaveer Singh' : cand.status === 'interview_r2' ? 'Dr Sharmila Yadav' : 'Satyaveer Singh')}
+                value={cand.recruiterAssigned || 'Satyaveer Singh'}
                 onChange={(e) => assignRecruiter(cand.id, e.target.value)}
-                className={clsx('px-3', 'py-1.5', 'rounded-lg', 'bg-white', 'border', 'border-slate-300', 'text-slate-800', 'font-semibold', 'text-xs', 'focus:outline-none', 'focus:border-blue-500')}
+                className={clsx('px-3', 'py-1.5', 'rounded-lg', 'bg-white', 'border', 'border-slate-300', 'text-slate-800', 'font-semibold', 'text-xs', 'focus:outline-none', 'focus:border-blue-500', 'cursor-pointer')}
               >
-                <optgroup label="Round 1 (Screening Lead)">
-                  <option value="Satyaveer Singh">Satyaveer Singh</option>
-                </optgroup>
-                <optgroup label="Round 2 & Final Leadership">
-                  <option value="Dr Sharmila Yadav">Dr Sharmila Yadav</option>
-                  <option value="CEO (Urban Gaon)">CEO (Urban Gaon)</option>
-                </optgroup>
+                <option value="Satyaveer Singh">Satyaveer Singh</option>
+                <option value="Dr Sharmila Yadav">Dr Sharmila Yadav</option>
               </select>
             </div>
           </div>
@@ -852,19 +847,14 @@ export const CandidateProfileModal: React.FC = () => {
                       </div>
 
                       <div>
-                        <label className="text-[11px] font-semibold text-slate-600 block mb-1">Assigned HR / Interviewer</label>
+                        <label className="text-[11px] font-semibold text-slate-600 block mb-1">Assigned HR</label>
                         <select
                           value={profileForm.recruiterAssigned || 'Satyaveer Singh'}
                           onChange={(e) => setProfileForm((p) => ({ ...p, recruiterAssigned: e.target.value }))}
-                          className="w-full text-xs p-2.5 rounded-xl bg-slate-50 border border-slate-200 focus:bg-white focus:border-blue-500 font-semibold text-slate-800 outline-none transition"
+                          className="w-full text-xs p-2.5 rounded-xl bg-slate-50 border border-slate-200 focus:bg-white focus:border-blue-500 font-semibold text-slate-800 outline-none transition cursor-pointer"
                         >
-                          <optgroup label="Round 1 (Screening Lead)">
-                            <option value="Satyaveer Singh">Satyaveer Singh</option>
-                          </optgroup>
-                          <optgroup label="Round 2 & Final Leadership">
-                            <option value="Dr Sharmila Yadav">Dr Sharmila Yadav</option>
-                            <option value="CEO (Urban Gaon)">CEO (Urban Gaon)</option>
-                          </optgroup>
+                          <option value="Satyaveer Singh">Satyaveer Singh</option>
+                          <option value="Dr Sharmila Yadav">Dr Sharmila Yadav</option>
                         </select>
                       </div>
                     </div>

@@ -13,18 +13,26 @@ import {
   GraduationCap, 
   Award, 
   Clock, 
-  ExternalLink 
+  ExternalLink,
+  Trash2,
+  AlertTriangle,
+  RotateCcw,
+  Check,
+  Ban
 } from 'lucide-react';
 import { useRecruitment } from '../../context/RecruitmentContext';
 import { CandidateSource, JobPosting } from '../../types';
 import { PortalLogo, Pagination } from '../common';
 
 export const JobsView: React.FC = () => {
-  const { jobs, candidates, setFilters, setActiveView } = useRecruitment();
+  const { jobs, candidates, setFilters, setActiveView, updateJobStatus, deleteJob } = useRecruitment();
 
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedDept, setSelectedDept] = useState<string>('all');
+  const [selectedStatus, setSelectedStatus] = useState<'all' | 'active' | 'filled' | 'closed' | 'paused'>('all');
   const [selectedJobForModal, setSelectedJobForModal] = useState<JobPosting | null>(null);
+  const [jobToDelete, setJobToDelete] = useState<JobPosting | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(6);
@@ -38,9 +46,19 @@ export const JobsView: React.FC = () => {
     return ['all', ...Array.from(set)];
   }, [jobs]);
 
+  // Counts for status breakdown
+  const statusCounts = useMemo(() => {
+    const active = jobs.filter(j => (j.status || 'active') === 'active').length;
+    const filled = jobs.filter(j => j.status === 'filled').length;
+    const closed = jobs.filter(j => j.status === 'closed').length;
+    const paused = jobs.filter(j => j.status === 'paused').length;
+    return { active, filled, closed, paused, total: jobs.length };
+  }, [jobs]);
+
   // Filtered jobs
   const filteredJobs = useMemo(() => {
     return jobs.filter((job) => {
+      const jobStatus = job.status || 'active';
       const matchesSearch = 
         !searchQuery.trim() ||
         job.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -49,10 +67,11 @@ export const JobsView: React.FC = () => {
         (job.rolePurpose && job.rolePurpose.toLowerCase().includes(searchQuery.toLowerCase()));
 
       const matchesDept = selectedDept === 'all' || job.department === selectedDept;
+      const matchesStatus = selectedStatus === 'all' || jobStatus === selectedStatus;
 
-      return matchesSearch && matchesDept;
+      return matchesSearch && matchesDept && matchesStatus;
     });
-  }, [jobs, searchQuery, selectedDept]);
+  }, [jobs, searchQuery, selectedDept, selectedStatus]);
 
   const paginatedJobs = useMemo(() => {
     return filteredJobs.slice(
@@ -88,6 +107,20 @@ export const JobsView: React.FC = () => {
     setActiveView('candidates');
   };
 
+  const handleDeleteConfirm = async () => {
+    if (!jobToDelete) return;
+    setIsDeleting(true);
+    try {
+      await deleteJob(jobToDelete.id);
+      if (selectedJobForModal?.id === jobToDelete.id) {
+        setSelectedJobForModal(null);
+      }
+      setJobToDelete(null);
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
   return (
     <div className="space-y-6 animate-fade-in pb-12">
       {/* Top Header */}
@@ -99,18 +132,26 @@ export const JobsView: React.FC = () => {
           </div>
           <h1 className="text-xl sm:text-2xl font-extrabold text-slate-900 tracking-tight">Job Requisitions</h1>
           <p className="text-xs text-slate-500 mt-1">
-            Click on any position to review the full Role Overview & JD or manage all applicants for that role.
+            Manage open requisitions, update status (Mark Filled / Closed), review JDs, or filter applicants.
           </p>
         </div>
 
-        <div className="flex items-center gap-3">
-          <div className="px-3.5 sm:px-4 py-2 rounded-xl bg-blue-50 border border-blue-200 text-xs font-semibold text-blue-800">
-            Total Requisitions: <strong className="text-blue-950 ml-1">{jobs.length} Active Positions</strong>
+        <div className="flex flex-wrap items-center gap-2">
+          <div className="px-3 py-1.5 rounded-xl bg-emerald-50 border border-emerald-200 text-xs font-semibold text-emerald-800 flex items-center gap-1.5">
+            <span className="w-2 h-2 rounded-full bg-emerald-600"></span>
+            <span>Active: <strong>{statusCounts.active}</strong></span>
+          </div>
+          <div className="px-3 py-1.5 rounded-xl bg-purple-50 border border-purple-200 text-xs font-semibold text-purple-800 flex items-center gap-1.5">
+            <Check size={12} className="text-purple-600" />
+            <span>Filled: <strong>{statusCounts.filled}</strong></span>
+          </div>
+          <div className="px-3 py-1.5 rounded-xl bg-slate-100 border border-slate-300 text-xs font-semibold text-slate-700 flex items-center gap-1.5">
+            <span>Closed: <strong>{statusCounts.closed}</strong></span>
           </div>
         </div>
       </div>
 
-      {/* Search & Department Filters */}
+      {/* Search & Filters */}
       <div className="bg-white border border-slate-200 p-3 sm:p-4 rounded-2xl shadow-2xs space-y-3">
         <div className="flex flex-col sm:flex-row gap-3">
           <div className="relative flex-1">
@@ -134,10 +175,54 @@ export const JobsView: React.FC = () => {
               </button>
             )}
           </div>
+
+          {/* Status Filter Dropdown / Pills */}
+          <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar">
+            <button
+              onClick={() => { setSelectedStatus('all'); setCurrentPage(1); }}
+              className={`px-3 py-1.5 text-xs rounded-xl font-bold transition cursor-pointer shrink-0 ${
+                selectedStatus === 'all'
+                  ? 'bg-blue-600 text-white shadow-xs'
+                  : 'bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200'
+              }`}
+            >
+              All Roles ({statusCounts.total})
+            </button>
+            <button
+              onClick={() => { setSelectedStatus('active'); setCurrentPage(1); }}
+              className={`px-3 py-1.5 text-xs rounded-xl font-bold transition cursor-pointer shrink-0 ${
+                selectedStatus === 'active'
+                  ? 'bg-emerald-600 text-white shadow-xs'
+                  : 'bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200'
+              }`}
+            >
+              ● Open ({statusCounts.active})
+            </button>
+            <button
+              onClick={() => { setSelectedStatus('filled'); setCurrentPage(1); }}
+              className={`px-3 py-1.5 text-xs rounded-xl font-bold transition cursor-pointer shrink-0 ${
+                selectedStatus === 'filled'
+                  ? 'bg-purple-600 text-white shadow-xs'
+                  : 'bg-purple-50 hover:bg-purple-100 text-purple-800 border border-purple-200'
+              }`}
+            >
+              ✓ Filled ({statusCounts.filled})
+            </button>
+            <button
+              onClick={() => { setSelectedStatus('closed'); setCurrentPage(1); }}
+              className={`px-3 py-1.5 text-xs rounded-xl font-bold transition cursor-pointer shrink-0 ${
+                selectedStatus === 'closed'
+                  ? 'bg-slate-700 text-white shadow-xs'
+                  : 'bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-300'
+              }`}
+            >
+              ✕ Closed ({statusCounts.closed})
+            </button>
+          </div>
         </div>
 
         {/* Department Pills */}
-        <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-1">
+        <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-1 border-t border-slate-100 pt-2">
           <span className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider mr-1 shrink-0">
             Department:
           </span>
@@ -156,12 +241,12 @@ export const JobsView: React.FC = () => {
                 }}
                 className={`px-3 py-1 text-xs rounded-lg font-medium whitespace-nowrap transition cursor-pointer shrink-0 ${
                   isActive
-                    ? 'bg-blue-600 text-white font-bold shadow-xs'
+                    ? 'bg-slate-900 text-white font-bold shadow-xs'
                     : 'bg-slate-100 hover:bg-slate-200 text-slate-600 border border-slate-200/60'
                 }`}
               >
-                {dept === 'all' ? 'All Roles' : dept}
-                <span className={`ml-1.5 text-[10px] px-1.5 py-0.2 rounded-full ${isActive ? 'bg-blue-700 text-white' : 'bg-slate-200 text-slate-700'}`}>
+                {dept === 'all' ? 'All Departments' : dept}
+                <span className={`ml-1.5 text-[10px] px-1.5 py-0.2 rounded-full ${isActive ? 'bg-slate-700 text-white' : 'bg-slate-200 text-slate-700'}`}>
                   {count}
                 </span>
               </button>
@@ -187,9 +272,30 @@ export const JobsView: React.FC = () => {
                       <h2 className="text-base font-bold text-slate-900 group-hover:text-blue-600 transition-colors">
                         {job.title}
                       </h2>
-                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 shrink-0">
+                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-100 text-slate-700 border border-slate-200 shrink-0">
                         {job.type}
                       </span>
+
+                      {/* Status Selector Dropdown */}
+                      <select
+                        value={job.status || 'active'}
+                        onChange={(e) => updateJobStatus(job.id, e.target.value as any)}
+                        className={`text-[10px] font-bold px-2.5 py-0.5 rounded-full border focus:outline-none cursor-pointer transition shadow-2xs ${
+                          job.status === 'filled'
+                            ? 'bg-purple-100 text-purple-800 border-purple-300'
+                            : job.status === 'closed'
+                            ? 'bg-slate-200 text-slate-700 border-slate-300'
+                            : job.status === 'paused'
+                            ? 'bg-amber-100 text-amber-800 border-amber-300'
+                            : 'bg-emerald-100 text-emerald-800 border-emerald-300'
+                        }`}
+                        title="Click to update opening status"
+                      >
+                        <option value="active">● Open / Active</option>
+                        <option value="filled">✓ Role Filled</option>
+                        <option value="closed">✕ Closed</option>
+                        <option value="paused">⏸ Paused</option>
+                      </select>
                     </div>
                     <p className="text-xs text-slate-500 mt-0.5 flex items-center gap-1.5">
                       <Building2 size={12} className="text-slate-400 shrink-0" />
@@ -235,12 +341,51 @@ export const JobsView: React.FC = () => {
               </div>
 
               {/* Action Buttons */}
-              <div className="pt-3 border-t border-slate-100 flex items-center justify-between gap-2">
-                <span className="text-[11px] text-slate-500">
-                  Target: <strong>{job.openPositions}</strong> {job.openPositions > 1 ? 'openings' : 'opening'}
-                </span>
+              <div className="pt-3 border-t border-slate-100 flex flex-wrap items-center justify-between gap-2">
+                <div className="flex flex-wrap items-center gap-2">
+                  <span className="text-[11px] text-slate-500">
+                    Target: <strong>{job.openPositions}</strong> {job.openPositions > 1 ? 'openings' : 'opening'}
+                  </span>
 
-                <div className="flex items-center gap-2">
+                  {/* Quick Status Action Buttons */}
+                  {job.status !== 'filled' && (
+                    <button
+                      onClick={() => updateJobStatus(job.id, 'filled')}
+                      className="text-[10px] font-bold px-2 py-1 rounded-lg bg-purple-50 hover:bg-purple-100 text-purple-700 border border-purple-200 transition cursor-pointer flex items-center gap-1"
+                      title="Mark this role as filled"
+                    >
+                      <Check size={11} /> Mark Filled
+                    </button>
+                  )}
+                  {job.status === 'active' && (
+                    <button
+                      onClick={() => updateJobStatus(job.id, 'closed')}
+                      className="text-[10px] font-bold px-2 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-600 border border-slate-200 transition cursor-pointer flex items-center gap-1"
+                      title="Close this role"
+                    >
+                      <Ban size={11} /> Close
+                    </button>
+                  )}
+                  {job.status && job.status !== 'active' && (
+                    <button
+                      onClick={() => updateJobStatus(job.id, 'active')}
+                      className="text-[10px] font-bold px-2 py-1 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 transition cursor-pointer flex items-center gap-1"
+                      title="Reopen / Activate role"
+                    >
+                      <RotateCcw size={11} /> Reopen
+                    </button>
+                  )}
+                </div>
+
+                <div className="flex items-center gap-1.5">
+                  <button
+                    onClick={() => setJobToDelete(job)}
+                    className="p-1.5 rounded-xl text-slate-400 hover:text-rose-600 hover:bg-rose-50 border border-transparent hover:border-rose-200 transition cursor-pointer"
+                    title="Delete Job Requisition"
+                  >
+                    <Trash2 size={14} />
+                  </button>
+
                   <button
                     onClick={() => setSelectedJobForModal(job)}
                     className="flex items-center gap-1 px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold transition cursor-pointer"
@@ -269,12 +414,13 @@ export const JobsView: React.FC = () => {
           <FileText size={36} className="mx-auto text-slate-300" />
           <h3 className="text-base font-bold text-slate-800">No Job Requisitions Found</h3>
           <p className="text-xs text-slate-500 max-w-md mx-auto">
-            No active positions matched your search or department filter. Try resetting filters to see all available roles.
+            No active positions matched your search or filter. Try resetting filters to see all available roles.
           </p>
           <button
             onClick={() => {
               setSearchQuery('');
               setSelectedDept('all');
+              setSelectedStatus('all');
             }}
             className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold rounded-xl transition cursor-pointer"
           >
@@ -305,13 +451,39 @@ export const JobsView: React.FC = () => {
             {/* Modal Header */}
             <div className="p-4 sm:p-6 bg-slate-50 border-b border-slate-200 flex items-start justify-between gap-4">
               <div className="min-w-0">
-                <div className="flex items-center gap-2 mb-1">
+                <div className="flex flex-wrap items-center gap-2 mb-1">
                   <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-blue-100 text-blue-800">
                     {selectedJobForModal.department}
                   </span>
                   <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800">
                     {selectedJobForModal.type}
                   </span>
+
+                  {/* Status Dropdown inside modal header */}
+                  <select
+                    value={selectedJobForModal.status || 'active'}
+                    onChange={(e) => {
+                      const newStatus = e.target.value as any;
+                      updateJobStatus(selectedJobForModal.id, newStatus);
+                      setSelectedJobForModal(prev => prev ? { ...prev, status: newStatus } : null);
+                    }}
+                    className={`text-[10px] font-bold px-2.5 py-0.5 rounded-full border focus:outline-none cursor-pointer transition shadow-2xs ${
+                      selectedJobForModal.status === 'filled'
+                        ? 'bg-purple-100 text-purple-800 border-purple-300'
+                        : selectedJobForModal.status === 'closed'
+                        ? 'bg-slate-200 text-slate-700 border-slate-300'
+                        : selectedJobForModal.status === 'paused'
+                        ? 'bg-amber-100 text-amber-800 border-amber-300'
+                        : 'bg-emerald-100 text-emerald-800 border-emerald-300'
+                    }`}
+                    title="Change opening status"
+                  >
+                    <option value="active">● Open / Active</option>
+                    <option value="filled">✓ Role Filled</option>
+                    <option value="closed">✕ Closed</option>
+                    <option value="paused">⏸ Paused</option>
+                  </select>
+
                   {selectedJobForModal.industry && (
                     <span className="text-[10px] text-slate-500 hidden sm:inline-block">
                       Industry: {selectedJobForModal.industry}
@@ -423,23 +595,117 @@ export const JobsView: React.FC = () => {
             </div>
 
             {/* Modal Footer */}
-            <div className="p-4 sm:p-5 bg-slate-50 border-t border-slate-200 flex items-center justify-between gap-3">
-              <button
-                onClick={() => setSelectedJobForModal(null)}
-                className="px-4 py-2 rounded-xl bg-white border border-slate-300 text-slate-700 hover:bg-slate-100 text-xs font-semibold transition cursor-pointer"
-              >
-                Close
-              </button>
+            <div className="p-4 sm:p-5 bg-slate-50 border-t border-slate-200 flex flex-wrap items-center justify-between gap-3">
+              <div className="flex items-center gap-2">
+                {selectedJobForModal.status !== 'filled' && (
+                  <button
+                    onClick={() => {
+                      updateJobStatus(selectedJobForModal.id, 'filled');
+                      setSelectedJobForModal(prev => prev ? { ...prev, status: 'filled' } : null);
+                    }}
+                    className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-purple-50 hover:bg-purple-100 text-purple-700 border border-purple-200 text-xs font-bold transition cursor-pointer"
+                  >
+                    <Check size={13} />
+                    <span>Mark as Filled</span>
+                  </button>
+                )}
+                {selectedJobForModal.status === 'active' && (
+                  <button
+                    onClick={() => {
+                      updateJobStatus(selectedJobForModal.id, 'closed');
+                      setSelectedJobForModal(prev => prev ? { ...prev, status: 'closed' } : null);
+                    }}
+                    className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-300 text-xs font-bold transition cursor-pointer"
+                  >
+                    <Ban size={13} />
+                    <span>Close Opening</span>
+                  </button>
+                )}
+                {selectedJobForModal.status && selectedJobForModal.status !== 'active' && (
+                  <button
+                    onClick={() => {
+                      updateJobStatus(selectedJobForModal.id, 'active');
+                      setSelectedJobForModal(prev => prev ? { ...prev, status: 'active' } : null);
+                    }}
+                    className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 text-xs font-bold transition cursor-pointer"
+                  >
+                    <RotateCcw size={13} />
+                    <span>Reopen Opening</span>
+                  </button>
+                )}
 
+                <button
+                  onClick={() => setJobToDelete(selectedJobForModal)}
+                  className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-rose-600 hover:bg-rose-50 border border-transparent hover:border-rose-200 text-xs font-bold transition cursor-pointer"
+                >
+                  <Trash2 size={13} />
+                  <span>Delete</span>
+                </button>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => setSelectedJobForModal(null)}
+                  className="px-4 py-2 rounded-xl bg-white border border-slate-300 text-slate-700 hover:bg-slate-100 text-xs font-semibold transition cursor-pointer"
+                >
+                  Close
+                </button>
+
+                <button
+                  onClick={() => handleViewApplicants(selectedJobForModal.id)}
+                  className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold transition shadow-xs cursor-pointer"
+                >
+                  <Users size={14} />
+                  <span>
+                    View Applicants ({candidates.filter(c => c.jobId === selectedJobForModal.id).length})
+                  </span>
+                  <ArrowRight size={13} />
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Delete Confirmation Modal */}
+      {jobToDelete && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs animate-fade-in">
+          <div className="bg-white border border-slate-200 rounded-3xl w-full max-w-md p-6 shadow-2xl space-y-4 animate-slide-up text-slate-900">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-2xl bg-rose-50 border border-rose-200 text-rose-600 flex items-center justify-center shrink-0">
+                <AlertTriangle size={20} />
+              </div>
+              <div>
+                <h3 className="text-base font-bold text-slate-900">Delete Job Opening?</h3>
+                <p className="text-xs text-slate-500">This action will remove the requisition from the portal.</p>
+              </div>
+            </div>
+
+            <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-200 text-xs space-y-1.5">
+              <div className="font-bold text-slate-800 text-sm">{jobToDelete.title}</div>
+              <div className="text-slate-600">{jobToDelete.department} • {jobToDelete.location}</div>
+              {candidates.filter(c => c.jobId === jobToDelete.id).length > 0 && (
+                <div className="text-amber-700 font-semibold text-[11px] pt-1 border-t border-slate-200">
+                  ⚠️ Note: {candidates.filter(c => c.jobId === jobToDelete.id).length} candidate application(s) are associated with this role.
+                </div>
+              )}
+            </div>
+
+            <div className="flex items-center justify-end gap-2 pt-2">
               <button
-                onClick={() => handleViewApplicants(selectedJobForModal.id)}
-                className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold transition shadow-xs cursor-pointer"
+                onClick={() => setJobToDelete(null)}
+                disabled={isDeleting}
+                className="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold transition cursor-pointer"
               >
-                <Users size={14} />
-                <span>
-                  View Applicants ({candidates.filter(c => c.jobId === selectedJobForModal.id).length})
-                </span>
-                <ArrowRight size={13} />
+                Cancel
+              </button>
+              <button
+                onClick={handleDeleteConfirm}
+                disabled={isDeleting}
+                className="px-4 py-2 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold transition shadow-xs flex items-center gap-1.5 cursor-pointer"
+              >
+                <Trash2 size={13} />
+                <span>{isDeleting ? 'Deleting...' : 'Yes, Delete Role'}</span>
               </button>
             </div>
           </div>

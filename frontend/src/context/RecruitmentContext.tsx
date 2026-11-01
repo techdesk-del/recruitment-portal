@@ -93,6 +93,8 @@ interface RecruitmentContextType {
   deleteCallRecord: (callId: string) => void;
   quickScheduleFollowUp: (candidateId: string, date: string, time: string, note?: string) => void;
   shiftCandidateToCalling: (candidate: Candidate) => void;
+  updateJobStatus: (id: string, status: 'active' | 'paused' | 'closed' | 'filled') => void;
+  deleteJob: (id: string) => Promise<void>;
 }
 
 const RecruitmentContext = createContext<RecruitmentContextType | undefined>(undefined);
@@ -507,38 +509,21 @@ export const RecruitmentProvider: React.FC<{ children: React.ReactNode }> = ({ c
   };
 
   // --- Candidate Actions ---
-      const updateCandidateStatus = (id: string, newStatus: CandidateStatus, details?: string, assignedPerson?: string) => {
-        let recruiterAssigned = assignedPerson;
-        if (!recruiterAssigned) {
-          if (newStatus === 'interview_r1') {
-            recruiterAssigned = 'Satyaveer Singh';
-          } else if (newStatus === 'interview_r2') {
-            recruiterAssigned = 'Dr Sharmila Yadav';
-          }
-        }
+  const updateCandidateStatus = (id: string, newStatus: CandidateStatus, details?: string) => {
+    updateCandidateState(id, { status: newStatus }, {
+      action: `Status changed to ${newStatus.toUpperCase()}`,
+      details: details || `Moved to ${newStatus}`
+    });
 
-        const updates: Partial<Candidate> = { status: newStatus };
-        if (recruiterAssigned) {
-          updates.recruiterAssigned = recruiterAssigned;
-        }
+    recruitmentApi.updateCandidateStatus(id, newStatus, details).catch(() => { });
 
-        updateCandidateState(id, updates, {
-          action: `Status changed to ${newStatus.toUpperCase()}`,
-      details: details || `Moved to ${newStatus}${recruiterAssigned ? ` (Assigned: ${recruiterAssigned})` : ''}`
-        });
-
-        recruitmentApi.updateCandidateStatus(id, newStatus, details).catch(() => { });
-        if (recruiterAssigned) {
-          recruitmentApi.updateCandidateRecruiter(id, recruiterAssigned).catch(() => { });
-        }
-
-        if (newStatus === 'offered' || newStatus === 'joined') {
-          confetti({ particleCount: 80, spread: 70, origin: { y: 0.6 } });
-          showToast('success', 'Status Updated', `Candidate moved to ${newStatus.toUpperCase()}!`);
-        } else {
-          showToast('info', 'Status Updated', `Candidate moved to ${newStatus}.${recruiterAssigned ? ` Assigned: ${recruiterAssigned}` : ''}`);
-        }
-      };
+    if (newStatus === 'offered' || newStatus === 'joined') {
+      confetti({ particleCount: 80, spread: 70, origin: { y: 0.6 } });
+      showToast('success', 'Status Updated', `Candidate moved to ${newStatus.toUpperCase()}!`);
+    } else {
+      showToast('info', 'Status Updated', `Candidate moved to ${newStatus}.`);
+    }
+  };
 
       const updateCandidateNotes = (id: string, notes: string) => {
         updateCandidateState(id, { notes });
@@ -959,17 +944,16 @@ export const RecruitmentProvider: React.FC<{ children: React.ReactNode }> = ({ c
         setInterviews((prev) => [newInterview, ...prev]);
         const nextStatus: CandidateStatus = data.round.includes('Round 2') ? 'interview_r2' : 'interview_r1';
 
-          updateCandidateState(data.candidateId, { status: nextStatus, recruiterAssigned: interviewerName }, {
-          action: 'Interview Scheduled',
-          details: `${data.round} on ${data.date} at ${data.startTime} with ${interviewerName}`,
-          performedBy: interviewerName,
-          type: 'interview'
-        });
+    updateCandidateState(data.candidateId, { status: nextStatus }, {
+      action: 'Interview Scheduled',
+      details: `${data.round} on ${data.date} at ${data.startTime} with ${interviewerName}`,
+      performedBy: interviewerName,
+      type: 'interview'
+    });
 
-        recruitmentApi.createInterview(newInterview).catch(() => { });
-        recruitmentApi.updateCandidateStatus(data.candidateId, nextStatus, `${data.round} scheduled`).catch(() => { });
-        recruitmentApi.updateCandidateRecruiter(data.candidateId, interviewerName).catch(() => { });
-        showToast('success', 'Interview Scheduled', `${data.round} set for ${data.candidateName} with ${interviewerName}.`);
+    recruitmentApi.createInterview(newInterview).catch(() => { });
+    recruitmentApi.updateCandidateStatus(data.candidateId, nextStatus, `${data.round} scheduled`).catch(() => { });
+    showToast('success', 'Interview Scheduled', `${data.round} set for ${data.candidateName} with ${interviewerName}.`);
         return newInterview;
       };
 
@@ -1158,6 +1142,26 @@ export const RecruitmentProvider: React.FC<{ children: React.ReactNode }> = ({ c
         showToast('success', 'Calling Desk', `${candidate.name} is now queued for calling.`);
       };
 
+      const updateJobStatus = (id: string, status: 'active' | 'paused' | 'closed' | 'filled') => {
+        setJobs((prev) =>
+          prev.map((j) => (j.id === id ? { ...j, status } : j))
+        );
+        recruitmentApi.updateJob(id, { status }).catch(() => { });
+        const label = status === 'filled' ? 'Marked as Filled' : status === 'closed' ? 'Marked as Closed' : status === 'paused' ? 'Paused' : 'Reopened / Activated';
+        showToast('success', 'Job Updated', `Requisition has been ${label}.`);
+      };
+
+      const deleteJob = async (id: string) => {
+        const target = jobs.find((j) => j.id === id);
+        setJobs((prev) => prev.filter((j) => j.id !== id));
+        try {
+          await recruitmentApi.deleteJob(id);
+        } catch (e) {
+          // offline fallback
+        }
+        showToast('info', 'Requisition Deleted', `${target?.title || 'Job Opening'} deleted successfully.`);
+      };
+
       const resetToDefaultData = () => {
         setCandidates(INITIAL_CANDIDATES);
         setJobs(INITIAL_JOBS);
@@ -1292,7 +1296,9 @@ export const RecruitmentProvider: React.FC<{ children: React.ReactNode }> = ({ c
           logCallRecord,
           deleteCallRecord,
           quickScheduleFollowUp,
-          shiftCandidateToCalling
+          shiftCandidateToCalling,
+          updateJobStatus,
+          deleteJob
         }}
       >
         {children}

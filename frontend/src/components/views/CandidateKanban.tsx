@@ -111,8 +111,8 @@ export const CandidateKanban: React.FC = () => {
     { status: 'applied', label: 'Applied', color: 'text-slate-700', border: 'border-slate-300', bg: 'bg-slate-100/90' },
     { status: 'screening', label: 'Screening', color: 'text-blue-700', border: 'border-blue-200', bg: 'bg-blue-50/70' },
     { status: 'shortlisted', label: 'Shortlisted', color: 'text-indigo-700', border: 'border-indigo-200', bg: 'bg-indigo-50/70' },
-    { status: 'interview_r1', label: 'Interview R1', color: 'text-purple-700', border: 'border-purple-200', bg: 'bg-purple-50/70' },
-    { status: 'interview_r2', label: 'Interview R2', color: 'text-fuchsia-700', border: 'border-fuchsia-200', bg: 'bg-fuchsia-50/70' },
+    { status: 'interview_r1', label: 'Interview Round 1 (Satya)', color: 'text-purple-700', border: 'border-purple-200', bg: 'bg-purple-50/70' },
+    { status: 'interview_r2', label: 'Interview Round 2 (Dr Sharmila & CEO)', color: 'text-fuchsia-700', border: 'border-fuchsia-200', bg: 'bg-fuchsia-50/70' },
     { status: 'offered', label: 'Offered', color: 'text-amber-800', border: 'border-amber-200', bg: 'bg-amber-50/70' },
     { status: 'joined', label: 'Joined / Hired', color: 'text-emerald-800', border: 'border-emerald-200', bg: 'bg-emerald-50/70' }
   ];
@@ -348,8 +348,8 @@ export const CandidateKanban: React.FC = () => {
 
                             {/* Recruiter & Star Rating */}
                             <div className="mt-2.5 flex items-center justify-between text-[11px] text-slate-500">
-                              <span className="truncate max-w-[130px]" title="Assigned HR / Interview Lead">
-                                👤 {cand.recruiterAssigned || (cand.status === 'interview_r1' ? 'Satyaveer Singh' : cand.status === 'interview_r2' ? 'Dr Sharmila Yadav' : 'Satyaveer Singh')}
+                              <span className="truncate max-w-[130px]" title="Assigned HR">
+                                👤 {cand.recruiterAssigned || 'Satyaveer Singh'}
                               </span>
                               <div className="flex items-center gap-0.5">
                                 {[1, 2, 3, 4, 5].map((star) => (
@@ -361,8 +361,8 @@ export const CandidateKanban: React.FC = () => {
                                       updateCandidateRating(cand.id, star);
                                     }}
                                     className={`cursor-pointer ${star <= cand.rating
-                                        ? 'text-amber-500 fill-amber-500'
-                                        : 'text-slate-300 hover:text-amber-400'
+                                      ? 'text-amber-500 fill-amber-500'
+                                      : 'text-slate-300 hover:text-amber-400'
                                       }`}
                                   />
                                 ))}

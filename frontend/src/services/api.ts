@@ -169,6 +169,11 @@ export const recruitmentApi = {
       body: JSON.stringify(updates)
     }),
 
+  deleteJob: (id: string) =>
+    request<{ success: boolean; id: string }>(`/api/jobs/${id}`, {
+      method: 'DELETE'
+    }),
+
   // --- Interviews ---
   fetchInterviews: () => request<InterviewSchedule[]>('/api/interviews'),
 

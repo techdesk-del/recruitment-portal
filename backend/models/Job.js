@@ -16,7 +16,7 @@ const JobSchema = new mongoose.Schema({
   postedDate: { type: String, default: () => new Date().toISOString() },
   status: { 
     type: String, 
-    enum: ['active', 'paused', 'closed'],
+    enum: ['active', 'paused', 'closed', 'filled'],
     default: 'active'
   },
   platforms: [{ 

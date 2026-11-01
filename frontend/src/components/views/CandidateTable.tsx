@@ -185,8 +185,8 @@ export const CandidateTable: React.FC = () => {
     { value: 'applied', label: 'Applied', color: 'bg-slate-100 text-slate-700 border-slate-300' },
     { value: 'screening', label: 'Screening', color: 'bg-blue-50 text-blue-700 border-blue-300' },
     { value: 'shortlisted', label: 'Shortlisted', color: 'bg-indigo-50 text-indigo-700 border-indigo-300' },
-    { value: 'interview_r1', label: 'Interview R1', color: 'bg-purple-50 text-purple-700 border-purple-300' },
-    { value: 'interview_r2', label: 'Interview R2', color: 'bg-fuchsia-50 text-fuchsia-700 border-fuchsia-300' },
+    { value: 'interview_r1', label: 'Interview Round 1 (Satya)', color: 'bg-purple-50 text-purple-700 border-purple-300' },
+    { value: 'interview_r2', label: 'Interview Round 2 (Dr Sharmila & CEO)', color: 'bg-fuchsia-50 text-fuchsia-700 border-fuchsia-300' },
     { value: 'offered', label: 'Offered', color: 'bg-amber-50 text-amber-800 border-amber-300' },
     { value: 'joined', label: 'Joined / Hired', color: 'bg-emerald-50 text-emerald-800 border-emerald-300' },
     { value: 'rejected', label: 'Rejected', color: 'bg-rose-50 text-rose-700 border-rose-300' }
@@ -651,25 +651,13 @@ export const CandidateTable: React.FC = () => {
                       {/* Assigned HR Column */}
                       <td className="py-3.5 px-4 whitespace-nowrap">
                         <select
-                          value={
-                            cand.recruiterAssigned ||
-                            (cand.status === 'interview_r1'
-                              ? 'Satyaveer Singh'
-                              : cand.status === 'interview_r2'
-                                ? 'Dr Sharmila Yadav'
-                                : 'Satyaveer Singh')
-                          }
+                          value={cand.recruiterAssigned || 'Satyaveer Singh'}
                           onChange={(e) => assignRecruiter(cand.id, e.target.value)}
                           className="py-1 px-2.5 rounded-xl bg-slate-50 hover:bg-slate-100 border border-slate-200 text-xs font-semibold text-slate-800 focus:outline-none focus:ring-1 focus:ring-blue-500 cursor-pointer shadow-2xs transition"
-                          title="Assign HR / Interview Lead"
+                          title="Assign HR"
                         >
-                          <optgroup label="Round 1 (Screening Lead)">
-                            <option value="Satyaveer Singh">Satyaveer Singh</option>
-                          </optgroup>
-                          <optgroup label="Round 2 & Final Leadership">
-                            <option value="Dr Sharmila Yadav">Dr Sharmila Yadav</option>
-                            <option value="CEO (Urban Gaon)">CEO (Urban Gaon)</option>
-                          </optgroup>
+                          <option value="Satyaveer Singh">Satyaveer Singh</option>
+                          <option value="Dr Sharmila Yadav">Dr Sharmila Yadav</option>
                         </select>
                       </td>
 

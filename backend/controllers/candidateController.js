@@ -77,27 +77,18 @@ export async function updateCandidateStatus(req, res) {
   const { id } = req.params;
   const { status, details, performedBy } = req.body;
 
-  let recruiterAssigned = req.body.recruiterAssigned;
-  if (!recruiterAssigned) {
-    if (status === 'interview_r1') {
-      recruiterAssigned = 'Satyaveer Singh';
-    } else if (status === 'interview_r2') {
-      recruiterAssigned = 'Dr Sharmila Yadav';
-    }
-  }
-
   const activityItem = {
     id: `act-${Date.now()}`,
     action: `Status updated to ${status.toUpperCase()}`,
-    details: details || `Moved to ${status}${recruiterAssigned ? ` (Assigned: ${recruiterAssigned})` : ''}`,
-    performedBy: performedBy || recruiterAssigned || 'Lead Recruiter',
+    details: details || `Moved to ${status}`,
+    performedBy: performedBy || 'Satyaveer Singh',
     timestamp: new Date().toISOString(),
     type: 'status'
   };
 
   const updateFields = { status };
-  if (recruiterAssigned) {
-    updateFields.recruiterAssigned = recruiterAssigned;
+  if (req.body.recruiterAssigned) {
+    updateFields.recruiterAssigned = req.body.recruiterAssigned;
   }
 
   const updated = await updateCandidateField(
@@ -106,8 +97,8 @@ export async function updateCandidateStatus(req, res) {
     { activityHistory: { $each: [activityItem], $position: 0 } }
   );
 
-  broadcastStatusUpdate({ id, status, recruiterAssigned, activityItem });
-  res.json({ success: true, id, status, recruiterAssigned, candidate: updated || undefined });
+  broadcastStatusUpdate({ id, status, activityItem });
+  res.json({ success: true, id, status, candidate: updated || undefined });
 }
 
 // PATCH recruiter notes

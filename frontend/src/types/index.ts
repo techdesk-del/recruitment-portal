@@ -148,7 +148,7 @@ export interface JobPosting {
   salaryRange: string;
   openPositions: number;
   postedDate: string;
-  status: 'active' | 'paused' | 'closed';
+  status: 'active' | 'paused' | 'closed' | 'filled';
   platforms: CandidateSource[];
   applicantsCount: number;
   hiredCount: number;

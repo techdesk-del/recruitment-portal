@@ -55,3 +55,17 @@ export async function updateJob(req, res) {
     res.status(500).json({ error: 'Failed to update job' });
   }
 }
+
+export async function deleteJob(req, res) {
+  const { id } = req.params;
+  try {
+    if (getMongoConnectionStatus()) {
+      await Job.findOneAndDelete({ id });
+      return res.json({ success: true, id, message: 'Job Requisition deleted successfully' });
+    }
+    res.json({ success: true, id });
+  } catch (err) {
+    console.error('Error deleting job in MongoDB:', err);
+    res.status(500).json({ error: 'Failed to delete job' });
+  }
+}

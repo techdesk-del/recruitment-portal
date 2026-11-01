@@ -18,14 +18,16 @@ import {
   AlertTriangle,
   RotateCcw,
   Check,
-  Ban
+  Ban,
+  Plus,
+  Sparkles
 } from 'lucide-react';
 import { useRecruitment } from '../../context/RecruitmentContext';
 import { CandidateSource, JobPosting } from '../../types';
 import { PortalLogo, Pagination } from '../common';
 
 export const JobsView: React.FC = () => {
-  const { jobs, candidates, setFilters, setActiveView, updateJobStatus, deleteJob } = useRecruitment();
+  const { jobs, candidates, setFilters, setActiveView, updateJobStatus, deleteJob, setIsAddJobModalOpen } = useRecruitment();
 
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedDept, setSelectedDept] = useState<string>('all');
@@ -137,6 +139,18 @@ export const JobsView: React.FC = () => {
         </div>
 
         <div className="flex flex-wrap items-center gap-2">
+          <button
+            onClick={() => setIsAddJobModalOpen(true)}
+            className="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs sm:text-sm shadow-xs transition active:scale-95 cursor-pointer mr-1"
+            title="Create a new job opening or auto-parse JD from PDF/DOCX"
+          >
+            <Plus size={16} />
+            <span>Add Job Opening</span>
+            <span className="hidden sm:inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-blue-500/50 text-[10px] font-medium text-blue-100">
+              <Sparkles size={11} /> AI JD Parse
+            </span>
+          </button>
+
           <div className="px-3 py-1.5 rounded-xl bg-emerald-50 border border-emerald-200 text-xs font-semibold text-emerald-800 flex items-center gap-1.5">
             <span className="w-2 h-2 rounded-full bg-emerald-600"></span>
             <span>Active: <strong>{statusCounts.active}</strong></span>

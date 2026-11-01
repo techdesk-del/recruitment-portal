@@ -16,7 +16,7 @@ const httpServer = createServer(app);
 
 // Global Middlewares
 app.use(cors({ origin: '*' }));
-app.use(express.json());
+app.use(express.json({ limit: '25mb' }));
 
 // WebSocket Initialization
 const io = initSocket(httpServer);

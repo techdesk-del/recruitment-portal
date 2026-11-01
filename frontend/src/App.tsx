@@ -13,7 +13,8 @@ import {
   ResumePreviewModal, 
   JobPostingsModal,
   WebhookSimulatorModal,
-  BulkResumeUploadModal 
+  BulkResumeUploadModal,
+  AddJobModal
 } from './components/modals';
 import { ToastContainer } from './components/common';
 import { AuthPage } from './components/auth';
@@ -77,6 +78,7 @@ export const App: React.FC = () => {
       <JobPostingsModal />
       <WebhookSimulatorModal />
       <BulkResumeUploadModal />
+      <AddJobModal />
       <ToastContainer />
     </div>
   );

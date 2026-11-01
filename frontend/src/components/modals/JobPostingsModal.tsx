@@ -6,7 +6,17 @@ import { UrbanGaonLogo } from '../common/UrbanGaonLogo';
 import { PortalLogo } from '../common/PortalLogo';
 
 export const JobPostingsModal: React.FC = () => {
-  const { jobs, candidates, isJobModalOpen, setIsJobModalOpen, setFilters, setActiveView, updateJobStatus, deleteJob } = useRecruitment();
+  const { 
+    jobs, 
+    candidates, 
+    isJobModalOpen, 
+    setIsJobModalOpen, 
+    setIsAddJobModalOpen,
+    setFilters, 
+    setActiveView, 
+    updateJobStatus, 
+    deleteJob 
+  } = useRecruitment();
   const [jobToDelete, setJobToDelete] = useState<JobPosting | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
 
@@ -63,12 +73,24 @@ export const JobPostingsModal: React.FC = () => {
               <p className="text-[11px] sm:text-xs text-slate-400 font-normal truncate">Active job postings across all recruitment portals</p>
             </div>
           </div>
-          <button
-            onClick={() => setIsJobModalOpen(false)}
-            className="p-1.5 sm:p-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-500 hover:text-slate-900 transition shrink-0 cursor-pointer"
-          >
-            <X size={18} />
-          </button>
+          <div className="flex items-center gap-2 shrink-0">
+            <button
+              onClick={() => {
+                setIsJobModalOpen(false);
+                setIsAddJobModalOpen(true);
+              }}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold shadow-xs transition active:scale-95 cursor-pointer"
+            >
+              <Plus size={14} />
+              <span>Add Job Opening</span>
+            </button>
+            <button
+              onClick={() => setIsJobModalOpen(false)}
+              className="p-1.5 sm:p-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-500 hover:text-slate-900 transition shrink-0 cursor-pointer"
+            >
+              <X size={18} />
+            </button>
+          </div>
         </div>
 
         {/* List of Jobs */}

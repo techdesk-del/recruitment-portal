@@ -1,10 +1,13 @@
 import * as pdfjsLib from 'pdfjs-dist';
+// Bundle the PDF.js worker locally (no CDN dependency → works offline / behind firewalls / on Vercel)
+import pdfWorkerUrl from 'pdfjs-dist/build/pdf.worker.min.js?url';
 import { Candidate, CandidateSource, JobPosting, EmployeeReferralInfo, WorkExperience, Education } from '../types';
+import { resumeApi } from '../services/api';
 
 // Initialize PDF.js worker for browser environments
 if (typeof window !== 'undefined') {
   try {
-    pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version || '3.11.174'}/pdf.worker.min.js`;
+    pdfjsLib.GlobalWorkerOptions.workerSrc = pdfWorkerUrl;
   } catch (err) {
     console.warn('PDF.js worker setup fallback:', err);
   }
@@ -26,6 +29,8 @@ export interface ParsedResumeResult {
   confidenceScore: number;
   extractedSnippet: string;
   parserUsed: 'gemini-ai' | 'universal-engine';
+  aiStatus?: 'ok' | 'not-configured' | 'failed' | 'skipped';
+  missingFields?: string[];
 }
 
 const INDIAN_CITIES = [
@@ -62,53 +67,20 @@ export function cleanNameFromFilename(fileName: string): string {
   return cleanTokens.slice(0, 3).join(' ');
 }
 
-// Extract email from text with strict regex
-export function extractEmail(text: string, candidateName?: string): string {
-  const emailRegex = /([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})/i;
-  const match = text.match(emailRegex);
-  if (match) return match[1].toLowerCase();
-
-  if (candidateName && /kuldeep/i.test(candidateName)) {
-    return 'singhkuldip578@gmail.com';
-  }
-  return '';
-}
-
-// Extract real Indian / International phone number
-export function extractPhone(text: string): string {
-  const phoneRegex = /(?:\+?91[\s-]?)?[6-9]\d{4}[\s-]?\d{5}|(?:\+?91[\s-]?)?[6-9]\d{9}|(?:\+?\d{1,3}[-.\s]?)?\(?\d{2,4}\)?[-.\s]?\d{3,5}[-.\s]?\d{4,5}/;
-  const match = text.match(phoneRegex);
-  if (match) return match[0].trim();
-  return '';
-}
+import { isValidEmail, normalizeForEmail, extractAllEmails, extractEmail, normalizeIndianMobile, formatIndianMobile, extractAllPhones, extractPhone } from './contactExtractor';
+export { isValidEmail, normalizeForEmail, extractAllEmails, extractEmail, normalizeIndianMobile, formatIndianMobile, extractAllPhones, extractPhone };
 
 // Extract years of experience
-export function extractExperienceYears(text: string, fileName: string = ''): number {
-  const combined = (text + ' ' + fileName).toLowerCase();
-  
-  if (combined.includes('kgk realty') || combined.includes('singhkuldip578') || combined.includes('kuldeep')) {
-    return 9.6;
-  }
+export function extractExperienceYears(text: string, _fileName: string = ''): number {
+  const combined = (text || '').toLowerCase();
 
-  const expMatch = combined.match(/(\d+(?:\.\d+)?)\+?\s*(?:years?|yrs?|yr)\b/);
+  const expMatch = combined.match(/(\d{1,2}(?:\.\d{1,2})?)\s*\+?\s*(?:years?|yrs?|yr)\b(?:\s*(?:of)?\s*(?:total|work|professional|industry|relevant)?\s*(?:experience|exp))?/);
   if (expMatch) {
     const val = parseFloat(expMatch[1]);
-    if (val >= 0.5 && val <= 35) return Math.round(val * 10) / 10;
+    if (val >= 0 && val <= 45) return Math.round(val * 10) / 10;
   }
-
-  // Look for date spans
-  const allYears = combined.match(/\b(19\d\d|20\d\d)\b/g);
-  if (allYears) {
-    const currentYear = new Date().getFullYear();
-    const valid = allYears.map(Number).filter(y => y >= 1990 && y <= currentYear);
-    if (valid.length > 0) {
-      const earliest = Math.min(...valid);
-      const diff = currentYear - earliest;
-      if (diff > 0 && diff <= 35) return diff;
-    }
-  }
-
-  return 4.0;
+  if (/\bfresher\b/.test(combined)) return 0;
+  return 0;
 }
 
 const createCustomJob = (title: string = '', dept: string = 'General'): JobPosting => ({
@@ -146,10 +118,12 @@ export function matchJobRequisition(
   }
 
   const primaryText = (currentDesignation + ' ' + skills.join(' ')).toLowerCase();
-  const bodyText = (rawResumeText || '').toLowerCase();
+  // When the candidate's actual role is known, match on the role + skills only (body text caused false matches)
+  const bodyText = (currentDesignation || '').trim() ? '' : (rawResumeText || '').toLowerCase();
 
   // If candidate is a driver/chauffeur and no driver requisition exists in open jobs:
-  if (/driver|chauffeur|fleet|commercial driving|heavy vehicle|light motor/i.test(primaryText) || /driver|chauffeur/i.test(bodyText)) {
+  const roleKnown = Boolean((currentDesignation || '').trim());
+  if (/driver|chauffeur|heavy vehicle|light motor/i.test(currentDesignation) || (!roleKnown && /\b(driver|chauffeur)\b/i.test(bodyText.slice(0, 1500)))) {
     const driverJob = jobs.find((j) => /driver/i.test(j.title));
     if (driverJob) return driverJob;
     return createCustomJob(currentDesignation || 'Driver', 'Logistics / Operations');
@@ -164,7 +138,7 @@ export function matchJobRequisition(
 
     // 1. Sales & Marketing
     if (jTitle.includes('sales') || jTitle.includes('marketing')) {
-      if (/sales|business development|channel|dealer|retail|revenue|target|client|lead/i.test(primaryText)) score += 55;
+      if (/\b(sales|business development|channel sales|dealer|marketing|bde|bdm)\b/i.test(primaryText)) score += 55;
       else if (/sales|business development|channel partner|dealer|fse|dse/i.test(bodyText)) score += 25;
     }
 
@@ -245,9 +219,11 @@ export function calculateAtsMatchScore(skills: string[], targetJob: JobPosting, 
 }
 
 // Layout-Aware PDF Text Extractor with Y-Coordinate Line Clustering
-async function extractPdfTextStreams(file: File): Promise<{
+export async function extractPdfTextStreams(file: File): Promise<{
   fullText: string;
   lines: string[];
+  linkText?: string;
+  rawStream?: string;
 }> {
   try {
     const arrayBuffer = await file.arrayBuffer();
@@ -255,10 +231,26 @@ async function extractPdfTextStreams(file: File): Promise<{
     const doc = await loadingTask.promise;
 
     const allLines: string[] = [];
+    const links: string[] = [];
+    const rawChunks: string[] = [];
 
     for (let pageNum = 1; pageNum <= doc.numPages; pageNum++) {
       const page = await doc.getPage(pageNum);
       const textContent = await page.getTextContent();
+
+      // Hyperlinks often hold the exact email / phone (mailto:, tel:, linkedin)
+      try {
+        const annots = await page.getAnnotations();
+        (annots as any[]).forEach((a) => {
+          const url = a?.url || a?.unsafeUrl;
+          if (url && typeof url === 'string') links.push(decodeURIComponent(url));
+        });
+      } catch {
+        // annotations optional
+      }
+
+      // Raw reading-order stream (keeps emails that were split across text items)
+      rawChunks.push((textContent.items as any[]).map((it) => (it.str || '') + (it.hasEOL ? '\n' : '')).join(''));
 
       const items = (textContent.items as any[])
         .filter((it) => it.str && it.str.trim())
@@ -329,21 +321,85 @@ async function extractPdfTextStreams(file: File): Promise<{
 
     return {
       fullText: allLines.join('\n'),
-      lines: allLines
+      lines: allLines,
+      linkText: links.join('\n'),
+      rawStream: rawChunks.join('\n')
     };
   } catch (err) {
     console.warn('PDF.js layout extraction fallback:', err);
-    const buffer = await file.arrayBuffer();
-    const bytes = new Uint8Array(buffer);
+    return { fullText: '', lines: [] };
+  }
+}
+
+// ---------------------------------------------------------------------------
+// WORD / TEXT EXTRACTORS
+// ---------------------------------------------------------------------------
+
+export async function extractDocxText(file: File): Promise<string> {
+  try {
+    const mammothMod: any = await import('mammoth/mammoth.browser');
+    const mammoth = mammothMod.default || mammothMod;
+    const arrayBuffer = await file.arrayBuffer();
+    const result = await mammoth.extractRawText({ arrayBuffer });
+    return (result?.value || '').replace(/\r/g, '');
+  } catch (err) {
+    console.warn('DOCX extraction failed:', err);
+    return '';
+  }
+}
+
+/** Legacy .doc (Word 97-2003): pull readable UTF-16LE and ASCII runs out of the binary. */
+async function extractLegacyDocText(file: File): Promise<string> {
+  try {
+    const bytes = new Uint8Array(await file.arrayBuffer());
+    // UTF-16LE runs
+    let utf16 = '';
+    let run = '';
+    for (let i = 0; i + 1 < bytes.length; i += 2) {
+      const code = bytes[i] | (bytes[i + 1] << 8);
+      if ((code >= 32 && code < 0xd800) || code === 10 || code === 13 || code === 9) {
+        run += code === 13 ? '\n' : String.fromCharCode(code);
+      } else {
+        if (run.length >= 4) utf16 += run + '\n';
+        run = '';
+      }
+    }
+    if (run.length >= 4) utf16 += run;
+    // ASCII runs (8-bit text storage)
     let ascii = '';
+    run = '';
     for (let i = 0; i < bytes.length; i++) {
       const c = bytes[i];
-      if (c >= 32 && c <= 126) ascii += String.fromCharCode(c);
-      else if (c === 10 || c === 13) ascii += '\n';
+      if ((c >= 32 && c <= 126) || c === 10 || c === 13 || c === 9) {
+        run += c === 13 ? '\n' : String.fromCharCode(c);
+      } else {
+        if (run.length >= 5) ascii += run + '\n';
+        run = '';
+      }
     }
-    const lines = ascii.split('\n').map((l) => l.trim()).filter((l) => l.length > 2);
-    return { fullText: ascii, lines };
+    const latinRatio = (s: string) => (s.match(/[A-Za-z0-9@.,\s]/g) || []).length / Math.max(1, s.length);
+    const best = latinRatio(utf16) > 0.85 && utf16.length > 200 ? utf16 : ascii;
+    return best.replace(/[^\S\n]+/g, ' ');
+  } catch {
+    return '';
   }
+}
+
+function stripRtf(rtf: string): string {
+  return rtf
+    .replace(/\\par[d]?/g, '\n')
+    .replace(/\{\*?\\[^{}]+}|[{}]|\\\n?[A-Za-z]+\n?(?:-?\d+)?[ ]?/g, '')
+    .replace(/\\'[0-9a-f]{2}/gi, '');
+}
+
+export async function fileToBase64(file: File): Promise<string> {
+  const buf = new Uint8Array(await file.arrayBuffer());
+  let binary = '';
+  const chunk = 0x8000;
+  for (let i = 0; i < buf.length; i += chunk) {
+    binary += String.fromCharCode.apply(null, Array.from(buf.subarray(i, i + chunk)));
+  }
+  return btoa(binary);
 }
 
 // Clean bullet artifacts, wingdings, and weird unprintable symbols
@@ -360,15 +416,11 @@ function parseUniversalResumeText(rawText: string, rawLines: string[], fileName:
   const cleanLines = rawLines.map(cleanResumeLine).filter(Boolean);
   const cleanText = cleanLines.join('\n');
 
-  // 1. Email Extraction
-  const emailRegex = /([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})/i;
-  const emailMatch = cleanText.match(emailRegex);
-  const email = emailMatch ? emailMatch[1].toLowerCase() : '';
+  // 1. Email Extraction (normalised, literal)
+  const email = extractEmail(rawText + '\n' + cleanText);
 
-  // 2. Phone Extraction
-  const phoneRegex = /(?:\+?91[\s-]?)?[6-9]\d{4}[\s-]?\d{5}|(?:\+?91[\s-]?)?[6-9]\d{9}|(?:\+?\d{1,3}[-.\s]?)?\(?\d{2,4}\)?[-.\s]?\d{3,5}[-.\s]?\d{4,5}/;
-  const phoneMatch = cleanText.match(phoneRegex);
-  const phone = phoneMatch ? phoneMatch[0].trim() : '';
+  // 2. Phone Extraction (ranked Indian mobile detection)
+  const phone = extractPhone(rawText + '\n' + cleanText);
 
   // 3. LinkedIn
   const linkedinMatch = cleanText.match(/(?:https?:\/\/)?(?:www\.)?linkedin\.com\/in\/([a-zA-Z0-9_-]+)/i);
@@ -416,8 +468,17 @@ function parseUniversalResumeText(rawText: string, rawLines: string[], fileName:
     'nagar', 'road', 'street', 'niwas', 'colony', 'apartment', 'house'
   ];
 
-  for (const line of headerLines) {
-    const l = line.trim();
+  // Explicit "Name : XYZ" label anywhere in the resume wins
+  const labelled = cleanText.match(/(?:^|\n)\s*(?:full\s+name|candidate\s+name|name)\s*[:\-–]\s*([A-Za-z][A-Za-z.' ]{2,40})/i);
+  if (labelled) {
+    const v = labelled[1].trim().replace(/\s+/g, ' ');
+    if (v.split(' ').length <= 5 && !/father|mother/i.test(v)) {
+      name = v.split(' ').map((w) => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(' ');
+    }
+  }
+
+  for (const line of (name ? [] : headerLines.length ? headerLines : cleanLines.slice(0, 8))) {
+    const l = line.trim().replace(/^(?:resume|curriculum vitae|cv|bio[- ]?data)\s*(?:of)?\s*[:\-–]?\s*/i, '');
     if (l.includes('@') || l.includes('http') || /\+?\d{6,}/.test(l) || /\b\d{6}\b/.test(l)) continue;
     
     const candidateParts = l.split(/[|•–—\-,]/).map((p) => p.trim());
@@ -471,7 +532,7 @@ function parseUniversalResumeText(rawText: string, rawLines: string[], fileName:
       break;
     }
   }
-  if (!location) location = 'Jaipur, Rajasthan';
+  if (!location) location = '';
 
   // 8. Work Experience Extraction
   const expLines = getSection('experience');
@@ -589,27 +650,20 @@ function parseUniversalResumeText(rawText: string, rawLines: string[], fileName:
     });
   });
 
-  // Add domain-specific keywords if detected in experience
-  if (/sales|business development|channel|dealer|revenue/i.test(cleanText)) {
-    skillsSet.add('Sales & Business Development');
-    skillsSet.add('Channel Sales');
-    skillsSet.add('Dealer Network Development');
-    skillsSet.add('Negotiation & Closing');
-    skillsSet.add('Team Leadership');
-  }
+  // NOTE: no auto-injected domain skills — they polluted role matching (e.g. a Driver matched to Sales).
 
   const skills = Array.from(skillsSet);
 
   // 11. Experience Calculation
-  let expYears = 4.0;
+  let expYears = extractExperienceYears(cleanText);
   const expStartYears: number[] = [];
   experiences.forEach((e) => {
     const match = e.duration.match(/\b(19\d\d|20\d\d)\b/);
     if (match) expStartYears.push(Number(match[0]));
   });
-  if (expStartYears.length > 0) {
+  if (!expYears && expStartYears.length > 0) {
     const earliest = Math.min(...expStartYears);
-    expYears = Math.max(1, new Date().getFullYear() - earliest);
+    expYears = Math.max(0, new Date().getFullYear() - earliest);
   }
 
   const currentCompany = experiences[0]?.company || (headerLines[1] ? headerLines[1].split(/[|–—]/)[0].trim() : '');
@@ -631,159 +685,274 @@ function parseUniversalResumeText(rawText: string, rawLines: string[], fileName:
   };
 }
 
-// Securely retrieved Gemini key (encoded to pass GitHub secret scanning push protection)
-const getFallbackKey = (): string => {
-  try {
-    return atob('QVEuQWI4Uk42SktpZk9WRWhsbkgwVEJtU3FmQlkyXzR0c05rcWRka3JBbGxZekJILWNEVXc=');
-  } catch {
-    return '';
-  }
-};
+// ---------------------------------------------------------------------------
+// AI PARSER (server-side Gemini — API key never shipped to the browser)
+// ---------------------------------------------------------------------------
 
-export const PERMANENT_GEMINI_API_KEY = getFallbackKey();
-
-// Optional Gemini AI Resume Parser with Strict JSON Extraction
-export async function parseResumeWithGemini(
-  resumeText: string,
-  apiKey: string = getFallbackKey()
-): Promise<{
+export interface AiResumeFields {
   name?: string;
   email?: string;
   phone?: string;
+  alternatePhone?: string;
   location?: string;
   currentCompany?: string;
   currentDesignation?: string;
+  appliedRole?: string;
   experienceYears?: number;
+  currentSalary?: string;
+  expectedSalary?: string;
+  noticePeriod?: string;
+  linkedin?: string;
   summary?: string;
   skills?: string[];
   workExperience?: WorkExperience[];
   education?: Education[];
-} | null> {
-  try {
-    const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
-    const prompt = `You are a recruitment ATS resume parsing engine. Analyze the following resume text and extract the candidate profile strictly adhering to this JSON structure:
-{
-  "name": "Candidate Full Name",
-  "email": "email@example.com",
-  "phone": "+91 XXXXXXXXXX",
-  "location": "City, State",
-  "currentCompany": "Current Employer Company Name",
-  "currentDesignation": "Current Role / Job Title",
-  "experienceYears": 9.5,
-  "summary": "Professional summary or career objective paragraph",
-  "skills": ["Skill 1", "Skill 2"],
-  "workExperience": [
-    {
-      "company": "Company Name",
-      "role": "Job Title",
-      "duration": "Duration (e.g. Aug 2022 – Aug 2025)",
-      "location": "City",
-      "highlights": ["bullet achievement 1", "bullet achievement 2"]
-    }
-  ],
-  "education": [
-    {
-      "degree": "Degree Name",
-      "institution": "School or University Name",
-      "year": "Passing Year or Range",
-      "grade": "Percentage or CGPA"
-    }
-  ]
 }
 
-Resume Text:
-${resumeText.slice(0, 15000)}
+export type AiParseStatus = 'ok' | 'not-configured' | 'failed' | 'skipped';
 
-Respond with strictly valid JSON only. Do not include markdown codeblocks (\`\`\`json).`;
+const GEMINI_DIRECT_MODELS = ['gemini-2.5-flash', 'gemini-3.8-flash', 'gemini-flash-latest', 'gemini-2.5-pro'];
 
-    const res = await fetch(endpoint, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        contents: [{ parts: [{ text: prompt }] }],
-        generationConfig: {
-          temperature: 0.1
-        }
-      })
-    });
+const GEMINI_PROMPT_SYSTEM = `You are an elite Google ATS Resume Parser trained on millions of Indian and global job applications across Real Estate, Construction, Logistics, Sales, Engineering, and Corporate operations.
+Your mission is 100% extraction accuracy with ZERO hallucinations:
+1. NAME: Full legal name from header or personal section. NEVER "Resume" or "CV". Include titles like "Ar.", "Er.", "Dr.". Never confuse with father's name.
+2. EMAIL: Candidate's personal email strictly from the TOP HEADER / TITLE section of the resume (next to or below name). Repair OCR spaces ("k p a n c h o l i 3 9 7 @ g m a i l . c o m" -> "kpancholi397@gmail.com"). Strip "mailto:", whitespace, and glued words. NEVER pick emails from work experience or company footers. If absent, return "".
+3. PHONE: Candidate's primary 10-digit Indian mobile with +91 (e.g. +91 78919 26000) strictly from the TOP HEADER / TITLE section. Candidate's OWN number only. NEVER pick contact numbers from work experience, past company offices, project descriptions, father's name, or references.
+4. ROLE & DESIGNATION: Candidate's TRUE recent designation: Driver -> "Driver" (NEVER label as Sales), Civil Supervisor -> "Site Supervisor (Civil)", Architect -> "Architect", Purchase Manager -> "Purchase Manager", Sales -> "Sales & Marketing Manager".
+5. EXPERIENCE: Verified total years of experience as a decimal number.
+Return strictly valid JSON only.`;
 
-    if (!res.ok) {
-      console.warn('Gemini API call returned non-200 status:', res.status);
-      return null;
+async function directBrowserGeminiParse(
+  payload: { fileName: string; mimeType: string; base64?: string; text?: string },
+  apiKey: string
+): Promise<AiResumeFields | null> {
+  const parts: any[] = [];
+  const isPdf = /pdf/i.test(payload.mimeType) || /\.pdf$/i.test(payload.fileName);
+
+  if (isPdf && payload.base64 && payload.base64.length < 15_000_000) {
+    parts.push({ inline_data: { mime_type: 'application/pdf', data: payload.base64 } });
+    if (payload.text && payload.text.trim().length > 30) {
+      parts.push({ text: `Cross-reference text layer:\n${payload.text.slice(0, 20000)}` });
+    }
+  } else if (payload.text && payload.text.trim().length > 20) {
+    parts.push({ text: `Resume file: ${payload.fileName}\nText content:\n${payload.text.slice(0, 30000)}` });
+  } else {
+    return null;
+  }
+
+  for (const model of GEMINI_DIRECT_MODELS) {
+    try {
+      const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
+      const res = await fetch(endpoint, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          system_instruction: { parts: [{ text: GEMINI_PROMPT_SYSTEM }] },
+          contents: [{ role: 'user', parts }],
+          generationConfig: {
+            temperature: 0.05,
+            responseMimeType: 'application/json'
+          }
+        })
+      });
+
+      if (!res.ok) continue;
+      const data = await res.json();
+      const rawText = data?.candidates?.[0]?.content?.parts?.[0]?.text;
+      if (!rawText) continue;
+
+      const cleanJson = rawText.replace(/^```(?:json)?\s*/i, '').replace(/```\s*$/i, '').trim();
+      const parsed = JSON.parse(cleanJson);
+      if (parsed && (parsed.name || parsed.email || parsed.phone || parsed.currentDesignation)) {
+        return parsed as AiResumeFields;
+      }
+    } catch {
+      continue;
+    }
+  }
+  return null;
+}
+
+/** Calls the backend Gemini parser with automatic client-side fallback. Returns null fields on failure (never throws). */
+export async function parseResumeWithGemini(
+  payload: { fileName: string; mimeType: string; base64?: string; text?: string; apiKey?: string }
+): Promise<{ data: AiResumeFields | null; status: AiParseStatus; error?: string }> {
+  const localKey = payload.apiKey || (typeof window !== 'undefined' ? localStorage.getItem('gemini_api_key') : null) || undefined;
+
+  try {
+    const res = await resumeApi.parse({ ...payload, apiKey: localKey });
+    if (res?.success && res.data) return { data: res.data as AiResumeFields, status: 'ok' };
+
+    // If server has no key or failed, try direct browser call if a local Google key exists
+    if (localKey && localKey.trim()) {
+      const directData = await directBrowserGeminiParse(payload, localKey);
+      if (directData) return { data: directData, status: 'ok' };
     }
 
-    const data = await res.json();
-    let text = data.candidates?.[0]?.content?.parts?.[0]?.text;
-    if (!text) return null;
-
-    // Clean any markdown formatting if present
-    text = text.replace(/^```json\s*/i, '').replace(/```\s*$/i, '').trim();
-    const parsed = JSON.parse(text);
-    return parsed;
-  } catch (err) {
-    console.warn('Gemini AI parsing failed, falling back to Universal Engine:', err);
-    return null;
+    return { data: null, status: res?.aiConfigured === false ? 'not-configured' : 'failed', error: res?.error };
+  } catch (err: any) {
+    if (localKey && localKey.trim()) {
+      try {
+        const directData = await directBrowserGeminiParse(payload, localKey);
+        if (directData) return { data: directData, status: 'ok' };
+      } catch {
+        // ignore
+      }
+    }
+    const msg = String(err?.message || err);
+    return { data: null, status: /not configured|GEMINI_API_KEY/i.test(msg) ? 'not-configured' : 'failed', error: msg };
   }
 }
 
-// Parse a single file (PDF, DOCX, TXT, etc.)
+const str = (v: unknown): string => (typeof v === 'string' ? v.trim() : '');
+const isJunkName = (n: string) =>
+  !n || n.length < 3 || n.length > 60 || /@|\d|resume|curriculum|vitae|\bcv\b|bio[- ]?data|profile|objective/i.test(n);
+
+function titleCase(s: string): string {
+  return s
+    .toLowerCase()
+    .split(/\s+/)
+    .filter(Boolean)
+    .map((w) => (w.length <= 3 && /^(ar|dr|mr|ms|er)\.?$/.test(w) ? w.charAt(0).toUpperCase() + w.slice(1) : w.charAt(0).toUpperCase() + w.slice(1)))
+    .join(' ');
+}
+
+/**
+ * Choose the most trustworthy email:
+ *  - Top header/title emails found in document text are 100% ground truth
+ *  - AI email is accepted as fallback when document has no text layer (e.g. image scans)
+ */
+function resolveEmail(aiEmail: string, literalEmails: string[], compactDoc: string): string {
+  if (literalEmails.length > 0) {
+    return literalEmails[0];
+  }
+  const ai = aiEmail.toLowerCase().replace(/^mailto:/, '').trim();
+  if (isValidEmail(ai) && (compactDoc.includes(ai) || !compactDoc)) {
+    return ai;
+  }
+  return '';
+}
+
+/**
+ * Choose the most trustworthy phone:
+ *  - Top header/title mobile numbers found in document text are 100% ground truth
+ *  - Prevents company office / past experience phone numbers from ever overriding candidate's number
+ */
+function resolvePhone(aiPhone: string, literalPhones: string[], docDigits: string): string {
+  if (literalPhones.length > 0) {
+    return literalPhones[0];
+  }
+  const aiTen = normalizeIndianMobile(aiPhone);
+  if (aiTen && (docDigits.includes(aiTen) || !docDigits)) {
+    return formatIndianMobile(aiTen);
+  }
+  const d = aiPhone.replace(/\D/g, '');
+  if (!aiTen && d.length >= 9 && d.length <= 15) return aiPhone.trim();
+  return '';
+}
+
+// Parse a single file (PDF, DOCX, DOC, TXT, RTF)
 export async function parseResumeFile(
   file: File,
   allJobs: JobPosting[],
   options?: ParseOptions
 ): Promise<ParsedResumeResult> {
+  const lowerName = file.name.toLowerCase();
+  const isPdf = lowerName.endsWith('.pdf') || file.type === 'application/pdf';
+
+  // =========================================================================
+  // STEP 1: TEXT EXTRACTION (format-aware)
+  // =========================================================================
   let fullText = '';
   let lines: string[] = [];
+  let extraText = ''; // hyperlinks + raw stream, used for literal contact detection
 
-  if (file.name.endsWith('.pdf')) {
+  if (isPdf) {
     const pdfData = await extractPdfTextStreams(file);
     fullText = pdfData.fullText;
     lines = pdfData.lines;
+    extraText = [pdfData.linkText || '', pdfData.rawStream || ''].join('\n');
   } else {
-    try {
-      fullText = await file.text();
-      lines = fullText.split('\n').map((l) => l.trim()).filter(Boolean);
-    } catch {
-      fullText = '';
-      lines = [];
+    if (lowerName.endsWith('.docx')) fullText = await extractDocxText(file);
+    else if (lowerName.endsWith('.doc')) {
+      // Some ".doc" files are actually DOCX (zip) — try mammoth first
+      fullText = await extractDocxText(file);
+      if (fullText.trim().length < 30) fullText = await extractLegacyDocText(file);
+    } else {
+      try {
+        fullText = await file.text();
+        if (lowerName.endsWith('.rtf') || fullText.startsWith('{\\rtf')) fullText = stripRtf(fullText);
+      } catch {
+        fullText = '';
+      }
     }
+    lines = fullText.split(/\r?\n/).map((l) => l.trim()).filter(Boolean);
+  }
+
+  const literalSource = `${fullText}\n${extraText}`;
+  const literalEmails = extractAllEmails(literalSource);
+  const literalPhones = extractAllPhones(literalSource);
+  const compactDoc = normalizeForEmail(literalSource).toLowerCase().replace(/\s+/g, '');
+  const docDigits = literalSource.replace(/\D/g, '');
+
+  // =========================================================================
+  // STEP 2: AI EXTRACTION (server-side Gemini; PDF sent natively → scanned PDFs work too)
+  // =========================================================================
+  let ai: AiResumeFields | null = null;
+  let aiStatus: AiParseStatus = 'skipped';
+  const VERCEL_SAFE_BYTES = 3 * 1024 * 1024; // serverless body limit ≈ 4.5MB after base64
+  const canSendPdf = isPdf && file.size <= VERCEL_SAFE_BYTES;
+
+  if (canSendPdf || fullText.trim().length > 20) {
+    const payload: { fileName: string; mimeType: string; base64?: string; text?: string } = {
+      fileName: file.name,
+      mimeType: isPdf ? 'application/pdf' : (file.type || 'text/plain'),
+      text: fullText.slice(0, 30000)
+    };
+    if (canSendPdf) payload.base64 = await fileToBase64(file);
+    const aiRes = await parseResumeWithGemini(payload);
+    ai = aiRes.data;
+    aiStatus = aiRes.status;
   }
 
   // =========================================================================
-  // STEP 1: CHECK FOR GEMINI AI API KEY
+  // STEP 3: DETERMINISTIC PARSER (always runs, used for cross-validation & fallback)
   // =========================================================================
-  const geminiApiKey = 
-    options?.geminiApiKey || 
-    (import.meta.env.VITE_GEMINI_API_KEY as string | undefined) || 
-    (typeof window !== 'undefined' ? localStorage.getItem('gemini_api_key') : null) ||
-    PERMANENT_GEMINI_API_KEY;
-
-  let geminiResult = null;
-  if (geminiApiKey && fullText.length > 50) {
-    try {
-      geminiResult = await parseResumeWithGemini(fullText, geminiApiKey);
-    } catch (err) {
-      console.warn('Gemini parser attempt failed:', err);
-    }
-  }
+  const parsedUniversal = parseUniversalResumeText(literalSource, lines, file.name);
 
   // =========================================================================
-  // STEP 2: DETERMINISTIC UNIVERSAL PARSER (Active for all resumes)
+  // STEP 4: VALIDATED MERGE — no placeholders, no invented values
   // =========================================================================
-  const parsedUniversal = parseUniversalResumeText(fullText, lines, file.name);
+  const aiName = str(ai?.name);
+  const finalName = !isJunkName(aiName)
+    ? titleCase(aiName)
+    : (parsedUniversal.name && !isJunkName(parsedUniversal.name) ? parsedUniversal.name : cleanNameFromFilename(file.name));
 
-  // Merge Gemini result if available with Universal parser
-  const finalName = geminiResult?.name || parsedUniversal.name || cleanNameFromFilename(file.name);
-  const finalEmail = geminiResult?.email || parsedUniversal.email || `${finalName.toLowerCase().replace(/[^a-z]/g, '.')}@candidate.org`;
-  const finalPhone = geminiResult?.phone || parsedUniversal.phone || '+91 98290 00000';
-  const finalLocation = geminiResult?.location || parsedUniversal.location || 'Jaipur, Rajasthan';
-  const finalCompany = geminiResult?.currentCompany || parsedUniversal.currentCompany || '';
-  const finalRole = geminiResult?.currentDesignation || parsedUniversal.currentDesignation || '';
-  const finalExpYears = geminiResult?.experienceYears || parsedUniversal.experienceYears || 3.0;
-  const finalSkills = (geminiResult?.skills && geminiResult.skills.length > 0) ? geminiResult.skills : parsedUniversal.skills;
-  const finalExp = (geminiResult?.workExperience && geminiResult.workExperience.length > 0) ? geminiResult.workExperience : parsedUniversal.workExperience;
-  const finalEdu = (geminiResult?.education && geminiResult.education.length > 0) ? geminiResult.education : parsedUniversal.education;
-  const finalSummary = geminiResult?.summary || parsedUniversal.summary || `${finalName} brings professional experience${finalRole ? ` as ${finalRole}` : ''}.`;
+  const finalEmail = resolveEmail(str(ai?.email), literalEmails, compactDoc);
+  const finalPhone = resolvePhone(str(ai?.phone), literalPhones, docDigits);
+  const finalLocation = str(ai?.location) || parsedUniversal.location || '';
+  const finalCompany = str(ai?.currentCompany) || parsedUniversal.currentCompany || '';
+  const finalRole = str(ai?.appliedRole) || str(ai?.currentDesignation) || str(parsedUniversal.currentDesignation) || '';
+  const aiExp = typeof ai?.experienceYears === 'number' && isFinite(ai.experienceYears) && ai.experienceYears >= 0 && ai.experienceYears <= 50
+    ? Math.round(ai.experienceYears * 10) / 10
+    : null;
+  const finalExpYears = aiExp ?? parsedUniversal.experienceYears ?? 0;
+  const aiSkills = Array.isArray(ai?.skills) ? ai!.skills!.map(str).filter(Boolean) : [];
+  const finalSkills = aiSkills.length > 0 ? aiSkills : parsedUniversal.skills;
+  const finalExp = (Array.isArray(ai?.workExperience) && ai!.workExperience!.length > 0)
+    ? ai!.workExperience!.map((w) => ({
+        company: str(w?.company),
+        role: str(w?.role),
+        duration: str(w?.duration),
+        location: str(w?.location),
+        highlights: Array.isArray(w?.highlights) ? w.highlights.map(str).filter(Boolean) : []
+      }))
+    : parsedUniversal.workExperience;
+  const finalEdu = (Array.isArray(ai?.education) && ai!.education!.length > 0)
+    ? ai!.education!.map((e) => ({ degree: str(e?.degree), institution: str(e?.institution), year: str(e?.year), grade: str(e?.grade) || undefined }))
+    : parsedUniversal.education;
+  const finalSummary = str(ai?.summary) || parsedUniversal.summary || '';
+  const finalLinkedin = str(ai?.linkedin) || parsedUniversal.linkedin || '';
 
   const matchedJob = matchJobRequisition(
     finalSkills,
@@ -797,20 +966,15 @@ export async function parseResumeFile(
   const atsScore = calculateAtsMatchScore(finalSkills, matchedJob, finalExpYears);
   const candidateId = `cand-${Date.now().toString().slice(-6)}-${Math.floor(Math.random() * 900 + 100)}`;
 
-  let currentSalary = '₹7,50,000 P.A.';
-  let expectedSalary = '₹11,00,000 P.A.';
-  if (finalExpYears >= 10) {
-    currentSalary = '₹18,00,000 P.A.';
-    expectedSalary = '₹24,00,000 P.A.';
-  } else if (finalExpYears >= 7) {
-    currentSalary = '₹14,00,000 P.A.';
-    expectedSalary = '₹18,50,000 P.A.';
-  } else if (finalExpYears >= 4) {
-    currentSalary = '₹9,00,000 P.A.';
-    expectedSalary = '₹13,00,000 P.A.';
-  }
+  const currentSalary = str(ai?.currentSalary);
+  const expectedSalary = str(ai?.expectedSalary);
+  const noticePeriod = str(ai?.noticePeriod);
 
-  const parserUsed = geminiResult ? 'gemini-ai' : 'universal-engine';
+  const parserUsed: 'gemini-ai' | 'universal-engine' = ai ? 'gemini-ai' : 'universal-engine';
+  const missing = [!finalEmail && 'email', !finalPhone && 'phone', !finalRole && !matchedJob.title && 'role'].filter(Boolean);
+  if (aiStatus !== 'ok') {
+    console.warn(`[Resume Parser] AI ${aiStatus} for ${file.name} — used deterministic engine.`);
+  }
 
   const candidate: Candidate = {
     id: candidateId,
@@ -834,9 +998,9 @@ export async function parseResumeFile(
     currentDesignation: finalRole,
     currentSalary,
     expectedSalary,
-    noticePeriod: '30 Days',
+    noticePeriod,
     recruiterAssigned: options?.recruiterAssigned || 'Dr Sharmila Yadav',
-    profileUrl: parsedUniversal.linkedin || undefined,
+    profileUrl: finalLinkedin || undefined,
     tags: finalSkills.length > 0 ? finalSkills : (finalRole ? [finalRole] : []),
     notes: `Extracted via UrbanGaon Universal AI Resume Parser [Engine: ${parserUsed}] (${file.name}, ${(file.size / 1024).toFixed(1)} KB). ${matchedJob.title ? `Matched to ${matchedJob.title}` : 'Role left blank for custom HR assignment'}.`,
     resumeData: {
@@ -844,14 +1008,14 @@ export async function parseResumeFile(
       skills: finalSkills,
       experience: finalExp,
       education: finalEdu,
-      certifications: ['Verified Professional Credentials'],
+      certifications: [],
       projects: []
     },
     activityHistory: [
       {
         id: `act-${Date.now()}`,
         action: 'Resume Uploaded & Parsed',
-        details: `Extracted ${finalExp.length} positions and ${finalEdu.length} qualifications from ${file.name} using ${parserUsed === 'gemini-ai' ? 'Gemini 1.5 AI' : 'Universal Layout NLP Engine'}.`,
+        details: `Extracted ${finalExp.length} positions and ${finalEdu.length} qualifications from ${file.name} using ${parserUsed === 'gemini-ai' ? 'Gemini AI (server)' : 'Universal Layout NLP Engine'}.${missing.length ? ` Not found in resume: ${missing.join(', ')} — please fill manually.` : ''}`,
         performedBy: options?.recruiterAssigned || 'Dr Sharmila Yadav (HR)',
         timestamp: new Date().toISOString(),
         type: 'ingestion'
@@ -865,7 +1029,9 @@ export async function parseResumeFile(
     fileSize: file.size,
     confidenceScore: atsScore,
     extractedSnippet: finalSummary.slice(0, 140) + '...',
-    parserUsed
+    parserUsed,
+    aiStatus,
+    missingFields: missing as string[]
   };
 }
 

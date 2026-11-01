@@ -67,6 +67,29 @@ async function request<T>(endpoint: string, options: RequestInit = {}): Promise<
   return res.json();
 }
 
+export const resumeApi = {
+  /** Server-side Gemini AI resume parsing (uses server GEMINI_API_KEY or client-provided key). */
+  parse: (payload: { fileName: string; mimeType: string; base64?: string; text?: string; apiKey?: string }) =>
+    request<{ success: boolean; aiConfigured?: boolean; model?: string; data?: any; error?: string }>('/api/resume/parse', {
+      method: 'POST',
+      body: JSON.stringify(payload)
+    }),
+  getStatus: () =>
+    request<{ aiConfigured: boolean; model: string; supportedModels: string[] }>('/api/resume/status', {
+      method: 'GET'
+    }),
+  testKey: (apiKey: string) =>
+    request<{ success: boolean; message?: string; error?: string }>('/api/resume/test-key', {
+      method: 'POST',
+      body: JSON.stringify({ apiKey })
+    }),
+  parseJd: (payload: { fileName: string; mimeType: string; base64?: string; text?: string; apiKey?: string }) =>
+    request<{ success: boolean; model?: string; data: Partial<JobPosting>; error?: string }>('/api/resume/parse-jd', {
+      method: 'POST',
+      body: JSON.stringify(payload)
+    })
+};
+
 export const authApi = {
   login: (credentials: LoginCredentials) =>
     request<AuthResponse>('/api/auth/login', {

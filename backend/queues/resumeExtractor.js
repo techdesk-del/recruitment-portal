@@ -99,8 +99,8 @@ export async function processResumeExtraction(jobData) {
 
   // Parse from raw textContent
   const name = extractNameFromFilename(fileName);
-  const email = extractEmail(textContent) || `${name.toLowerCase().replace(/[^a-z0-9]/g, '.')}@candidate.org`;
-  const phone = extractPhone(textContent) || '+91 98290 12345';
+  const email = extractEmail(textContent) || '';
+  const phone = extractPhone(textContent) || '';
   const skills = extractSkillsFromText(textContent);
 
   // Extract experience years

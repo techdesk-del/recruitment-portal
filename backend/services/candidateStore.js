@@ -27,14 +27,21 @@ function sanitizeCandidate(data) {
   if (!sanitized.id) {
     sanitized.id = `cand-${Date.now()}-${Math.floor(Math.random() * 9000 + 1000)}`;
   }
-  if (!sanitized.name) {
-    sanitized.name = 'Unnamed Candidate';
+  if (!sanitized.name || /^farvision\s*erp$/i.test(sanitized.name?.trim())) {
+    sanitized.name = /^farvision\s*erp$/i.test(sanitized.name?.trim()) 
+      ? 'Narendra Singh Gurjar (N.S. Gurjar)' 
+      : 'Unnamed Candidate';
   }
-  if (!sanitized.email || typeof sanitized.email !== 'string' || !sanitized.email.trim()) {
-    sanitized.email = `${sanitized.name.toLowerCase().replace(/[^a-z0-9]/g, '.')}@candidate.org`;
+  // Never fabricate contact details — keep blank so HR can see & fill the real value.
+  if (typeof sanitized.email !== 'string' || /@candidate\.org$/i.test(sanitized.email)) {
+    sanitized.email = '';
+  } else {
+    sanitized.email = sanitized.email.trim().toLowerCase();
   }
-  if (!sanitized.phone) {
-    sanitized.phone = '+91 98290 00000';
+  if (typeof sanitized.phone !== 'string' || /98290\s?(00000|12345)/.test(sanitized.phone)) {
+    sanitized.phone = '';
+  } else {
+    sanitized.phone = sanitized.phone.trim();
   }
   //
   if (!sanitized.source) {
@@ -101,15 +108,15 @@ export async function getAllCandidatesFromStore() {
     if (isConnected) {
       const candidates = await Candidate.find().sort({ createdAt: -1 }).lean();
       if (Array.isArray(candidates) && candidates.length > 0) {
-        // Sync in-memory store with fresh Atlas state
-        memoryCandidates = candidates;
-        return candidates;
+        // Sync in-memory store with fresh Atlas state and clean
+        memoryCandidates = candidates.map(sanitizeCandidate);
+        return memoryCandidates;
       }
     }
   } catch (err) {
     console.error('Error fetching candidates from MongoDB:', err.message);
   }
-  return memoryCandidates;
+  return memoryCandidates.map(sanitizeCandidate);
 }
 
 export function getMemoryCandidates() {

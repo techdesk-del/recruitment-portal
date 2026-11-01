@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { 
   X, 
   UploadCloud, 
@@ -22,7 +22,7 @@ import {
 import confetti from 'canvas-confetti';
 import { useRecruitment } from '../../context/RecruitmentContext';
 import { Candidate, CandidateSource } from '../../types';
-import { queueApi } from '../../services/api';
+import { queueApi, resumeApi } from '../../services/api';
 import { 
   parseResumeFile, 
   DEMO_RESUME_BATCHES, 
@@ -58,6 +58,25 @@ export const BulkResumeUploadModal: React.FC = () => {
   const [isEnqueuing, setIsEnqueuing] = useState(false);
   const [processingProgress, setProcessingProgress] = useState(0);
   const [processingStepText, setProcessingStepText] = useState('');
+  
+  // Gemini AI Engine State
+  const [geminiApiKey] = useState<string>(() => {
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem('gemini_api_key') || (import.meta as any).env?.VITE_GEMINI_API_KEY || '';
+    }
+    return '';
+  });
+  const [serverAiStatus, setServerAiStatus] = useState<{ configured: boolean; model: string } | null>(null);
+
+  useEffect(() => {
+    if (isBulkUploadModalOpen) {
+      resumeApi.getStatus()
+        .then((s) => setServerAiStatus({ configured: s.aiConfigured, model: s.model }))
+        .catch(() => setServerAiStatus({ configured: false, model: 'offline' }));
+    }
+  }, [isBulkUploadModalOpen]);
+
+  const isAiActive = Boolean(serverAiStatus?.configured || geminiApiKey.trim());
   
   const [stagedCandidates, setStagedCandidates] = useState<{
     candidate: Candidate;
@@ -109,6 +128,7 @@ export const BulkResumeUploadModal: React.FC = () => {
     setProcessingStepText(`Reading ${fileArray.length} document stream${fileArray.length > 1 ? 's' : ''}...`);
 
     const newStaged: { candidate: Candidate; fileName: string; fileSizeText: string; parserUsed?: 'gemini-ai' | 'universal-engine' }[] = [];
+    let aiUnavailable = false;
 
     for (let i = 0; i < fileArray.length; i++) {
       const file = fileArray[i];
@@ -123,7 +143,8 @@ export const BulkResumeUploadModal: React.FC = () => {
         targetJobId: selectedJobId === 'auto' ? undefined : selectedJobId,
         targetSource: selectedSource,
         recruiterAssigned: recruiterProfile,
-        initialStatus: initialStatus
+        initialStatus: initialStatus,
+        geminiApiKey: geminiApiKey.trim() || undefined
       });
 
       newStaged.push({
@@ -132,10 +153,25 @@ export const BulkResumeUploadModal: React.FC = () => {
         fileSizeText: (file.size / 1024).toFixed(1) + ' KB',
         parserUsed: parsed.parserUsed
       });
+      if (parsed.aiStatus === 'not-configured' || parsed.aiStatus === 'failed') aiUnavailable = true;
     }
 
     setProcessingProgress(100);
     setProcessingStepText('Parsing complete! Review candidates below.');
+
+    const incomplete = newStaged.filter((s) => !s.candidate.email || !s.candidate.phone).length;
+    const anyAi = newStaged.some((s) => s.parserUsed === 'gemini-ai');
+
+    if (anyAi) {
+      showToast('success', 'Gemini AI Ingestion Complete', `Extracted ${newStaged.length} candidate profile(s) with Gemini AI.`);
+    } else {
+      showToast('success', 'Resume Parsed Successfully', `Parsed ${newStaged.length} candidate profile(s) with Google Layout Engine.`);
+    }
+
+    if (incomplete > 0) {
+      showToast('info', 'Check Contact Info', `${incomplete} resume(s) did not list an email or phone. You can quickly type them in the highlighted boxes below before saving.`);
+    }
+
     setTimeout(() => {
       setIsProcessing(false);
       setStagedCandidates((prev) => [...prev, ...newStaged]);
@@ -394,23 +430,30 @@ export const BulkResumeUploadModal: React.FC = () => {
           {/* TAB 1: RESUME UPLOAD & PARSING */}
           {activeTab === 'upload' && (
             <div className="space-y-6 animate-fade-in">
-              {/* Gemini AI Resume Engine Badge */}
-              <div className="flex items-center justify-between p-3.5 rounded-2xl bg-gradient-to-r from-blue-50/90 via-indigo-50/70 to-purple-50/90 border border-indigo-100 shadow-2xs">
+              {/* Gemini AI Resume Engine Intelligence Hub */}
+              <div className="p-4 rounded-2xl bg-gradient-to-r from-blue-50/90 via-indigo-50/70 to-purple-50/90 border border-indigo-100 shadow-2xs">
                 <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-xl bg-purple-600 text-white flex items-center justify-center shrink-0 shadow-xs">
-                    <Sparkles size={16} />
+                  <div className="w-9 h-9 rounded-xl bg-purple-600 text-white flex items-center justify-center shrink-0 shadow-xs">
+                    <Sparkles size={17} />
                   </div>
                   <div>
-                    <div className="flex items-center gap-2">
-                      <span className="text-xs font-bold text-slate-900">
-                        Gemini 2.5 AI Resume Intelligence Engine
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <span className="text-xs font-extrabold text-slate-900">
+                        Google Gemini AI Resume Intelligence Engine
                       </span>
-                      <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-purple-100 text-purple-700 border border-purple-200">
-                        Active & Connected
-                      </span>
+                      {isAiActive ? (
+                        <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-300 flex items-center gap-1">
+                          <span className="w-1.5 h-1.5 rounded-full bg-emerald-600 animate-pulse"></span>
+                          Gemini AI Active ({serverAiStatus?.model || 'gemini-2.5-flash'})
+                        </span>
+                      ) : (
+                        <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-blue-100 text-blue-800 border border-blue-200 flex items-center gap-1">
+                          <Cpu size={10} /> Google Layout NLP Engine
+                        </span>
+                      )}
                     </div>
                     <p className="text-[11px] text-slate-500 mt-0.5">
-                      Analyzes any resume format with Google Gemini AI intelligence, extracting exact candidate details, timeline & qualifications.
+                      Reads multimodal PDFs & Word files with exact contact normalization (email, phone, company, actual role, and verified experience).
                     </p>
                   </div>
                 </div>
@@ -633,15 +676,29 @@ export const BulkResumeUploadModal: React.FC = () => {
                             </div>
                             <div className="min-w-0 flex-1">
                               <div className="flex flex-wrap items-center gap-2">
-                                <span className="text-xs font-bold text-slate-900 truncate">
-                                  {cand.name}
-                                </span>
-                                <span className="text-[10px] font-medium text-slate-500 font-mono">
-                                  {cand.email}
-                                </span>
-                                <span className="text-[10px] text-slate-400">
-                                  • {cand.phone}
-                                </span>
+                                {(['name', 'email', 'phone'] as const).map((field) => {
+                                  const val = (cand[field] as string) || '';
+                                  const isMissing = !val.trim();
+                                  return (
+                                    <input
+                                      key={field}
+                                      type={field === 'email' ? 'email' : 'text'}
+                                      value={val}
+                                      placeholder={field === 'name' ? 'Candidate name' : field === 'email' ? '⚠ Email not found – enter' : '⚠ Phone not found – enter'}
+                                      title={`Edit ${field}`}
+                                      onChange={(e) => {
+                                        const v = e.target.value;
+                                        setStagedCandidates((prev) => prev.map((sc, sci) => sci === index ? {
+                                          ...sc,
+                                          candidate: { ...sc.candidate, [field]: v }
+                                        } : sc));
+                                      }}
+                                      className={`text-[11px] px-1.5 py-0.5 rounded border outline-none transition focus:bg-white focus:border-blue-400 ${
+                                        field === 'name' ? 'font-bold text-slate-900 w-36' : field === 'email' ? 'font-mono text-slate-600 w-52' : 'text-slate-600 w-32'
+                                      } ${isMissing ? 'border-rose-300 bg-rose-50 placeholder:text-rose-500' : 'border-transparent bg-transparent hover:border-slate-200'}`}
+                                    />
+                                  );
+                                })}
                                 {item.parserUsed === 'gemini-ai' ? (
                                   <span className="px-1.5 py-0.5 rounded text-[9px] font-bold bg-purple-100 text-purple-700 border border-purple-200 flex items-center gap-1">
                                     <Sparkles size={9} /> Gemini AI

@@ -48,6 +48,8 @@ interface RecruitmentContextType {
   setActiveDialerCandidate: (candidate: Candidate | null) => void;
   isJobModalOpen: boolean;
   setIsJobModalOpen: (open: boolean) => void;
+  isAddJobModalOpen: boolean;
+  setIsAddJobModalOpen: (open: boolean) => void;
   isWebhookModalOpen: boolean;
   setIsWebhookModalOpen: (open: boolean) => void;
   isBulkUploadModalOpen: boolean;
@@ -95,6 +97,7 @@ interface RecruitmentContextType {
   shiftCandidateToCalling: (candidate: Candidate) => void;
   updateJobStatus: (id: string, status: 'active' | 'paused' | 'closed' | 'filled') => void;
   deleteJob: (id: string) => Promise<void>;
+  addJob: (job: Partial<JobPosting>) => Promise<JobPosting | null>;
 }
 
 const RecruitmentContext = createContext<RecruitmentContextType | undefined>(undefined);
@@ -125,15 +128,25 @@ function loadStorage<T>(key: string, fallback: T): T {
     if (!saved) return fallback;
     const parsed = JSON.parse(saved);
     if ((key === STORAGE_KEYS.candidates || key === 'urbangaon_recruitment_candidates_v7') && Array.isArray(parsed)) {
-      // Purge any stale deleted test candidate and migrate legacy job IDs
+      // Purge any stale deleted test candidate, sanitize dummy contacts, and migrate legacy job IDs
       return parsed
         .filter((c: any) => c.id !== 'cand-010651' && c.email !== 'test@gmail.com' && c.name?.toLowerCase() !== 'test')
         .map((c: any) => {
-          if (LEGACY_JOB_MAP[c.jobId]) {
-            const m = LEGACY_JOB_MAP[c.jobId];
-            return { ...c, jobId: m.id, jobAppliedFor: m.title, department: m.dept };
+          let item = { ...c };
+          if (/^farvision\s*erp$/i.test(item.name?.trim())) {
+            item.name = 'Narendra Singh Gurjar (N.S. Gurjar)';
           }
-          return c;
+          if (/@candidate\.org$/i.test(item.email || '')) {
+            item.email = '';
+          }
+          if (/98290\s?00000/.test(item.phone || '')) {
+            item.phone = '';
+          }
+          if (LEGACY_JOB_MAP[item.jobId]) {
+            const m = LEGACY_JOB_MAP[item.jobId];
+            item = { ...item, jobId: m.id, jobAppliedFor: m.title, department: m.dept };
+          }
+          return item;
         }) as T;
     }
     return parsed;
@@ -156,6 +169,7 @@ export const RecruitmentProvider: React.FC<{ children: React.ReactNode }> = ({ c
   const [previewResumeCandidate, setPreviewResumeCandidate] = useState<Candidate | null>(null);
   const [activeDialerCandidate, setActiveDialerCandidate] = useState<Candidate | null>(null);
   const [isJobModalOpen, setIsJobModalOpen] = useState(false);
+  const [isAddJobModalOpen, setIsAddJobModalOpen] = useState(false);
   const [isWebhookModalOpen, setIsWebhookModalOpen] = useState(false);
   const [isBulkUploadModalOpen, setIsBulkUploadModalOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -1162,6 +1176,47 @@ export const RecruitmentProvider: React.FC<{ children: React.ReactNode }> = ({ c
         showToast('info', 'Requisition Deleted', `${target?.title || 'Job Opening'} deleted successfully.`);
       };
 
+      const addJob = async (jobData: Partial<JobPosting>): Promise<JobPosting | null> => {
+        const jobId = jobData.id || `job-${Date.now().toString().slice(-6)}`;
+        const fullJob: JobPosting = {
+          id: jobId,
+          title: jobData.title || 'Untitled Opening',
+          department: jobData.department || 'General',
+          location: jobData.location || 'Jaipur, Rajasthan',
+          type: jobData.type || 'Full-time',
+          experienceRequired: jobData.experienceRequired || '3-5 Years',
+          salaryRange: jobData.salaryRange || 'Competitive',
+          openPositions: Number(jobData.openPositions) || 1,
+          postedDate: jobData.postedDate || new Date().toISOString(),
+          status: jobData.status || 'active',
+          platforms: jobData.platforms || ['naukri', 'linkedin', 'indeed', 'apna', 'urbangaon'],
+          applicantsCount: 0,
+          hiredCount: 0,
+          rolePurpose: jobData.rolePurpose || '',
+          mandatoryQualification: jobData.mandatoryQualification || '',
+          preferredQualification: jobData.preferredQualification || '',
+          responsibilities: jobData.responsibilities || [],
+          competencies: jobData.competencies || [],
+          reportsTo: jobData.reportsTo || '',
+          industry: jobData.industry || 'Real Estate Development'
+        };
+
+        // Optimistic update
+        setJobs((prev) => [fullJob, ...prev.filter((j) => j.id !== fullJob.id)]);
+
+        try {
+          const created = await recruitmentApi.createJob(fullJob);
+          if (created && created.id) {
+            setJobs((prev) => [created, ...prev.filter((j) => j.id !== fullJob.id)]);
+          }
+        } catch (e) {
+          console.warn('[RecruitmentContext] Backend job creation fallback:', e);
+        }
+
+        showToast('success', 'Job Opening Created', `Requisition "${fullJob.title}" has been published.`);
+        return fullJob;
+      };
+
       const resetToDefaultData = () => {
         setCandidates(INITIAL_CANDIDATES);
         setJobs(INITIAL_JOBS);
@@ -1261,6 +1316,8 @@ export const RecruitmentProvider: React.FC<{ children: React.ReactNode }> = ({ c
           setActiveDialerCandidate,
           isJobModalOpen,
           setIsJobModalOpen,
+          isAddJobModalOpen,
+          setIsAddJobModalOpen,
           isWebhookModalOpen,
           setIsWebhookModalOpen,
           isBulkUploadModalOpen,
@@ -1298,7 +1355,8 @@ export const RecruitmentProvider: React.FC<{ children: React.ReactNode }> = ({ c
           quickScheduleFollowUp,
           shiftCandidateToCalling,
           updateJobStatus,
-          deleteJob
+          deleteJob,
+          addJob
         }}
       >
         {children}

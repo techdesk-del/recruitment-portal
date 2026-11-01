@@ -9,11 +9,13 @@ import syncRoutes from './syncRoutes.js';
 import authRoutes from './authRoutes.js';
 import queueRoutes from './queueRoutes.js';
 import communicationRoutes from './communicationRoutes.js';
+import resumeRoutes from './resumeRoutes.js';
 
 const apiRouter = Router();
 
 apiRouter.use('/', healthRoutes);
 apiRouter.use('/auth', authRoutes);
+apiRouter.use('/resume', resumeRoutes);
 apiRouter.use('/queue', queueRoutes);
 apiRouter.use('/communications', communicationRoutes);
 apiRouter.use('/candidates', candidateRoutes);

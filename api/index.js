@@ -8,8 +8,8 @@ const app = express();
 
 // Enable Cross-Origin Resource Sharing for any remote client worldwide
 app.use(cors({ origin: '*' }));
-app.use(express.json({ limit: '20mb' }));
-app.use(express.urlencoded({ extended: true, limit: '20mb' }));
+app.use(express.json({ limit: '25mb' }));
+app.use(express.urlencoded({ extended: true, limit: '25mb' }));
 
 let isSeeded = false;
 

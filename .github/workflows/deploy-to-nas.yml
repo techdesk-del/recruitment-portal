@@ -1,0 +1,28 @@
+name: Deploy to Synology DS925+ NAS
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    name: Auto-Deploy to Synology NAS
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger Remote Deployment via SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.NAS_HOST }}
+          port: ${{ secrets.NAS_PORT || 22 }}
+          username: ${{ secrets.NAS_USER }}
+          password: ${{ secrets.NAS_PASSWORD }}
+          key: ${{ secrets.NAS_SSH_KEY }}
+          script: |
+            cd "/volume1/docker/recruitment-dashboard" || cd "/volume1/docker/ATS Dashboard"
+            echo "Pulling latest changes from GitHub..."
+            git pull origin main
+            echo "Rebuilding and updating containers..."
+            docker compose up -d --build
+            echo "Deployment successful!"
+

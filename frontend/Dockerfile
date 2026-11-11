@@ -1,30 +1,16 @@
-# Multi-stage Dockerfile for Frontend (Synology DS925+ Production)
-# Stage 1: Build the React + Vite static bundle
-FROM node:20-alpine AS builder
-
-WORKDIR /app
-
-# Cache package installation layer
-COPY package*.json ./
-RUN npm ci
-
-# Copy source code and build
-COPY . .
-RUN npm run build
-
-# Stage 2: Serve via Nginx with WebSocket reverse-proxying
+# High-Performance Production Nginx Container for Synology DS925+
+# Pre-compiled React + Vite bundle with instant 1-second deployment
 FROM nginx:alpine
 
-# Remove default nginx config
+# Remove default nginx configuration
 RUN rm -rf /etc/nginx/conf.d/default.conf
 
-# Copy custom nginx configuration
+# Copy custom reverse proxy & WebSocket configuration
 COPY nginx.conf /etc/nginx/conf.d/default.conf
 
-# Copy build artifacts from Stage 1
-COPY --from=builder /app/dist /usr/share/nginx/html
+# Copy pre-compiled production build bundle directly into web root
+COPY dist /usr/share/nginx/html
 
 EXPOSE 80
 
 CMD ["nginx", "-g", "daemon off;"]
-

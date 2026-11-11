@@ -4,6 +4,7 @@ import { User } from '../models/User.js';
 import { ENV } from '../config/env.js';
 import { ensureDBConnected, getMongoConnectionStatus } from '../config/database.js';
 import { DEFAULT_USERS } from '../services/userSeeder.js';
+import { broadcastUserCreated, broadcastUserUpdated } from '../sockets/socketHandler.js';
 
 // In-memory fallback users in case MongoDB Atlas is unreachable
 let memoryUsers = DEFAULT_USERS.map(u => {
@@ -70,6 +71,7 @@ export async function register(req, res) {
       });
 
       await user.save();
+      broadcastUserCreated(user.toJSON());
       const token = generateToken(user);
       return res.status(201).json({
         success: true,
@@ -102,6 +104,7 @@ export async function register(req, res) {
     const token = generateToken(memUser);
     const safeUser = { ...memUser };
     delete safeUser.password;
+    broadcastUserCreated(safeUser);
 
     return res.status(201).json({
       success: true,
@@ -283,6 +286,7 @@ export async function login(req, res) {
         if (!updated) {
           return res.status(404).json({ error: 'User not found.' });
         }
+        broadcastUserUpdated(updated.toJSON());
         return res.json({ success: true, user: updated.toJSON() });
       }
 
@@ -291,6 +295,7 @@ export async function login(req, res) {
         memoryUsers[idx].role = role;
         const safe = { ...memoryUsers[idx] };
         delete safe.password;
+        broadcastUserUpdated(safe);
         return res.json({ success: true, user: safe });
       }
 

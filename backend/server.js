@@ -10,6 +10,7 @@ import { initSocket } from './sockets/socketHandler.js';
 import { initResumeQueue } from './queues/resumeQueue.js';
 import apiRouter from './routes/index.js';
 import { startLinkedInAutoSyncScheduler } from './services/linkedinAutoFetcher.js';
+import { initRealtimeDBSync } from './services/realtimeDBSync.js';
 
 const app = express();
 const httpServer = createServer(app);
@@ -43,6 +44,28 @@ httpServer.listen(ENV.PORT, () => {
 
   // Start 60-second automated inbox polling
   startLinkedInAutoSyncScheduler(io);
+
+  // Initialize Real-time Database Bridge if dual local/cloud URIs are configured
+  initRealtimeDBSync();
 });
+
+// Production Graceful Shutdown for Synology DSM / Docker Container Manager
+const gracefulShutdown = async (signal) => {
+  console.log(`\n🛑 Received ${signal}. Executing graceful shutdown...`);
+  httpServer.close(() => {
+    console.log('✅ HTTP & WebSocket listeners terminated.');
+  });
+  try {
+    const mongoose = (await import('mongoose')).default;
+    await mongoose.connection.close(false);
+    console.log('✅ MongoDB connection closed gracefully.');
+  } catch (err) {
+    // Ignore close error
+  }
+  process.exit(0);
+};
+
+process.on('SIGTERM', () => gracefulShutdown('SIGTERM'));
+process.on('SIGINT', () => gracefulShutdown('SIGINT'));
 
 export { app, httpServer, io };

@@ -366,6 +366,24 @@ export const RecruitmentProvider: React.FC<{ children: React.ReactNode }> = ({ c
       showToast('success', '⚡ Background Batch Complete', `All ${payload.total} resumes parsed and ingested into Atlas via decoupled background worker!`);
     });
 
+    // 8. Real-Time Job Requisition Created / Updated / Deleted
+    socket.on('JOB_CREATED', (newJob: JobPosting) => {
+      if (!newJob?.id) return;
+      setJobs((prev) => (prev.some((j) => j.id === newJob.id) ? prev : [newJob, ...prev]));
+      showToast('info', '💼 New Job Opening', `Requisition "${newJob.title}" has been published.`);
+    });
+
+    socket.on('JOB_UPDATED', (updatedJob: Partial<JobPosting> & { id: string }) => {
+      if (!updatedJob?.id) return;
+      setJobs((prev) => prev.map((j) => (j.id === updatedJob.id ? { ...j, ...updatedJob } : j)));
+    });
+
+    socket.on('JOB_DELETED', ({ id }: { id: string }) => {
+      if (!id) return;
+      setJobs((prev) => prev.filter((j) => j.id !== id));
+      showToast('warning', '🗑️ Job Requisition Closed', 'A job opening was removed.');
+    });
+
     return () => {
       socket.off('NEW_CANDIDATE_INGESTED');
       socket.off('CANDIDATE_STATUS_UPDATED');
@@ -378,6 +396,9 @@ export const RecruitmentProvider: React.FC<{ children: React.ReactNode }> = ({ c
       socket.off('CALL_RECORD_DELETED');
       socket.off('QUEUE_PROGRESS');
       socket.off('QUEUE_BATCH_COMPLETED');
+      socket.off('JOB_CREATED');
+      socket.off('JOB_UPDATED');
+      socket.off('JOB_DELETED');
     };
   }, []);
 
@@ -394,10 +415,11 @@ export const RecruitmentProvider: React.FC<{ children: React.ReactNode }> = ({ c
       isPolling = true;
 
       try {
-        const [cloudCandidates, cloudInterviews, cloudCalls] = await Promise.allSettled([
+        const [cloudCandidates, cloudInterviews, cloudCalls, cloudJobs] = await Promise.allSettled([
           recruitmentApi.fetchCandidates(),
           recruitmentApi.fetchInterviews(),
-          recruitmentApi.fetchCalls()
+          recruitmentApi.fetchCalls(),
+          recruitmentApi.fetchJobs()
         ]);
 
         if (!isMounted) return;
@@ -473,6 +495,11 @@ export const RecruitmentProvider: React.FC<{ children: React.ReactNode }> = ({ c
         // Sync Calling Logs
         if (cloudCalls.status === 'fulfilled' && Array.isArray(cloudCalls.value) && cloudCalls.value.length > 0) {
           setCallRecords((curr) => (curr.length !== cloudCalls.value.length ? cloudCalls.value : curr));
+        }
+
+        // Sync Jobs
+        if (cloudJobs.status === 'fulfilled' && Array.isArray(cloudJobs.value) && cloudJobs.value.length > 0) {
+          setJobs((curr) => (curr.length !== cloudJobs.value.length ? cloudJobs.value : curr));
         }
       } catch (err) {
         // Silent background fallback
@@ -1246,6 +1273,7 @@ export const RecruitmentProvider: React.FC<{ children: React.ReactNode }> = ({ c
       interview_r1: candidates.filter((c) => c.status === 'interview_r1').length,
       interview_r2: candidates.filter((c) => c.status === 'interview_r2').length,
       offered: candidates.filter((c) => c.status === 'offered').length,
+      offer_accepted: candidates.filter((c) => c.status === 'offer_accepted').length,
       joined: candidates.filter((c) => c.status === 'joined').length,
       rejected: candidates.filter((c) => c.status === 'rejected').length
     };

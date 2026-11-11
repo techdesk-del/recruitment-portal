@@ -1,7 +1,13 @@
 import { CallRecord } from '../models/CallRecord.js';
 import { Candidate } from '../models/Candidate.js';
 import { ensureDBConnected, getMongoConnectionStatus } from '../config/database.js';
-import { broadcastCallRecordCreated, broadcastCallRecordDeleted } from '../sockets/socketHandler.js';
+import {
+  broadcastCallRecordCreated,
+  broadcastCallRecordDeleted,
+  broadcastCandidateUpdated,
+  broadcastStatusUpdate
+} from '../sockets/socketHandler.js';
+import { updateCandidateInStore } from '../services/candidateStore.js';
 
 export async function getCalls(req, res) {
   try {
@@ -56,34 +62,46 @@ export async function createCall(req, res) {
       };
 
       // Sync candidate calling details and activity history in MongoDB
-      await Candidate.findOneAndUpdate(
+      const candidateUpdates = {
+        'callingDetails.lastCallTime': data.callTime,
+        'callingDetails.lastDisposition': data.disposition,
+        'callingDetails.lastCallNotes': data.notes,
+        'callingDetails.callStatus': callStatus,
+        'callingDetails.nextFollowUpDate': data.followUpDate || '',
+        'callingDetails.nextFollowUpTime': data.followUpTime || '',
+        'callingDetails.confirmedCurrentSalary': data.confirmedCurrentCtc || '',
+        'callingDetails.confirmedExpectedSalary': data.confirmedExpectedCtc || '',
+        'callingDetails.confirmedNoticePeriod': data.confirmedNoticePeriod || '',
+        'callingDetails.confirmedLocation': data.confirmedLocation || '',
+        'callingDetails.isNegotiable': data.isNegotiable || 'yes',
+        'callingDetails.reasonForLeaving': data.reasonForLeaving || '',
+        'callingDetails.tentativeInterviewDate': data.tentativeInterviewDate || '',
+        isCallingQueued: false,
+        ...(data.promoteToInterview && { status: 'shortlisted' })
+      };
+
+      const updatedCand = await Candidate.findOneAndUpdate(
         { id: data.candidateId },
         {
           $inc: { 'callingDetails.totalCalls': 1 },
-          $set: {
-            'callingDetails.lastCallTime': data.callTime,
-            'callingDetails.lastDisposition': data.disposition,
-            'callingDetails.lastCallNotes': data.notes,
-            'callingDetails.callStatus': callStatus,
-            'callingDetails.nextFollowUpDate': data.followUpDate || '',
-            'callingDetails.nextFollowUpTime': data.followUpTime || '',
-            'callingDetails.confirmedCurrentSalary': data.confirmedCurrentCtc || '',
-            'callingDetails.confirmedExpectedSalary': data.confirmedExpectedCtc || '',
-            'callingDetails.confirmedNoticePeriod': data.confirmedNoticePeriod || '',
-            'callingDetails.confirmedLocation': data.confirmedLocation || '',
-            'callingDetails.isNegotiable': data.isNegotiable || 'yes',
-            'callingDetails.reasonForLeaving': data.reasonForLeaving || '',
-            'callingDetails.tentativeInterviewDate': data.tentativeInterviewDate || '',
-            isCallingQueued: false,
-            lastUpdatedDate: new Date().toISOString(),
-            ...(data.promoteToInterview && { status: 'shortlisted' })
-          },
+          $set: { ...candidateUpdates, lastUpdatedDate: new Date().toISOString() },
           $push: {
             'callingDetails.callHistory': { $each: [data], $position: 0 },
             activityHistory: { $each: [activityItem], $position: 0 }
           }
+        },
+        { new: true }
+      ).catch((err) => {
+        console.warn('Candidate sync after call warning:', err.message);
+        return null;
+      });
+
+      if (updatedCand) {
+        broadcastCandidateUpdated(updatedCand);
+        if (data.promoteToInterview) {
+          broadcastStatusUpdate({ id: data.candidateId, status: 'shortlisted', activityItem });
         }
-      ).catch((err) => console.warn('Candidate sync after call warning:', err.message));
+      }
 
       broadcastCallRecordCreated(saved);
       return res.status(201).json(saved);

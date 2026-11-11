@@ -489,6 +489,7 @@ export const CandidateProfileModal: React.FC = () => {
                 <option value="interview_r1">Interview Round 1 (Satya)</option>
                 <option value="interview_r2">Interview Round 2 (Dr Sharmila & CEO)</option>
                 <option value="offered">Offer Extended</option>
+                <option value="offer_accepted">Offer Accepted</option>
                 <option value="joined">Joined / Hired</option>
                 <option value="rejected">Rejected</option>
               </select>

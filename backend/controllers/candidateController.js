@@ -1,6 +1,11 @@
 import { Candidate } from '../models/Candidate.js';
 import { ensureDBConnected, getMongoConnectionStatus } from '../config/database.js';
-import { getAllCandidatesFromStore, persistCandidate, deleteCandidateFromStore } from '../services/candidateStore.js';
+import {
+  getAllCandidatesFromStore,
+  persistCandidate,
+  updateCandidateInStore,
+  deleteCandidateFromStore
+} from '../services/candidateStore.js';
 import {
   broadcastStatusUpdate,
   broadcastNewCandidate,
@@ -8,14 +13,9 @@ import {
   broadcastCandidateDeleted
 } from '../sockets/socketHandler.js';
 
-// Helper to update candidate fields in MongoDB
+// Helper to update candidate fields in MongoDB and store synchronously
 async function updateCandidateField(id, updates, extraPush = null) {
-  await ensureDBConnected();
-  const updateQuery = {
-    $set: { ...updates, lastUpdatedDate: new Date().toISOString() },
-    ...(extraPush && { $push: extraPush })
-  };
-  return Candidate.findOneAndUpdate({ id }, updateQuery, { new: true });
+  return updateCandidateInStore(id, updates, extraPush);
 }
 
 // GET all candidates (Guaranteed MongoDB Atlas synchronization)

@@ -1,4 +1,4 @@
-﻿# UrbanGaon Unified Recruitment Platform
+# UrbanGaon Unified Recruitment Platform
 
 > Enterprise-Grade Architecture: Clean Separation of **Frontend** (React + Vite + TypeScript) and **Backend** (Node.js + Express + MongoDB Atlas).
 
@@ -90,3 +90,13 @@ npm run dev
 - **Database:** ecruitment_dashboard
 - **Collections:** candidates, jobs, interviews, callrecords
 - **Dual-Persistence:** If network drops, gracefully maintains in-memory store and re-syncs once reconnected.
+
+
+---
+
+## 🏢 Synology NAS DS925+ Deployment
+Complete turnkey deployment configuration for Synology DSM Container Manager with real-time database synchronization:
+- **Compose Stack:** [docker-compose.yml](file:///d:/Recruitment%20Dashboard/docker-compose.yml) (Nginx Frontend, Node API, Mongo 7.0, Redis 7.0)
+- **Deployment Guide:** [Synology DS925+ Deployment Guide](file:///d:/Recruitment%20Dashboard/docs/SYNOLOGY_DS925_DEPLOYMENT_GUIDE.md)
+- **Environment Template:** [.env.nas.example](file:///d:/Recruitment%20Dashboard/.env.nas.example)
+- **Automated Backup Script:** [scripts/synology-backup.sh](file:///d:/Recruitment%20Dashboard/scripts/synology-backup.sh)

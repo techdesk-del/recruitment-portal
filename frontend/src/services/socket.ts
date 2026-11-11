@@ -2,10 +2,10 @@ import { io, Socket } from 'socket.io-client';
 
 const isBrowser = typeof window !== 'undefined';
 
-const isVercelOrCloud = (): boolean => {
+const isVercelServerless = (): boolean => {
   if (!isBrowser) return false;
   const host = window.location.hostname;
-  return host.includes('vercel.app') || (host !== 'localhost' && host !== '127.0.0.1');
+  return host.includes('vercel.app');
 };
 
 const getSocketUrl = (): string | null => {
@@ -14,10 +14,19 @@ const getSocketUrl = (): string | null => {
     return envWsUrl.replace(/\/+$/, '');
   }
 
-  // On Vercel / serverless cloud hosting without dedicated standalone WebSocket servers:
-  // Return null to avoid flooding the browser console with failed wss:// connection attempts
-  if (isVercelOrCloud()) {
+  // Only Vercel serverless lacks a persistent WebSocket gateway
+  if (isVercelServerless()) {
     return null;
+  }
+
+  // NAS / On-Premise / Docker / Localhost deployment
+  if (isBrowser) {
+    // If running in local Vite development mode (port 5173 / 5174), point to local backend port 5000
+    if (window.location.port === '5173' || window.location.port === '5174') {
+      return `http://${window.location.hostname || 'localhost'}:5000`;
+    }
+    // In production on Synology NAS (Docker/Nginx reverse proxy), connect to current origin
+    return window.location.origin;
   }
 
   return 'http://localhost:5000';

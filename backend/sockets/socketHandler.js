@@ -91,3 +91,37 @@ export function broadcastQueueBatchCompleted(payload) {
     ioInstance.emit('QUEUE_BATCH_COMPLETED', payload);
   }
 }
+
+export function broadcastJobCreated(job) {
+  if (ioInstance) {
+    ioInstance.emit('JOB_CREATED', job);
+  }
+}
+
+export function broadcastJobUpdated(job) {
+  if (ioInstance) {
+    ioInstance.emit('JOB_UPDATED', job);
+  }
+}
+
+export function broadcastJobDeleted(id) {
+  if (ioInstance) {
+    ioInstance.emit('JOB_DELETED', { id });
+  }
+}
+
+export function broadcastUserCreated(user) {
+  if (ioInstance) {
+    const safeUser = { ...user };
+    delete safeUser.password;
+    ioInstance.emit('USER_CREATED', safeUser);
+  }
+}
+
+export function broadcastUserUpdated(user) {
+  if (ioInstance) {
+    const safeUser = { ...user };
+    delete safeUser.password;
+    ioInstance.emit('USER_UPDATED', safeUser);
+  }
+}

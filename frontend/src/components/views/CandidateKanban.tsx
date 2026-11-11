@@ -114,6 +114,7 @@ export const CandidateKanban: React.FC = () => {
     { status: 'interview_r1', label: 'Interview Round 1 (Satya)', color: 'text-purple-700', border: 'border-purple-200', bg: 'bg-purple-50/70' },
     { status: 'interview_r2', label: 'Interview Round 2 (Dr Sharmila & CEO)', color: 'text-fuchsia-700', border: 'border-fuchsia-200', bg: 'bg-fuchsia-50/70' },
     { status: 'offered', label: 'Offered', color: 'text-amber-800', border: 'border-amber-200', bg: 'bg-amber-50/70' },
+    { status: 'offer_accepted', label: 'Offer Accepted', color: 'text-teal-800', border: 'border-teal-200', bg: 'bg-teal-50/70' },
     { status: 'joined', label: 'Joined / Hired', color: 'text-emerald-800', border: 'border-emerald-200', bg: 'bg-emerald-50/70' }
   ];
 
@@ -146,13 +147,13 @@ export const CandidateKanban: React.FC = () => {
   });
 
   const getNextStatus = (current: CandidateStatus): CandidateStatus | null => {
-    const order: CandidateStatus[] = ['applied', 'screening', 'shortlisted', 'interview_r1', 'interview_r2', 'offered', 'joined'];
+    const order: CandidateStatus[] = ['applied', 'screening', 'shortlisted', 'interview_r1', 'interview_r2', 'offered', 'offer_accepted', 'joined'];
     const idx = order.indexOf(current);
     return idx >= 0 && idx < order.length - 1 ? order[idx + 1] : null;
   };
 
   const getPrevStatus = (current: CandidateStatus): CandidateStatus | null => {
-    const order: CandidateStatus[] = ['applied', 'screening', 'shortlisted', 'interview_r1', 'interview_r2', 'offered', 'joined'];
+    const order: CandidateStatus[] = ['applied', 'screening', 'shortlisted', 'interview_r1', 'interview_r2', 'offered', 'offer_accepted', 'joined'];
     const idx = order.indexOf(current);
     return idx > 0 ? order[idx - 1] : null;
   };

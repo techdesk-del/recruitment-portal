@@ -7,6 +7,7 @@ export type CandidateStatus =
   | 'interview_r1' 
   | 'interview_r2' 
   | 'offered' 
+  | 'offer_accepted'
   | 'joined' 
   | 'rejected';
 

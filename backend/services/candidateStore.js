@@ -123,6 +123,46 @@ export function getMemoryCandidates() {
   return memoryCandidates;
 }
 
+export async function updateCandidateInStore(id, updates, extraPush = null) {
+  let updatedDoc = null;
+  try {
+    const isConnected = await ensureDBConnected();
+    if (isConnected) {
+      const updateQuery = {
+        $set: { ...updates, lastUpdatedDate: new Date().toISOString() },
+        ...(extraPush && { $push: extraPush })
+      };
+      const query = mongoose.Types.ObjectId.isValid(id) && String(new mongoose.Types.ObjectId(id)) === id
+        ? { $or: [{ id }, { _id: id }] }
+        : { id };
+
+      updatedDoc = await Candidate.findOneAndUpdate(query, updateQuery, { new: true }).lean();
+      if (updatedDoc) {
+        console.log(`[Store] Successfully updated candidate in MongoDB: ${updatedDoc.name} (${id})`);
+      }
+    }
+  } catch (err) {
+    console.error('MongoDB update error in updateCandidateInStore:', err.message);
+  }
+
+  // Update in-memory copy synchronously
+  const idx = memoryCandidates.findIndex((c) => c.id === id || String(c._id) === id);
+  if (idx >= 0) {
+    if (updatedDoc) {
+      memoryCandidates[idx] = updatedDoc;
+    } else {
+      memoryCandidates[idx] = {
+        ...memoryCandidates[idx],
+        ...updates,
+        lastUpdatedDate: new Date().toISOString()
+      };
+    }
+    return updatedDoc || memoryCandidates[idx];
+  }
+
+  return updatedDoc || { id, ...updates };
+}
+
 export async function deleteCandidateFromStore(id) {
   try {
     const isConnected = await ensureDBConnected();

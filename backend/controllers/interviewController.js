@@ -1,7 +1,14 @@
 import { Interview } from '../models/Interview.js';
 import { Candidate } from '../models/Candidate.js';
 import { ensureDBConnected, getMongoConnectionStatus } from '../config/database.js';
-import { broadcastInterviewCreated, broadcastInterviewUpdated, broadcastInterviewDeleted } from '../sockets/socketHandler.js';
+import {
+  broadcastInterviewCreated,
+  broadcastInterviewUpdated,
+  broadcastInterviewDeleted,
+  broadcastStatusUpdate,
+  broadcastCandidateUpdated
+} from '../sockets/socketHandler.js';
+import { updateCandidateInStore } from '../services/candidateStore.js';
 import { sendInterviewInviteEmail } from '../services/emailService.js';
 import { buildInterviewWhatsAppMessage, sendWhatsAppAlert } from '../services/whatsappService.js';
 
@@ -42,14 +49,16 @@ export async function createInterview(req, res) {
         type: 'interview'
       };
 
-      const candDoc = await Candidate.findOneAndUpdate(
-        { id: data.candidateId },
-        { 
-          $set: { status: 'interview_r1', lastUpdatedDate: new Date().toISOString() },
-          $push: { activityHistory: { $each: [activityItem], $position: 0 } }
-        },
-        { new: true }
+      const candDoc = await updateCandidateInStore(
+        data.candidateId,
+        { status: 'interview_r1' },
+        { activityHistory: { $each: [activityItem], $position: 0 } }
       ).catch(() => null);
+
+      if (candDoc) {
+        broadcastStatusUpdate({ id: data.candidateId, status: 'interview_r1', activityItem });
+        broadcastCandidateUpdated(candDoc);
+      }
 
       // Non-blocking Automated Communications (Email & Calendar Invite & WhatsApp)
       (async () => {

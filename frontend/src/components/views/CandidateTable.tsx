@@ -188,6 +188,7 @@ export const CandidateTable: React.FC = () => {
     { value: 'interview_r1', label: 'Interview Round 1 (Satya)', color: 'bg-purple-50 text-purple-700 border-purple-300' },
     { value: 'interview_r2', label: 'Interview Round 2 (Dr Sharmila & CEO)', color: 'bg-fuchsia-50 text-fuchsia-700 border-fuchsia-300' },
     { value: 'offered', label: 'Offered', color: 'bg-amber-50 text-amber-800 border-amber-300' },
+    { value: 'offer_accepted', label: 'Offer Accepted', color: 'bg-teal-50 text-teal-800 border-teal-300' },
     { value: 'joined', label: 'Joined / Hired', color: 'bg-emerald-50 text-emerald-800 border-emerald-300' },
     { value: 'rejected', label: 'Rejected', color: 'bg-rose-50 text-rose-700 border-rose-300' }
   ];

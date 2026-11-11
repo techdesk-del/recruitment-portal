@@ -1,5 +1,10 @@
 import { Job } from '../models/Job.js';
 import { getMongoConnectionStatus } from '../config/database.js';
+import {
+  broadcastJobCreated,
+  broadcastJobUpdated,
+  broadcastJobDeleted
+} from '../sockets/socketHandler.js';
 
 export async function getJobs(req, res) {
   try {
@@ -22,15 +27,17 @@ export async function createJob(req, res) {
     if (!jobData.id) {
       jobData.id = `job-${Date.now().toString().slice(-6)}`;
     }
+    let savedJob = jobData;
     if (getMongoConnectionStatus()) {
       const saved = await Job.findOneAndUpdate(
         { id: jobData.id },
         jobData,
         { upsert: true, new: true, setDefaultsOnInsert: true }
       );
-      return res.status(201).json(saved);
+      savedJob = saved.toObject ? saved.toObject() : saved;
     }
-    res.status(201).json(jobData);
+    broadcastJobCreated(savedJob);
+    return res.status(201).json(savedJob);
   } catch (err) {
     console.error('Error creating job in MongoDB:', err);
     res.status(500).json({ error: 'Failed to create job' });
@@ -41,15 +48,19 @@ export async function updateJob(req, res) {
   const { id } = req.params;
   const updates = req.body;
   try {
+    let resultJob = { id, ...updates };
     if (getMongoConnectionStatus()) {
       const updated = await Job.findOneAndUpdate(
         { id },
         { $set: updates },
         { new: true }
       );
-      return res.json({ success: true, job: updated });
+      if (updated) {
+        resultJob = updated.toObject ? updated.toObject() : updated;
+      }
     }
-    res.json({ success: true, id, updates });
+    broadcastJobUpdated(resultJob);
+    return res.json({ success: true, job: resultJob });
   } catch (err) {
     console.error('Error updating job in MongoDB:', err);
     res.status(500).json({ error: 'Failed to update job' });
@@ -61,9 +72,9 @@ export async function deleteJob(req, res) {
   try {
     if (getMongoConnectionStatus()) {
       await Job.findOneAndDelete({ id });
-      return res.json({ success: true, id, message: 'Job Requisition deleted successfully' });
     }
-    res.json({ success: true, id });
+    broadcastJobDeleted(id);
+    return res.json({ success: true, id, message: 'Job Requisition deleted successfully' });
   } catch (err) {
     console.error('Error deleting job in MongoDB:', err);
     res.status(500).json({ error: 'Failed to delete job' });

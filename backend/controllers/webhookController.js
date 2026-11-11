@@ -24,8 +24,8 @@ export async function handleApnaWebhook(req, res) {
 
   if (req.body?.event === 'ping' || req.body?.type === 'ping' || req.body?.action === 'ping' || req.body?.ping) {
     console.log('[Apna Webhook] Ping verification acknowledged');
-    return res.status(200).json({ 
-      success: true, 
+    return res.status(200).json({
+      success: true,
       message: 'Apna Webhook endpoint verified & healthy',
       timestamp: new Date().toISOString()
     });
@@ -118,8 +118,8 @@ export async function handleApnaWebhook(req, res) {
   const savedCandidate = await persistCandidate(candidate);
   broadcastNewCandidate(savedCandidate);
 
-  return res.status(200).json({ 
-    success: true, 
+  return res.status(200).json({
+    success: true,
     message: 'Candidate saved in MongoDB and pushed to Dashboard via WebSocket',
     candidateId: savedCandidate.id,
     receivedAt: new Date().toISOString()
@@ -136,8 +136,8 @@ export async function handleApnaEmailWebhook(req, res) {
     const savedCandidate = await persistCandidate(candidateData);
     broadcastNewCandidate(savedCandidate);
 
-    return res.status(200).json({ 
-      success: true, 
+    return res.status(200).json({
+      success: true,
       message: 'Apna application email parsed, saved to MongoDB Atlas, and pushed to Dashboard.',
       candidateId: savedCandidate.id,
       candidateName: savedCandidate.name,
@@ -226,10 +226,10 @@ export async function handleLinkedInWebhook(req, res) {
     const candidateData = await parseLinkedInEmail(data);
     const savedCandidate = await persistCandidate(candidateData);
     broadcastNewCandidate(savedCandidate);
-    res.status(200).json({ 
-      success: true, 
+    res.status(200).json({
+      success: true,
       message: 'LinkedIn candidate parsed, saved to MongoDB Atlas, and pushed to Dashboard.',
-      candidateId: savedCandidate.id 
+      candidateId: savedCandidate.id
     });
   } catch (err) {
     console.error('LinkedIn parse error:', err);
@@ -246,10 +246,10 @@ export async function handleLinkedInEmailWebhook(req, res) {
     const candidateData = await parseLinkedInEmail(rawContent);
     const savedCandidate = await persistCandidate(candidateData);
     broadcastNewCandidate(savedCandidate);
-    res.status(200).json({ 
-      success: true, 
+    res.status(200).json({
+      success: true,
       message: 'Raw LinkedIn email parsed, saved to MongoDB Atlas, and pushed to Dashboard.',
-      candidateId: savedCandidate.id 
+      candidateId: savedCandidate.id
     });
   } catch (err) {
     console.error('LinkedIn email parse error:', err);

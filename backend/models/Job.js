@@ -30,6 +30,14 @@ const JobSchema = new mongoose.Schema({
   preferredQualification: { type: String, default: '' },
   responsibilities: [{ type: String }],
   competencies: [{ type: String }],
+  keyResultAreas: [{
+    raw: { type: String },
+    weight: { type: String },
+    details: { type: String },
+    area: { type: String },
+    kpi: { type: String },
+    target: { type: String }
+  }],
   reportsTo: { type: String, default: '' },
   industry: { type: String, default: 'Real Estate Development' }
 }, {

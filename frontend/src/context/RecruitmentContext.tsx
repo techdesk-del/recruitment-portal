@@ -96,6 +96,7 @@ interface RecruitmentContextType {
   quickScheduleFollowUp: (candidateId: string, date: string, time: string, note?: string) => void;
   shiftCandidateToCalling: (candidate: Candidate) => void;
   updateJobStatus: (id: string, status: 'active' | 'paused' | 'closed' | 'filled') => void;
+  updateJob: (id: string, updates: Partial<JobPosting>) => Promise<JobPosting | null>;
   deleteJob: (id: string) => Promise<void>;
   addJob: (job: Partial<JobPosting>) => Promise<JobPosting | null>;
 }
@@ -262,7 +263,12 @@ export const RecruitmentProvider: React.FC<{ children: React.ReactNode }> = ({ c
             localStorage.setItem(STORAGE_KEYS.candidates, JSON.stringify(cleanCandidates));
           } catch (e) { }
         }
-        if (jobRes.status === 'fulfilled' && jobRes.value.length > 0) setJobs(jobRes.value);
+        if (jobRes.status === 'fulfilled' && jobRes.value.length > 0) {
+          setJobs(jobRes.value);
+          try {
+            localStorage.setItem(STORAGE_KEYS.jobs, JSON.stringify(jobRes.value));
+          } catch (e) { }
+        }
         if (intRes.status === 'fulfilled' && intRes.value.length > 0) setInterviews(intRes.value);
         if (callRes.status === 'fulfilled' && callRes.value.length > 0) setCallRecords(callRes.value);
       } catch (err) {
@@ -327,6 +333,35 @@ export const RecruitmentProvider: React.FC<{ children: React.ReactNode }> = ({ c
         const next = prev.filter((c) => c.id !== id);
         try { localStorage.setItem(STORAGE_KEYS.candidates, JSON.stringify(next)); } catch (e) { }
         return next;
+      });
+    });
+
+    // 5. Job Created / Updated / Deleted
+    socket.on('JOB_CREATED', (newJob: JobPosting) => {
+      if (!newJob || !newJob.id) return;
+      setJobs((prev) => {
+        if (prev.some((j) => j.id === newJob.id)) return prev;
+        const updated = [newJob, ...prev];
+        try { localStorage.setItem(STORAGE_KEYS.jobs, JSON.stringify(updated)); } catch (e) { }
+        return updated;
+      });
+    });
+
+    socket.on('JOB_UPDATED', (updatedJob: JobPosting) => {
+      if (!updatedJob || !updatedJob.id) return;
+      setJobs((prev) => {
+        const updated = prev.map((j) => (j.id === updatedJob.id ? { ...j, ...updatedJob } : j));
+        try { localStorage.setItem(STORAGE_KEYS.jobs, JSON.stringify(updated)); } catch (e) { }
+        return updated;
+      });
+    });
+
+    socket.on('JOB_DELETED', ({ id }: { id: string }) => {
+      if (!id) return;
+      setJobs((prev) => {
+        const updated = prev.filter((j) => j.id !== id);
+        try { localStorage.setItem(STORAGE_KEYS.jobs, JSON.stringify(updated)); } catch (e) { }
+        return updated;
       });
     });
 
@@ -497,9 +532,39 @@ export const RecruitmentProvider: React.FC<{ children: React.ReactNode }> = ({ c
           setCallRecords((curr) => (curr.length !== cloudCalls.value.length ? cloudCalls.value : curr));
         }
 
-        // Sync Jobs
+        // Sync Jobs with Non-Destructive Reconciliation
         if (cloudJobs.status === 'fulfilled' && Array.isArray(cloudJobs.value) && cloudJobs.value.length > 0) {
-          setJobs((curr) => (curr.length !== cloudJobs.value.length ? cloudJobs.value : curr));
+          setJobs((current) => {
+            const remoteMap = new Map(cloudJobs.value.map((r: JobPosting) => [r.id, r]));
+            const currentMap = new Map(current.map((j) => [j.id, j]));
+
+            let changed = current.length !== cloudJobs.value.length;
+            if (!changed) {
+              for (const item of cloudJobs.value) {
+                const existing = currentMap.get(item.id);
+                if (
+                  !existing ||
+                  existing.status !== item.status ||
+                  existing.title !== item.title ||
+                  existing.department !== item.department ||
+                  existing.salaryRange !== item.salaryRange ||
+                  existing.openPositions !== item.openPositions
+                ) {
+                  changed = true;
+                  break;
+                }
+              }
+            }
+
+            if (changed) {
+              const merged = [...current.filter((j) => !remoteMap.has(j.id)), ...cloudJobs.value];
+              try {
+                localStorage.setItem(STORAGE_KEYS.jobs, JSON.stringify(merged));
+              } catch (e) { }
+              return merged;
+            }
+            return current;
+          });
         }
       } catch (err) {
         // Silent background fallback
@@ -1184,17 +1249,63 @@ export const RecruitmentProvider: React.FC<{ children: React.ReactNode }> = ({ c
       };
 
       const updateJobStatus = (id: string, status: 'active' | 'paused' | 'closed' | 'filled') => {
-        setJobs((prev) =>
-          prev.map((j) => (j.id === id ? { ...j, status } : j))
-        );
+        setJobs((prev) => {
+          const next = prev.map((j) => (j.id === id ? { ...j, status } : j));
+          try {
+            localStorage.setItem(STORAGE_KEYS.jobs, JSON.stringify(next));
+          } catch (e) { }
+          return next;
+        });
         recruitmentApi.updateJob(id, { status }).catch(() => { });
         const label = status === 'filled' ? 'Marked as Filled' : status === 'closed' ? 'Marked as Closed' : status === 'paused' ? 'Paused' : 'Reopened / Activated';
         showToast('success', 'Job Updated', `Requisition has been ${label}.`);
       };
 
+      const updateJob = async (id: string, updates: Partial<JobPosting>): Promise<JobPosting | null> => {
+        let result: JobPosting | null = null;
+        setJobs((prev) => {
+          const next = prev.map((j) => {
+            if (j.id === id) {
+              result = { ...j, ...updates };
+              return result;
+            }
+            return j;
+          });
+          try {
+            localStorage.setItem(STORAGE_KEYS.jobs, JSON.stringify(next));
+          } catch (e) { }
+          return next;
+        });
+
+        try {
+          const response = await recruitmentApi.updateJob(id, updates);
+          if (response && response.job) {
+            setJobs((prev) => {
+              const next = prev.map((j) => (j.id === id ? response.job : j));
+              try {
+                localStorage.setItem(STORAGE_KEYS.jobs, JSON.stringify(next));
+              } catch (e) { }
+              return next;
+            });
+            result = response.job;
+          }
+        } catch (e) {
+          console.warn('[RecruitmentContext] Backend job update fallback:', e);
+        }
+
+        showToast('success', 'Job Requisition Updated', `Changes to "${result?.title || 'Job Opening'}" have been saved.`);
+        return result;
+      };
+
       const deleteJob = async (id: string) => {
         const target = jobs.find((j) => j.id === id);
-        setJobs((prev) => prev.filter((j) => j.id !== id));
+        setJobs((prev) => {
+          const next = prev.filter((j) => j.id !== id);
+          try {
+            localStorage.setItem(STORAGE_KEYS.jobs, JSON.stringify(next));
+          } catch (e) { }
+          return next;
+        });
         try {
           await recruitmentApi.deleteJob(id);
         } catch (e) {
@@ -1223,18 +1334,31 @@ export const RecruitmentProvider: React.FC<{ children: React.ReactNode }> = ({ c
           mandatoryQualification: jobData.mandatoryQualification || '',
           preferredQualification: jobData.preferredQualification || '',
           responsibilities: jobData.responsibilities || [],
+          keyResultAreas: jobData.keyResultAreas || [],
           competencies: jobData.competencies || [],
           reportsTo: jobData.reportsTo || '',
           industry: jobData.industry || 'Real Estate Development'
         };
 
         // Optimistic update
-        setJobs((prev) => [fullJob, ...prev.filter((j) => j.id !== fullJob.id)]);
+        setJobs((prev) => {
+          const next = [fullJob, ...prev.filter((j) => j.id !== fullJob.id)];
+          try {
+            localStorage.setItem(STORAGE_KEYS.jobs, JSON.stringify(next));
+          } catch (e) { }
+          return next;
+        });
 
         try {
           const created = await recruitmentApi.createJob(fullJob);
           if (created && created.id) {
-            setJobs((prev) => [created, ...prev.filter((j) => j.id !== fullJob.id)]);
+            setJobs((prev) => {
+              const next = [created, ...prev.filter((j) => j.id !== fullJob.id)];
+              try {
+                localStorage.setItem(STORAGE_KEYS.jobs, JSON.stringify(next));
+              } catch (e) { }
+              return next;
+            });
           }
         } catch (e) {
           console.warn('[RecruitmentContext] Backend job creation fallback:', e);
@@ -1383,6 +1507,7 @@ export const RecruitmentProvider: React.FC<{ children: React.ReactNode }> = ({ c
           quickScheduleFollowUp,
           shiftCandidateToCalling,
           updateJobStatus,
+          updateJob,
           deleteJob,
           addJob
         }}

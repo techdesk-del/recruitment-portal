@@ -5,4 +5,5 @@ export * from './WebhookSimulatorModal';
 export * from './InterviewEvaluationForm';
 export * from './BulkResumeUploadModal';
 export * from './AddJobModal';
+export * from './EditJobModal';
 

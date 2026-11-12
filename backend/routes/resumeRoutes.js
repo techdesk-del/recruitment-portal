@@ -12,10 +12,10 @@ const router = Router();
 
 const SUPPORTED_MODELS = [
   process.env.GEMINI_MODEL,
-  'gemini-2.5-flash',
-  'gemini-3.8-flash',
-  'gemini-flash-latest',
-  'gemini-2.5-pro'
+  'gemini-1.5-flash',
+  'gemini-2.0-flash',
+  'gemini-1.5-pro',
+  'gemini-flash-latest'
 ].filter(Boolean);
 
 const RESPONSE_SCHEMA = {
@@ -296,22 +296,37 @@ const JD_RESPONSE_SCHEMA = {
     reportsTo: { type: 'STRING', description: 'Reporting manager or director' },
     industry: { type: 'STRING', description: 'Industry or sector, e.g. Real Estate Development' },
     responsibilities: { type: 'ARRAY', items: { type: 'STRING' }, description: 'Key job responsibilities' },
-    competencies: { type: 'ARRAY', items: { type: 'STRING' }, description: 'Key skills, competencies, and tool proficiencies' }
+    competencies: { type: 'ARRAY', items: { type: 'STRING' }, description: 'Key skills, competencies, and tool proficiencies' },
+    keyResultAreas: {
+      type: 'ARRAY',
+      items: {
+        type: 'OBJECT',
+        properties: {
+          area: { type: 'STRING' },
+          kpi: { type: 'STRING' },
+          target: { type: 'STRING' },
+          weight: { type: 'STRING' },
+          raw: { type: 'STRING' }
+        }
+      },
+      description: 'Key Result Areas & Performance Indicators (KRAs / KPIs) if stated in the JD'
+    }
   },
   required: ['title', 'department', 'responsibilities', 'competencies']
 };
 
 const JD_SYSTEM_INSTRUCTION = `You are an elite Talent Acquisition & HR Director for UrbanGaon Real Estate & Infrastructure Development.
 Your mission is to extract complete, exact job opening specifications from this Job Description (JD) document:
-1. TITLE: Exact role title (e.g. "Supervisor (Civil)", "Assistant Manager - Sales", "Head of Architecture", "EA to Director", "Deputy Project Manager").
-2. DEPARTMENT: Best matching department [Civil, Sales & Marketing, Architecture & Design, Project Management, Operations, Finance & Accounts, Human Resources, IT & Tech, Executive Office].
-3. LOCATION: Location of role (default "Jaipur, Rajasthan" if not explicitly stated).
-4. EXPERIENCE REQUIRED: Precise years range (e.g. "3-5 Years", "7-10 Years", "Freshers / 0-2 Years").
-5. SALARY RANGE: If stated (e.g. "₹12,00,000 - ₹18,00,000 P.A."), otherwise "Competitive / Negotiable".
+1. TITLE: Exact role title (e.g. "Assistant Manager – Sales", "Sales & Marketing Manager", "Supervisor (Civil)", "Head of Architecture").
+2. DEPARTMENT: Best matching department [Civil, Sales & Marketing, Architecture & Design, Project Management, Procurement / Supply Chain & Contracts, Finance & Accounts, Administration / Corporate HR, AI, IT & Research, Executive Office].
+3. LOCATION: Location of role (default "Jaipur, Rajasthan (On-Site)" if not explicitly stated).
+4. EXPERIENCE REQUIRED: Precise years range (e.g. "4 - 7 years", "3-5 Years", "7-10 Years").
+5. SALARY RANGE: If stated (e.g. "₹12,00,000 - ₹18,00,000 P.A."), otherwise "₹6,00,000 - ₹12,00,000 P.A.".
 6. OPEN POSITIONS: Number of vacancies if stated, otherwise 1.
 7. RESPONSIBILITIES: Detailed bullet points of all primary duties and responsibilities mentioned in the JD.
-8. COMPETENCIES: Specific skills, tools (e.g. AutoCAD, Revit, Farvision ERP, MS Office), and domain competencies.
-9. ROLE PURPOSE: 2-3 sentence clear summary of the role's purpose and strategic value.
+8. KEY RESULT AREAS & PERFORMANCE INDICATORS: Extract table rows with area, metric/kpi, target, and weight percentage.
+9. COMPETENCIES: Specific skills, tools, and domain competencies.
+10. ROLE PURPOSE: 2-3 sentence clear summary of the role's purpose and mandate.
 Return strictly valid JSON only.`;
 
 router.post('/parse-jd', async (req, res) => {
@@ -384,33 +399,225 @@ router.post('/parse-jd', async (req, res) => {
     }
   }
 
-  // Fallback: Deterministic text parsing if Gemini not available or failed
-  const docText = text || '';
-  const lines = docText.split(/\r?\n/).map(l => l.trim()).filter(Boolean);
-  const cleanTitle = (lines[0] || fileName.replace(/\.[^/.]+$/, '').replace(/role overview/i, '').replace(/[-_]+/g, ' ')).trim();
+  // Fallback: Robust deterministic text parsing engine with multi-role support
+  const cleanDoc = (text || '').replace(/\r/g, '');
 
-  const expMatch = docText.match(/(\d+(?:-\d+)?\+?\s*(?:years?|yrs?))/i);
-  const expReq = expMatch ? expMatch[0] : '3-5 Years';
+  const repairOcr = (str) => {
+    return (str || '')
+      .replace(/\bCoordinat\s+e\b/gi, 'Coordinate')
+      .replace(/\bdocument\s+ation\b/gi, 'documentation')
+      .replace(/\bcus\s+tomer\b/gi, 'customer')
+      .replace(/\bfollow\s*-\s*up\b/gi, 'follow-up')
+      .replace(/\bStron\s+g\b/gi, 'Strong')
+      .replace(/\bGoo\s+d\b/gi, 'Good')
+      .replace(/\bRes\s+ilient\b/gi, 'Resilient')
+      .replace(/\bEn\s+sure\b/gi, 'Ensure')
+      .replace(/\brelationship\s*-\s*building\b/gi, 'relationship-building')
+      .replace(/\bself\s*-\s*motivated\b/gi, 'self-motivated')
+      .replace(/\btarget\s*-\s*driven\b/gi, 'Target-driven')
+      .replace(/\btarget\s*-\s*based\b/gi, 'target-based')
+      .replace(/\bend\s*-\s*to\s*-\s*end\b/gi, 'end-to-end');
+  };
+
+  const rawRoleBlocks = cleanDoc
+    .split(/(?=(?:^|\n)\s*Role\s*Overview\s*[:—–-]+)/i)
+    .map((b) => b.trim())
+    .filter(Boolean);
+
+  let targetDoc = cleanDoc;
+  if (rawRoleBlocks.length > 0) {
+    if (fileName) {
+      const cleanFn = fileName.toLowerCase().replace(/[-_]+/g, ' ');
+      const words = cleanFn.split(/\s+/).filter((w) => w.length > 3 && !['role', 'overview', 'pdf', 'docx'].includes(w));
+      let bestBlock = rawRoleBlocks[0];
+      let maxMatches = -1;
+
+      rawRoleBlocks.forEach((b) => {
+        const headerLine = (b.split('\n')[0] || '').toLowerCase();
+        const matchCount = words.filter((w) => headerLine.includes(w)).length;
+        if (matchCount > maxMatches) {
+          maxMatches = matchCount;
+          bestBlock = b;
+        }
+      });
+      targetDoc = maxMatches > 0 ? bestBlock : rawRoleBlocks[0];
+    } else {
+      targetDoc = rawRoleBlocks[0];
+    }
+  }
+
+  const extractField = (doc, pattern) => {
+    const match = doc.match(pattern);
+    if (!match) return '';
+    return match[1].replace(/^[—–\s:-]+|[—–\s:-]+$/g, '').trim();
+  };
+
+  // 1. Position / Job Title
+  let title = extractField(targetDoc, /(?:^|\n)\s*Position\s*[:—–-]?\s*([^\n]+)/i);
+  if (!title) {
+    title = extractField(targetDoc, /(?:^|\n)\s*(?:Job\s*Title|Role\s*Title)\s*[:—–-]?\s*([^\n]+)/i);
+  }
+  if (!title) {
+    title = extractField(targetDoc, /(?:^|\n)\s*Role\s*Overview\s*[:—–-]+\s*([^\n]+)/i);
+  }
+  if (!title) {
+    title = fileName
+      .replace(/\.[^/.]+$/, '')
+      .replace(/^Role\s*Overview\s*[-_—–]+/i, '')
+      .replace(/[-_]+/g, ' ')
+      .trim();
+  }
+
+  // 2. Department
+  const rawDept = extractField(targetDoc, /(?:^|\n)\s*Department\s*[:—–-]?\s*([^\n]+)/i);
+  const lDept = (rawDept || title).toLowerCase();
+  let department = 'Sales & Marketing';
+
+  if (/\b(ai|it|research|software|data science|computer|tech)\b/i.test(lDept)) {
+    department = 'AI, IT & Research';
+  } else if (/\b(architect|architecture|interior|design|bim|revit)\b/i.test(lDept)) {
+    department = 'Architecture & Design';
+  } else if (/\b(project\s*manager|deputy\s*project|dpm|pm)\b/i.test(lDept) && !lDept.includes('civil')) {
+    department = 'Project Management';
+  } else if (/\b(civil|site|construction|structural|surveyor)\b/i.test(lDept)) {
+    department = 'Civil';
+  } else if (/\b(procure|supply|purchase|vendor|contracts|buying)\b/i.test(lDept)) {
+    department = 'Procurement / Supply Chain & Contracts';
+  } else if (/\b(sale|sales|market|marketing|branding|crm|lead|business development|bdd|bde)\b/i.test(lDept)) {
+    department = 'Sales & Marketing';
+  } else if (/\b(director|executive|ea to|leadership|ceo|board|secretariat)\b/i.test(lDept)) {
+    department = 'Executive Office';
+  } else if (/\b(account|finance|ca\b|audit|taxation|commercial|billing)\b/i.test(lDept)) {
+    department = 'Finance & Accounts';
+  } else if (/\b(hr|human|admin|people|recruitment|talent|payroll)\b/i.test(lDept)) {
+    department = 'Administration / Corporate HR';
+  }
+
+  // 3. Reports To
+  const reportsTo = extractField(targetDoc, /(?:^|\n)\s*Reports\s*To\s*[:—–-]?\s*([^\n]+)/i) || 'Leadership / Management';
+
+  // 4. Industry
+  const industry = extractField(targetDoc, /(?:^|\n)\s*Industry\s*[:—–-]?\s*([^\n]+)/i) || 'Real Estate Development';
+
+  // 5. Location
+  let location = extractField(targetDoc, /(?:^|\n)\s*Location\s*[:—–-]?\s*([^\n]+)/i) || 'Jaipur, Rajasthan (On-Site)';
+  if (!location.toLowerCase().includes('on-site') && !location.toLowerCase().includes('remote')) {
+    location = `${location} (On-Site)`;
+  }
+
+  // 6. Mandatory Qualification
+  const mandatoryQualification = extractField(targetDoc, /(?:^|\n)\s*Mandatory\s*Qualification\s*[:—–-]?\s*([^\n]+)/i);
+
+  // 7. Preferred Qualification
+  const preferredQualification = extractField(targetDoc, /(?:^|\n)\s*Preferred\s*Qualification\s*[:—–-]?\s*([^\n]+)/i);
+
+  // 8. Experience
+  let experienceRequired = '3-5 Years';
+  const expMatch = targetDoc.match(/(?:^|\n)\s*Experience\s*[:—–-]?\s*([^\n]+(?:\n[^\n]+)?)/i);
+  if (expMatch && expMatch[1]) {
+    const rawExp = expMatch[1].trim();
+    const expRange =
+      rawExp.match(/\d+[\s–-]+\d+\s*(?:years?|yrs?)/i) ||
+      rawExp.match(/\d+\+?\s*(?:years?|yrs?)/i);
+    experienceRequired = expRange ? expRange[0].replace(/–/g, '-').trim() : rawExp.slice(0, 40).trim();
+  }
+
+  // 9. Normalize structural section markers (matching whole line headers)
+  const structured = targetDoc
+    .replace(/(?:^|\n)\s*Role\s*Purpose[^\n]*/gi, '\n§§ROLE_PURPOSE§§\n')
+    .replace(/(?:^|\n)\s*Key\s*Responsibili[^\n]*/gi, '\n§§RESPONSIBILITIES§§\n')
+    .replace(/(?:^|\n)\s*Key\s*Result\s*Areas[^\n]*/gi, '\n§§KRA§§\n')
+    .replace(/(?:^|\n)\s*(?:Competencies|Key\s*Skills)[^\n]*/gi, '\n§§COMPETENCIES§§\n');
+
+  // Role Purpose
+  const purpMatch = structured.match(/§§ROLE_PURPOSE§§\s*([\s\S]*?)(?=(?:§§RESPONSIBILITIES§§|§§KRA§§|§§COMPETENCIES§§|$))/i);
+  let rolePurpose = '';
+  if (purpMatch && purpMatch[1]) {
+    rolePurpose = repairOcr(purpMatch[1].replace(/\n+/g, ' ').replace(/\s+/g, ' ').trim());
+  } else {
+    rolePurpose = `${title || 'Position'} responsible for key operational deliverables at UrbanGaon.`;
+  }
+
+  // Key Responsibilities
+  const respMatch = structured.match(/§§RESPONSIBILITIES§§\s*([\s\S]*?)(?=(?:§§KRA§§|§§COMPETENCIES§§|$))/i);
+  let responsibilities = [];
+  if (respMatch && respMatch[1]) {
+    responsibilities = respMatch[1]
+      .split('\n')
+      .map((l) => repairOcr(l.replace(/^[\s●•\-\*\d\.\)\u25cf\uf0b7\u2022]+/, '').trim()))
+      .filter((l) => l.length > 5 && !/^(kra area|kpi|target|measure|wt\b|key responsibilities)/i.test(l));
+  }
+
+  // Key Result Areas & Performance Indicators (KRAs)
+  const kraMatch = structured.match(/§§KRA§§\s*([\s\S]*?)(?=(?:§§COMPETENCIES§§|§§RESPONSIBILITIES§§|$))/i);
+  const keyResultAreas = [];
+  if (kraMatch && kraMatch[1]) {
+    const kraLines = kraMatch[1]
+      .split('\n')
+      .map((l) => l.trim())
+      .filter((l) => l.length > 5 && !/^(kra area|kpi\s*\/\s*measure|target|wt\b)/i.test(l));
+
+    kraLines.forEach((line) => {
+      const wtMatch = line.match(/\s+(\d+%\s*)$/);
+      if (wtMatch) {
+        const weight = wtMatch[1].trim();
+        const rest = line.slice(0, wtMatch.index).trim();
+        keyResultAreas.push({
+          raw: repairOcr(line),
+          weight,
+          details: repairOcr(rest)
+        });
+      } else {
+        keyResultAreas.push({
+          raw: repairOcr(line),
+          weight: '',
+          details: repairOcr(line)
+        });
+      }
+    });
+  }
+
+  // Competencies
+  const compMatch = structured.match(/§§COMPETENCIES§§\s*([\s\S]*?)(?=(?:§§KRA§§|§§RESPONSIBILITIES§§|§§ROLE_PURPOSE§§|$))/i);
+  let competencies = [];
+  if (compMatch && compMatch[1]) {
+    competencies = compMatch[1]
+      .split('\n')
+      .map((l) => repairOcr(l.replace(/^[\s●•\-\*\d\.\)\u25cf\uf0b7\u2022]+/, '').trim()))
+      .filter((l) => l.length > 3 && !/^(?:competencies|we are looking for|key skills|skills\b)/i.test(l));
+  }
+
+  // Salary Range
+  const salaryMatch =
+    targetDoc.match(/(?:₹|INR|Rs\.?)\s*\d+[\d,]*(?:\s*-\s*(?:₹|INR|Rs\.?)?\s*\d+[\d,]*)?\s*(?:P\.?A\.?|per\s*annum|LPA)?/i) ||
+    targetDoc.match(/\d+(?:\.\d+)?\s*(?:-\s*\d+(?:\.\d+)?\s*)?LPA/i);
+  const salaryRange = salaryMatch ? salaryMatch[0].trim() : '₹6,00,000 - ₹12,00,000 P.A.';
+
+  // Job Type
+  let jobType = 'Full-time';
+  if (/hybrid/i.test(targetDoc)) jobType = 'Hybrid';
+  else if (/remote/i.test(targetDoc)) jobType = 'Remote';
+  else if (/contract/i.test(targetDoc)) jobType = 'Contract';
 
   return res.json({
     success: true,
     model: 'offline-nlp',
     data: {
-      title: cleanTitle || 'New Job Requisition',
-      department: /civil|construction|site/i.test(docText) ? 'Civil' :
-                  /sales|marketing|bdm|bde/i.test(docText) ? 'Sales & Marketing' :
-                  /architect|bim|revit/i.test(docText) ? 'Architecture & Design' :
-                  /project manager|dpm/i.test(docText) ? 'Project Management' :
-                  /purchase|procurement/i.test(docText) ? 'Procurement & Purchase' :
-                  /accounts|finance|ca\b|audit/i.test(docText) ? 'Finance & Accounts' : 'General',
-      location: 'Jaipur, Rajasthan',
-      type: 'Full-time',
-      experienceRequired: expReq,
-      salaryRange: 'Competitive',
+      title: title || 'New Job Requisition',
+      department,
+      location,
+      type: jobType,
+      experienceRequired,
+      salaryRange,
       openPositions: 1,
-      rolePurpose: lines.slice(1, 4).join(' ').slice(0, 300) || `${cleanTitle} position at UrbanGaon.`,
-      responsibilities: lines.filter(l => l.length > 20 && l.length < 200).slice(0, 6),
-      competencies: ['Problem Solving', 'Team Leadership', 'Project Execution'],
+      rolePurpose,
+      responsibilities: responsibilities.length > 0 ? responsibilities : ['Execute key operational objectives'],
+      keyResultAreas,
+      competencies: competencies.length > 0 ? competencies : ['Strategic Execution', 'Team Collaboration'],
+      mandatoryQualification,
+      preferredQualification,
+      reportsTo,
+      industry,
       status: 'active',
       platforms: ['naukri', 'linkedin', 'indeed', 'apna', 'urbangaon']
     }

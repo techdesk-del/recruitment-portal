@@ -20,11 +20,13 @@ import {
   Check,
   Ban,
   Plus,
-  Sparkles
+  Pencil,
+  Target
 } from 'lucide-react';
 import { useRecruitment } from '../../context/RecruitmentContext';
 import { CandidateSource, JobPosting } from '../../types';
 import { PortalLogo, Pagination } from '../common';
+import { EditJobModal } from '../modals/EditJobModal';
 
 export const JobsView: React.FC = () => {
   const { jobs, candidates, setFilters, setActiveView, updateJobStatus, deleteJob, setIsAddJobModalOpen } = useRecruitment();
@@ -33,6 +35,7 @@ export const JobsView: React.FC = () => {
   const [selectedDept, setSelectedDept] = useState<string>('all');
   const [selectedStatus, setSelectedStatus] = useState<'all' | 'active' | 'filled' | 'closed' | 'paused'>('all');
   const [selectedJobForModal, setSelectedJobForModal] = useState<JobPosting | null>(null);
+  const [editingJob, setEditingJob] = useState<JobPosting | null>(null);
   const [jobToDelete, setJobToDelete] = useState<JobPosting | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
 
@@ -142,13 +145,10 @@ export const JobsView: React.FC = () => {
           <button
             onClick={() => setIsAddJobModalOpen(true)}
             className="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs sm:text-sm shadow-xs transition active:scale-95 cursor-pointer mr-1"
-            title="Create a new job opening or auto-parse JD from PDF/DOCX"
+            title="Create a new job opening or auto-extract JD from PDF/DOCX"
           >
             <Plus size={16} />
             <span>Add Job Opening</span>
-            <span className="hidden sm:inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-blue-500/50 text-[10px] font-medium text-blue-100">
-              <Sparkles size={11} /> AI JD Parse
-            </span>
           </button>
 
           <div className="px-3 py-1.5 rounded-xl bg-emerald-50 border border-emerald-200 text-xs font-semibold text-emerald-800 flex items-center gap-1.5">
@@ -401,6 +401,14 @@ export const JobsView: React.FC = () => {
                   </button>
 
                   <button
+                    onClick={() => setEditingJob(job)}
+                    className="p-1.5 rounded-xl text-slate-400 hover:text-blue-600 hover:bg-blue-50 border border-transparent hover:border-blue-200 transition cursor-pointer"
+                    title="Edit Job Requisition"
+                  >
+                    <Pencil size={14} />
+                  </button>
+
+                  <button
                     onClick={() => setSelectedJobForModal(job)}
                     className="flex items-center gap-1 px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold transition cursor-pointer"
                     title="View Full Job Description"
@@ -606,11 +614,52 @@ export const JobsView: React.FC = () => {
                   </div>
                 </div>
               )}
+
+              {/* Key Result Areas & Performance Indicators (KRAs) */}
+              {selectedJobForModal.keyResultAreas && selectedJobForModal.keyResultAreas.length > 0 && (
+                <div className="space-y-2">
+                  <h3 className="text-xs font-bold text-slate-900 uppercase tracking-wider flex items-center gap-1.5">
+                    <Target size={14} className="text-indigo-600" />
+                    Key Result Areas & Performance Indicators ({selectedJobForModal.keyResultAreas.length})
+                  </h3>
+                  <div className="overflow-x-auto rounded-xl border border-slate-200">
+                    <table className="w-full text-xs text-left">
+                      <thead className="bg-slate-50 text-slate-600 font-semibold border-b border-slate-200">
+                        <tr>
+                          <th className="p-2.5">Key Result Area (KRA)</th>
+                          <th className="p-2.5">KPI / Target</th>
+                          <th className="p-2.5 text-right">Weight</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-slate-100">
+                        {selectedJobForModal.keyResultAreas.map((kra, idx) => (
+                          <tr key={idx} className="hover:bg-slate-50/50">
+                            <td className="p-2.5 font-medium text-slate-800">{kra.area || kra.raw}</td>
+                            <td className="p-2.5 text-slate-600">{kra.kpi || kra.target || kra.details || '—'}</td>
+                            <td className="p-2.5 text-right font-bold text-indigo-600">{kra.weight || '—'}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              )}
             </div>
 
             {/* Modal Footer */}
             <div className="p-4 sm:p-5 bg-slate-50 border-t border-slate-200 flex flex-wrap items-center justify-between gap-3">
               <div className="flex items-center gap-2">
+                <button
+                  onClick={() => {
+                    const currentJob = selectedJobForModal;
+                    setSelectedJobForModal(null);
+                    setEditingJob(currentJob);
+                  }}
+                  className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 text-xs font-bold transition cursor-pointer"
+                >
+                  <Pencil size={13} />
+                  <span>Edit Requisition</span>
+                </button>
                 {selectedJobForModal.status !== 'filled' && (
                   <button
                     onClick={() => {
@@ -724,6 +773,13 @@ export const JobsView: React.FC = () => {
             </div>
           </div>
         </div>
+      )}
+      {/* Edit Job Modal */}
+      {editingJob && (
+        <EditJobModal
+          job={editingJob}
+          onClose={() => setEditingJob(null)}
+        />
       )}
     </div>
   );

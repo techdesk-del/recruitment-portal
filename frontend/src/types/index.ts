@@ -139,6 +139,15 @@ export interface Candidate {
   activityHistory: ActivityLog[];
 }
 
+export interface KeyResultArea {
+  raw?: string;
+  weight?: string;
+  details?: string;
+  area?: string;
+  kpi?: string;
+  target?: string;
+}
+
 export interface JobPosting {
   id: string;
   title: string;
@@ -158,8 +167,10 @@ export interface JobPosting {
   preferredQualification?: string;
   responsibilities?: string[];
   competencies?: string[];
+  keyResultAreas?: KeyResultArea[];
   reportsTo?: string;
   industry?: string;
+  availableRoles?: string[];
 }
 
 export interface DashboardMetrics {

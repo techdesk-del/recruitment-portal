@@ -19,7 +19,14 @@ jobs:
           password: ${{ secrets.NAS_PASSWORD }}
           key: ${{ secrets.NAS_SSH_KEY }}
           script: |
-            cd "/volume1/docker/recruitment-dashboard" || cd "/volume1/docker/ATS Dashboard"
+            if [ -d "/volume1/docker/ATS Dashboard" ]; then
+              cd "/volume1/docker/ATS Dashboard"
+            elif [ -d "/volume1/docker/recruitment-dashboard" ]; then
+              cd "/volume1/docker/recruitment-dashboard"
+            else
+              echo "Project directory not found on NAS"
+              exit 1
+            fi
             echo "Pulling latest changes from GitHub..."
             git pull origin main
             echo "Rebuilding and updating containers..."
